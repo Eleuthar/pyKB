@@ -1,0 +1,123 @@
+
+class <name1>:
+	clzVar = 0		# class variable, unique & shared among objects
+	def __init__(self):
+		self.__privateVar = []
+		name1.clzVar += 1
+		
+	def function1(self, v):
+		self.__privateVar.append(v)
+		
+	
+class <name2>(name1):
+	def __init__(self):
+		name1.__init__(self)
+			OR !!
+		super().__init__()
+			self.__subclassVar = 0
+
+
+	
+  	SINGLE VS DOUBLE UNDERSCORE
+	`````````````````````````````````
+        * _single_leading = declare private member & class in module, which are ignored in "from module import *" aka weak internal use indicator
+
+        * __double_leading = mangle attribute name to avoid conflict between classes
+
+
+
+
+	ENCAPSULATION
+	````````````````````
+	* storage under private variable with double underscore
+	
+
+
+	
+	INHERITANCE
+	````````````````	
+	* define subclass by pointing to superclass
+	
+	* mandatory invoke superclass constructor before any other initialization
+	
+	* super() allows access to nearest superclass without needing to know its name and to use the "self" argument
+	
+	* super() allows access to any of the resources available inside the superclass (ex. private var)
+	
+	* subclass can open the superclass class variable
+	
+	* superclass instance variables can be opened only by invoking the super() constructor
+	
+	
+
+
+	POLYMORPHISM
+	````````````````````
+	* when a subclass can modify the behaviour of its superclass; such a method is virtual: overridden method is called by another method in superclass.
+	
+	* the overridden method calls another method that does the actual new implementation
+
+	
+
+
+	COMPOSITION
+	``````````````````
+	* form an object using different other objects
+	
+	* project a class as a container able to store and use other objects (derived from other classes), where each object implements a partial behavior
+	
+	
+
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<	CMD		<<<<<<<<<<<<<<<<<<<<<<
+
+
+hasattr(ClassName\object, <attribute>)
+	\\ return boolean if a class or object has a certain property
+	
+	
+getattr(object, property)
+	\\ get value of property
+	
+	
+setattr(<object>, <property>, <value>
+	\\ set a new value of an object's property
+	
+
+isinstance(<value>, <dataType>)
+	\\ check if value is of type <dataType>
+
+
+<ClassName>.__dict__
+	\\ return class variables and methods
+
+
+<object>.__dict__
+	\\ instance variables are stored under
+
+
+<object>._<ClassName>__var  \ __method()
+	\\ private method || private instance variable
+	
+	
+<ClassName>.__name__
+	\\ return string with class name; objects cannot access this property
+	
+
+type(<object>.__name__)
+	\\ return the class used to instantiate the object
+	
+
+obj.__module__ 
+	\\ __main__ or <name> if module is imported
+	
+
+<subclass>.__bases__
+	\\ return tuple of superclasses of a given class; N\A for object
+	
+
+ObjectX is ObjectQ
+	\\ return bool if 2 var refer to same object
+	
+	

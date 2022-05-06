@@ -1,0 +1,31 @@
+# pip install virtualenv
+
+
+# virtualenv project1_env; cd project1_env
+
+OR
+
+# virtualenv -p /usr/bin/python2.6 <proj_ver_name>
+    \\ specify the python version for the project
+
+
+# source project1_env/bin/activate
+    \\ activate the env 
+
+
+# pip freeze --local > requirements.txt
+    \\ export packages & version no. for another project
+
+OR
+
+# pip install -r requirements.txt
+    \\ install the packages from another exported env 
+
+
+# pip list
+    \\ show installed packages from req.txt
+
+
+# deactivate
+    \\ exit the current env
+

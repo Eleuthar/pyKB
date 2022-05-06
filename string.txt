@@ -1,0 +1,79 @@
+ord(<one-char-string>)
+	\\ get a character's ASCII\UNICODE code point
+	
+	
+chr(<code point>)
+	\\ return the character matching the code point
+	
+
+min\max(<STRING>)
+	\\ return the char corresponding to lowest\highest code point number
+	
+	
+<CHAR> in <STRING\LIST>
+	\\ return boolean
+	
+<STRING>.find \ rfind(<STRING>, [int], [int])
+<STRING>.index(<STRING\CHAR>)
+	\\ return the first occurrence of the char\string in the string
+	\\ find doesn't generate error if pattern does not exist, returns -1; optional limits slice the search
+	
+
+<STRING>.count("<CHAR>")
+	\\ count the no. of occurrences of char in string
+	
+	
+<STRING>.capitalize()
+	\\ set first letter to uppercase
+	
+	
+<STRING>.lower()
+	\\ set string to lowercase
+	
+
+<STRING>.upper()
+	\\ set string to uppercase
+
+
+<STRING>.center(int)
+	\\ center a string in a field of <int> width
+
+
+<STRING>.endswith(<STRING>)
+<STRING>.startswith(<STRING>)
+	\\ return boolean if word end\start with <char\string>
+	
+
+<STRING>.isalnum()
+		.isdigit()
+		.isalpha()
+		.islower()
+		.isupper()
+		.isspace()
+	\\ return boolean if string is letter or digit \ digit \ letter \  lower case \ upper case \ whitespace only
+	
+	
+<STRING>.join(<LIST>)
+	\\ join <list> elements separated by <string>
+	
+
+<STRING>.split()
+	\\ return a list of the whitespace separated parts
+	
+	
+<STRING>.lstrip() \ rstrip()
+<STRING>.lstrip(<string>)
+<STRING>.strip()
+	\\ remove leading whitespace; param version removes also string pattern until no longer matches pattern identically; rstrip starts from right side; strip is combo
+	
+	
+<STRING>.replace("replaced", "replacer", [int])
+	\\ 3rd arg limit number of replacements
+	
+	
+<STRING>.swapcase()
+	\\ lowercase become upper & viceversa
+	
+	
+<STRING>.title()
+	\\ every word beginz with Uppercase

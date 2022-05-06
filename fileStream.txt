@@ -1,0 +1,115 @@
+OPEN MODE
+```````````````
+r = read
+	* file must exist, else raise exception
+
+w = write
+	* if file not exist, it will be created
+		- if it cannot be created, raise exception
+	* if file exist, it will be truncated to 0 length (erased)
+
+a = append
+	* if file not exist, it will be created
+	* if file exist, append content
+
+r+ = read & update
+	* file must exist & be writeable
+	* allow read & write
+
+w+ = write & update
+	* if file exist, append
+	*  allow read & write
+	
+x = exclusive create: if file exist, raise exception
+
+	
+<mode>b = open in binary mode
+<mode>t = open in text mode (default)
+	
+
+
+STREAM ERROR CONSTANT
+`````````````````````````
+
+!!! IOError.errno contains the completion code of the failed action
+
+!!! alternative to Exception.errno == os.strerror(<integer>), return the string description of error; no <integer> will raise ValueError
+
+
+* errno.EACCES = permission denied
+
+* errno.EBADF = bad file number (ex.: unopened stream)
+
+* errno.EEXIST = file exist
+
+* errno.EFBIG = file too large
+
+* errno.EISDIR 	= is Directory
+
+* errno.EMFILE = too many open files
+
+* errno.ENOENT = no such file or directory
+
+* errno.ENOSPC = no space on device
+
+
+EXAMPLE
+````````````
+from os import strerror
+
+try:
+	txt = open("export.txt", 'r')
+	ln = txt.readline()
+		while ln != '':
+			ln = txt.readline()
+	txt.close()
+	
+		OR (iterable)
+					
+	for ln in open("export.txt",' r'):
+		print(ln)
+		
+except Exception as exc:
+	print(exc, strerror(exc.errno))
+
+
+
+CMD
+`````
+read() 
+	\\ will copy in RAM the entire file (caution advised)
+	
+	
+read(1)
+	\\ will copy 1 character, then move the virtual reading head to the next; used with "while"
+	
+	
+readline()
+	\\ read 1 line
+	
+
+readlines()
+	\\ read all lines and return a list of strings, 1 element per line; print returns one line at a time
+	\\ optional integer argument to read a number of bytes
+	\\ not recommended due to unknown file size
+	
+
+readinto(<bytearray>)
+	\\ read binary file using the total capacity of a bytearray variable
+
+
+binFile = open('file.bin', 'rb')
+data = bytearray(65536)
+binCopy = open('newfile.bin', 'wb')
+readin = binFile.readinto(data)
+binCopy.write(data)
+	\\ read() without arg tries to read all content into the memory
+	\\ binFile.read() can take an integer arg for the amount of bytes to read at once, the next amount waiting to be read
+	\\ readin stores the number of bytes; write() can return the amount of bytes written
+
+
+txtFile.write(string)
+
+binFile.write(bytearray)
+
+img = bytearray(binFile.read())

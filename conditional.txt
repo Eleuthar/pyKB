@@ -1,0 +1,29 @@
+IF - ELIF - ELSE
+~~~~~~~~~~~~~~~~
+
+~ IF-IF-IF-IF: Each "IF" statement is tested separately
+
+
+~ IF-ELSE: "ELSE" statement is executed if the "IF" condition is false
+
+
+~ IF-IF-IF-ELSE: Each "IF" statement is tested separately; "ELSE" is executed if the last "IF" is false
+
+
+~ IF-IF-ELIF-ELIF-ELSE: If one "IF" is false, the subsequent "ELIF" are checked, executing the first True "ELIF"; if all conditions are False, the "ELSE" block is executed
+
+
+
+FOR \ WHILE
+~~~~~~~~~~~~
+
+for i in range(X):
+
+for i in range(start, stop, step):
+
+~ assigning "i" value before loop will not execute code
+
+~ can use "ELSE" at the end of the loop and will retain the value of "i" set before loop
+
+
+Every year that is exactly divisible by four is a leap year, except for years that are exactly divisible by 100, but these centurial years are leap years if they are exactly divisible by 400

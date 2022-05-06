@@ -1,0 +1,38 @@
+IMPORTANT
+```````````````
+
+~ generator = return a series of values and control the iteration process
+
+~ iterator = an object conforming to the iterator protocol. It provides 2 methods:
+
+	1. __iter__()
+	return the object to be iterated
+	
+	2. __next__()
+	return the next value; is invoked by the for \ in statement, to pass through the next iteration. If there are no more values to provide, it raises the StopIteration exception
+	
+	
+~ yield instead of return, makes the function into a generator and does not lose the state of the function
+
+~ invoking the function returns the object identifier, not the series of values
+
+
+
+EXAMPLE 1
+```````````````
+def generatorFun(v):
+	for z in range(v):
+		yield z
+		
+for q in generatorFun(6):
+	print(q)
+	
+
+
+EXAMPLE 2
+```````````````
+the_list = [1 if x % 2 == 0 else 0 for x in range(10)]
+	\\ return a list
+	
+the_generator = (1 if x % 2 == 0 else 0 for x in range(10))
+	\\ return a generator

@@ -1,0 +1,53 @@
+import xml.etree.ElementTree as X
+
+
+tree = X.parse('qz.xml')
+root = tree.getroot()
+
+root.tag
+root.getchildren()
+root.find('tag')
+
+
+
+for q in root.findall('tagName')
+	q.tag
+	q.attrib
+		\\ dict of attributes
+	q.attrib['attribute']
+	q.keys()
+		\\ array of keys
+	q.items()
+		\\ array of tuples, same output of attrib
+	
+
+
+	if q.find('tag').text == "QZXQ":
+		root.remove(q)
+
+	for prop in q:
+		prop.tag
+		prop.attrib
+		prop.text
+
+\\ iterate, display tree element, remove element
+
+
+
+new_tag = X.Element('tag')
+X.SubElement(new_tag, 'id').text = '4'
+X.SubElement(new_tag, 'price', {'currency': 'EUR'}).text = '6978'
+root.append(new_tag)
+tree.write('newXML.xml', method='')
+
+
+TREE
+_root', '_setroot', 'find', 'findall', 'findtext', 'getiterator', 'getroot', 'iter', 'iterfind'
+
+
+ROOT
+'append', 'attrib', 'clear', 'extend', 'find', 'findall', 'findtext', 'get', 'getchildren', 'getiterator', 'insert', 'items', 'iter', 'iterfind', 'itertext', 'keys', 'makeelement', 'remove', 'set', 'tag', 'tail', 'text'
+
+
+
+

@@ -1,0 +1,8 @@
+ 
+OPERATOR
+`````````
+ ** = exponent (uses right > left side binding)
+
+ 
+ ~ data & operators (+,-,*,/,//,%,**) form expression. The simplest is a literal itself
+ 

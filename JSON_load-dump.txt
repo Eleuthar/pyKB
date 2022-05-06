@@ -1,0 +1,81 @@
+
+json.dumps(<p>)
+	\\ convert all Python data to JSON string
+	\\ type "Class" is not JSON serializable, canont dump the content of an object; use __dict__ instead of the actual object to print the instance properties.
+
+
+primitive = '"\\"The Meaning of Life\\" by Monty Python\'s Flying Circus"'
+print(json.loads(<j>))
+	\\ convert json data to python
+	\\ json needs double backslash to escape quote
+
+
+
+~~~~~~~~~~~~~~~~~~~~ serialize & deserialize object with custom function ~~~~~~~~~~~~~~~~~~~~~~
+
+
+import json
+
+
+class Who:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+
+def encode_who(w):
+    if isinstance(w, Who):
+        return w.__dict__
+    else:
+        raise TypeError(w.__class__.__name__ + 'is not JSON serializable')
+
+
+def decode_who(w):
+    return Who(w['name'], w['age'])
+
+
+old_man = Who("Jane Doe", 23)
+json_str = json.dumps(old_man, default=encode_who)
+new_man = json.loads(json_str, object_hook=decode_who)
+print(type(new_man))
+print(new_man.__dict__)
+
+	\\ object_hook point to the function responsible for creating a new obj of the needed class and fill it with the actual data
+	\\ invoked only when JSON string describe JSON object
+
+
+
+
+~~~~~~~~~~~~~~~~~~~ serialize object via JSONENCODER \ JSONDECODER override ~~~~~~~~~~~~~~~~~~
+
+import json
+
+
+class Who:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+
+class MyEncoder(json.JSONEncoder):
+    def default(self, w):
+        if isinstance(w, Who):
+            return w.__dict__
+        else:
+            return super().default(self, z)
+
+
+class MyDecoder(json.JSONDecoder):
+    def __init__(self):
+        json.JSONDecoder.__init__(self, object_hook=self.decode_who)
+
+    def decode_who(self, d):
+        return Who(**d)
+
+
+some_man = Who('Jane Doe', 23)
+json_str = json.dumps(some_man, cls=MyEncoder)
+new_man = json.loads(json_str, cls=MyDecoder)
+
+print(type(new_man))
+print(new_man.__dict__)

@@ -1,0 +1,131 @@
+IMPORTANT
+````````````````
+
+~ handle the more concrete exceptions first, up to the most general (child -> parent exception branch)
+
+
+~ if none of the specified except branches matches the raised exception, the exception remains unhandled
+
+
+~ if unnamed except branch exists, it must be declared last (only one unnamed except branch can exist).
+
+
+~ "else" is executed ONLY if no exception is raised; must always be declared after "except:"
+
+
+~ "finally" is always executed must be declared after either "except" or "else" if added
+
+
+~ 'with' keyword replaces try-except and handles unmanaged object like file stream -- recommended approach
+	\\ no need for close(), `with` ensure proper acquisition and releas
+e of context manager resource
+        \\ using try-except instead of `with`, if exception occurs, the file can be prevented from closing
+        \\ `with` applies to user-defined objects only if __enter__() & __exit__() methods are defined
+        \\ __enter__ creates a file descriptor and returns it, __exit__ is executed immediately after the `with` block -- every context manager has these 2 functions
+
+
+
+CMD
+``````
+from os import strerror
+
+
+with open('file_path', 'w') as file:
+    file.write('hello world !')
+
+
+raise <Exception>(<string mzg>)
+	\\ trigger  exception \ custom exception with args as __str__()
+	\\ raised exception must be catched with Except
+
+
+raise
+	\\ without <Exception> will immediately re-raise the same exception as currently handled; can be used only inside the try branch, otherwise it causes an error.
+	
+	
+assert <expression>
+	\\ evaluates expression to True or non-zero\non-empty\non-None, else raise exception "AssertionError" = assertion failed
+	\\ secure code from producing invalid result
+	\\ is not superset of exception or data validator
+
+
+
+CUSTOM EXCEPTION
+````````````````````````
+
+class PizzaError(Exception):
+    def __init__(self, pizza, message):
+        Exception.__init__(self, message)
+        self.pizza = pizza
+
+
+class TooMuchCheeseError(PizzaError):
+    def __init__(self, pizza, cheese, message):
+        PizzaError.__init__(self, pizza, message)
+        self.cheese = cheese
+
+
+def make_pizza(pizza, cheese):
+    if pizza not in ['margherita', 'capricciosa', 'calzone']:
+        raise PizzaError(pizza, "no such pizza on the menu")
+    if cheese > 100:
+        raise TooMuchCheeseError(pizza, cheese, "too much cheese")
+    print("Pizza ready!")
+
+
+for (pz, ch) in [('calzone', 0), ('margherita', 110), ('mafia', 20)]:
+    try:
+        make_pizza(pz, ch)
+    except TooMuchCheeseError as tmce:
+        print(tmce, ':', tmce.cheese)
+    except PizzaError as pe:
+        print(pe, ':', pe.pizza)
+	except Exception as x:
+		print(x, strerror(x.errno))
+
+
+
+EXCEPTION
+``````````````
+
+ArithmeticError
+	\\ zero division or arg invalid domain
+	
+	
+AssertionError
+	\\ raised by assert, with arg == False, None, 0 or empty string
+
+
+ZeroDivisionError
+
+
+OverflowError
+	\\ child of ArithmeticError, due to an operation that produces a number too big to be stored
+	
+
+IndexError
+	\\ child of LookupError, when accessing a non-existent sequence element
+	
+	
+LookupError
+	\\ includes all exceptions caused by error resulting from invalid references to collection
+	
+
+ValueError
+	\\ incompatible data type
+	
+
+KeyboardInterrupt
+	\\ Ctrl+ C; child of BaseException; can be handled to not terminate program
+
+
+ImportError
+	\\ child of Exception < StandardError; an import operation fails
+	
+
+KeyError
+	\\ child of LookupError, when try to access a non-existent collection element
+	
+	
+AttributeError
+	\\ missing object property

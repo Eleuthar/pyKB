@@ -1,0 +1,42 @@
+import mysql.connector
+
+
+qdb = mysql.connector.connect(
+    host='localhost',
+    user='uzr',
+    password='pvd',
+    database='zdb'
+)
+
+
+mycursor = qdb.cursor()
+    \\ execute queries via cursor
+
+
+zql = "SELECT * FROM tableQ WHERE colQ = %s" 
+prepValue = ("value 1", )
+    \\ prevent SQL INJECTION with prepared statements with placeholder %s
+
+
+mycursor.execute("CREATE TABLE tableQ (name VARCHAR(255), addr VARCHAR(255))")
+
+
+mycursor.execute("SHOW TABLES")
+    \\ return iterable list of tables
+
+
+rez = mycursor.fetchall()
+    \\ fetch all rowz from the last executed statement
+
+
+rez = mycursor.fetchone()
+    \\ return the first row of the query
+
+
+mycursor.rowcount
+    \\ return the number of rowz returned
+
+
+mycursor.lastrowid
+	\\ get last row ID inserted
+

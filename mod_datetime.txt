@@ -1,0 +1,73 @@
+from datetime import *
+import time
+
+
+
+date.today().year\month\day
+	\\ read-only prop
+
+
+d = date(2021, 11, 10)
+	\\ mandatory format: year, month, day
+	
+	
+d.weekday()
+	\\ Mon 0 - Sun 6
+	
+	
+d.isoweekday()
+	\\ Mon 1 - Sun 7
+	
+
+timestamp = time.time()
+	\\ Unix epoch timestamp in seconds since 1970 Jan 1st
+
+
+dt = datetime(2020, 10, 4, 14, 55)
+dt.timestamp()
+	\\ return Epoch as float
+	
+	
+date.fromtimestamp(timestamp)
+
+
+date.fromisoformat('2019-11-04')
+	
+	
+d = d.replace(year=1999, month=5, day=14)
+	\\ edit original date
+
+
+tm = datetime.time(hour, minute, second, microsecond, tzinfo, fold)
+	\\ tzinfo = timezone subclass, fold = 0 || 1 (wall time)
+
+
+dt = datetime(year, month, day, hour, minute, second, microsecond, tzinfo, fold)
+	\\ combines date & time, can be used to return date or time
+	
+	
+curDT = datetime.now() \ .today() \ .utcnow()
+
+
+time.sleep(int)
+	\\ suspend program for <int> seconds
+	
+	
+time.ctime(<timestamp>)
+	\\ string conversion
+	
+
+time.gmtime(<epoch>)
+time.localtime(<epoch>)
+	\\ return time.struct_time() constructor with tm_ argz: year, mon, mday, hour, min, sec, wday, yday, isdist
+	\\ using 0-8 index returns the actual value
+	
+	
+time.asctime(time.gmtime(<epoch>))
+	\\ convert struct_time or tuple to string readable
+	
+	
+time.mktime(<struct_time values>)
+		\\ convert struct_time or tuple to local time in Epoch
+	
+4.5.1.15

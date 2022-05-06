@@ -1,0 +1,49 @@
+
+AND & requires exactly two 1s to provide 1 as the result;
+
+OR | requires at least one 1 to provide 1 as the result;
+
+XOR ^ requires exactly one 1 to provide 1 as the result.
+
+q = 16
+	\\ translate to binary
+~q = -16
+
+
+
+CHECK \ SET BIT
+~~~~~~~~~~~~~~~
+flag_register = 0x1234
+mask = <decimal value of bit position>
+	\\ 3rd bit: 2^3 = 8, etc
+	\\  converts from decimal to binary to determine the position to operate on
+	
+	
+if flag_register & mask:
+	\\ return true if bit was set to 1;
+	
+	
+flag_register |= mask
+	\\ set flag bit to 1
+	
+
+flag_register &= ~mask
+	\\ reset bit to 0
+	
+	
+flag_register ^= mask
+	\\ negate bit with XOR; replace bit 1 with 0, or 0 with 1;
+	
+	
+
+BINARY LEFT\RIGHT SHIFTING
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* shifting to right removes the rightmost bit == division
+* shifting to left adds bit == multiplication
+* bits = size of the shift aka exponent of base 2;
+
+value << bits
+	\\ left shift => value * 2^bits
+value >> bits
+	\\ right shift => value // 2^bits

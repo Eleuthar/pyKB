@@ -1,0 +1,20 @@
+os.makedirs(<dir1/dir2>)
+
+
+os.chdir(<dirPath>)
+	\\ change directory
+	
+
+os.listdir()
+
+
+os.getcwd()
+	\\ current working dir
+	
+
+os.rmdir(<dirPath>)
+os.removedirs(<dir1/dir2>
+	\\ must be empty
+	
+	
+os.system("cmd as a string")

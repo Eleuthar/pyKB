@@ -1,0 +1,93 @@
+~~~~~~~~~~
+| SERVER |
+~~~~~~~~~~
+
+socket > bind > listen > accept > recv > send > recv > close
+
+import socket
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as z:
+	z.bind(HOST,PORT)
+	z.listen()
+		\\ can contain a param for max connections to accept
+ 		\\ max value is set under /proc/sys/net/core/somaxconn
+
+	conn, addr = z.accept()
+		\\ upon client connect, it returns a new socket obj [conn] and a tuple holding the client address [addr]
+
+	with conn:
+		while True:
+			data = conn.recv(1024); 
+			if not data:
+				break	
+			conn.sendall(data)
+		
+		\\ loop read client data & echo it back
+		\\ if conn.recv gets empty bytes obj b'', terminate conn
+
+
+
+~~~~~~~~~~
+| CLIENT |
+~~~~~~~~~~
+
+CLIENT: socket > connect > send > recv > close
+
+
+import socket
+
+
+server_addr = input("What server do you want to connect to?")
+
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	\\ AF_INET = Address Family InterNET socket domain
+	\\ SOCK_STREAM = socket able to act as char device in TCP proto
+	
+	
+sock.connect((server_addr, 80))
+	\\ tuple argument, do not use proto prefix
+	
+	
+sock.send(b"GET / HTTP/1.1\r\nHost: " + bytes(server_addr, "utf8") + b"\r\nConnection: close\r\n\r\n")	
+	\\ send method doesn't natively accept <STRING>, "b" translates the string to byte
+	
+	
+reply = sock.recv(<int>)
+	\\ get the response and put it in a byte object of <int> size
+	\\ firewall may hinder
+	
+	
+sock.shutdown(socket.SHUT_RDWR)
+	\\ send to server the intention to close the communication
+	\\ RDWR = conjunction of 2 argz: RD & WR
+	
+	
+sock.close()
+	\\ terminate connection
+	
+	
+print(repr(reply))
+	\\ get string representation of the response
+	
+	
+
+HTTP GET
+`````````
+* HTTP protocol to be translated to python code
+
+GET / HTTP/1.1\r\n
+Host: www.<domain>\r\n
+Connection: close\r\n
+	\\ close the connection after the first request is closed, for demo
+\r\n
+
+
+
+EXCEPTION
+``````````
+socket.gaierror
+	\\ thrown by socket.connect(), the name comes from OS kernel function: getaddrinfo(), that does the actual work to get the full addr info
+	\\ throw scenario:
+		1. Connection refused
+		2. Name or service not known

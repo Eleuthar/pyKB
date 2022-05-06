@@ -1,0 +1,24 @@
+
+# network post json
+
+# valid card = 4007000000027
+
+
+def do_request():
+        while True:
+                reply = requests.post(url, data=jzon).text
+                print(reply)
+
+threadz = []
+
+for q in range(50):
+        t = threading.Thread(target=do_request)
+        t.daemon = True
+        threads.append(t)
+
+for q in range(50):
+        threads[q].start()
+
+for q in range(50):
+        threads[q].join()
+

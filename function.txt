@@ -1,0 +1,88 @@
+IMPORTANT
+````````````````
+~ positional argument must follow order
+
+ex:
+def z(q,x):
+	return x ** q
+
+z(x=4, 2) >> SYNTAX ERROR
+
+
+
+LAMBDA
+``````````````
+varName = lambda param: expression
+
+EX_1:
+two = lambda: 2
+sqr = lambda x: x*x
+pwr = lambda x,y: x**y
+
+~ to be used when a function is called only once, for a list of parameters aka map(lambda, list) or filter(lambda, list)
+~ map returns a map object
+~ filter returns a filter object
+
+
+EX_2:
+list_1 = [x for x in range(5)]
+list_2 = list(map(lambda x: 2 ** x, list_1))
+print(list_2)
+for x in map(lambda x: x * x, list_2):
+    print(x, end=' ')
+	# call function for each element
+
+
+EX_3:
+from random import seed, randint
+seed()
+data = [randint(-10,10) for x in range(5)]
+filtered = list(filter(lambda x: x > 0 and x % 2 == 0, data))
+	# elements that return True from lambda, can pass the filter
+	
+	
+!!! lambda should be defined as function, not assigned to variable
+
+	
+	
+CLOSURE
+````````````````
+~ store values when their context of creation does not exist anymore
+
+
+EX_4:
+def outer(par):
+    loc = par
+
+    def inner():
+        return loc
+    return inner
+
+var = 1
+fun = outer(var)
+print(fun())
+
+1. an inner function returns the outer function's variable
+
+2. the outer function returns the inner function (not the local variable's value). 
+If the outer function simply returns the local variable, "fun" would no longer point to a function, but an integer which is not callable.
+
+
+EX_5:
+def make_closure(par):
+    loc = par
+
+    def power(p):
+        return p ** loc
+    return power
+
+
+fsqr = make_closure(2)
+fcub = make_closure(3)
+
+for i in range(5):
+    print(i, fsqr(i), fcub(i))
+	
+1. outer function param is used as local var for inner
+2. inner function returns the function to outer
+3. fsqr & fscub become the returned inner function -> power(p) == fsqr(p), where value of "p" is given by "i"

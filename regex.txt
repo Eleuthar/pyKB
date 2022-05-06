@@ -1,0 +1,59 @@
+import re
+
+txt = 'the rain in spain'
+
+
+re.search("^The.*Spain$", txt)
+	\\ .* any number of characters, ^=begin, $=end
+	\\ return a match object
+
+
+re.findall()
+	\\ return list of all matches
+
+
+re.split()
+	\\ return a list where the string has been split at each match
+
+
+re.sub()
+	\\ replace one or many matches with a string
+
+
+
+
+METACHARACTER
+```````````````
+. = any character, except newline
+
+
+
+QUANTIFIER
+``````````````
+? = 0 or 1
+* = 0 or more 
++ = 1 or more
+{x} = exactly the specified number of occurences
+
+
+
+SPECIAL SEQUENCE preceeding char
+``````````````````````````````````
+
+\A = char is at beginning of string
+\Z = char is at end of string
+
+\b = char is at beginning or end of string; preceeding "r" treat raw string
+\B = not
+
+\d = string contain digitz
+\D = not
+
+\s = white space char
+\S = not
+
+\w = contain a-Z, 0-9 and  _
+\W = not
+
+
+

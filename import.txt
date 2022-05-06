@@ -1,0 +1,14 @@
+from sys import path
+path.append("<nonstandardModule>")
+import <nonstandardModule>
+	\\ import custom module
+
+
+import sys
+modulenames = set(sys.modules) & set(globals())
+allmodules = [sys.modules[name] for name in modulenames]
+	\\ find imported modules, except those using "from"
+	
+	
+globals()
+	\\ return current global variables and imports

@@ -1,0 +1,54 @@
+1. wait for client connection
+2. read request
+3. send response
+4. keep connection alive for next client request
+	\\ if no req from client for a time, it closes the connection
+	\\ header "Connection" informs client if connection is kept alive or closed after responding
+
+
+import requests as q
+
+
+q.get('http://<ip>:<port>/<json>/[<prop>]?_sort=<prop>&_order=[asc\desc]')
+	\\ default port 80 can be omitted
+
+
+q.post('<ip>:<port>', headers=hVar, data=json.dumps(<pyDict>))
+	\\ POST = send new data
+
+
+q.put('<ip>:<port>/<json>/<id>', headers=hVar, data=json.dumps(<pyDict>))
+	\\ PUT = replace\update data
+
+
+q.delete('<ip>:<port>/<json>/<id>')
+
+
+r.status_code
+	\\ return the last status code from server
+
+
+q.codes.__dict__
+	\\ get all known status codes
+
+
+r.headers
+	\\ return the header as dict
+
+
+r.text
+	\\ return the actual data provided by server
+
+
+q.exceptions.timeout
+q.exceptions.ConnectionError
+
+
+r.headers['Content-Type']
+	\\ return json or text, etc
+
+
+r.json()
+	\\ return the string containing the received message
+
+

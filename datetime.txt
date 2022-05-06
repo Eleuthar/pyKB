@@ -1,0 +1,102 @@
+from datetime import date, datetime, timedelta
+import time
+import calendar
+
+
+
+
+DATE
+````````````
+
+today = date(y, m, d)
+	\\ new object
+
+
+today.isoformat()
+	\\ return string = year-month-day
+
+
+today.isocalendar()
+	\\ return tuple = ISO year, week number, weekday number(1-7)
+
+
+today.weekday()
+	\\ return week day number (0-6)
+
+
+today.isoweekday()
+	\\ return week day number (1-7)
+
+
+today.strftime('%Y/%m/%d')
+	\\ date, time & datetime string formatting, choosing any delimiter
+
+
+today.strftime('%y %B %d')
+	\\ example return '20 February 05'
+
+
+
+
+TIME
+``````````
+time.sleep(5)
+
+
+timestamp = time.time()
+	\\ return epoch timestamp
+
+
+time.ctime()
+	\\ return 'Sat Feb  5 13:07:07 2022'
+	\\ can use timestamp arg
+
+
+
+
+DATETIME
+````````````````
+
+dt = datetime(y, m, d, h, m)
+	\\ combine date & time 
+
+
+datetime.today()
+datetime.now()
+datetime.utcnow()
+	\\ current local date & time
+
+
+datetime.timestamp()
+	\\ epoch current date & time
+
+
+dt1 = datetime(2020, 11, 4, 0, 0, 0)
+dt2 = datetime(2022, 2, 5, 14, 27, 0)
+
+dt1 - dt2
+	\\ subtracting 2 datetimes return a timedelta: xxx days, h:mm:ss
+
+
+newDelta = timedelta(weeks=x, days=x, hours=x)
+	\\ create a timedelta object, the time difference between 2 dates
+	\\ weeks are converted to days
+	\\ hours & minutes can be converted to seconds
+	\\ milliseconds can be converted to microseconds
+	\\ delta can be added to date & datetime variable
+
+
+
+
+CALENDAR
+```````````````
+
+calendar.calendar(2020)
+	\\ print the calendar for year 2020
+	\\ argz: w = date col width, l = no. of lines per week
+
+
+calendar.weekheader(1)
+calendar.weekheader(2)
+	\\ print the first 1 or 2 letters of the weekday
+

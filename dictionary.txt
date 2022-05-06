@@ -1,0 +1,76 @@
+!!! Dictionaries in python version < 3.6 don't keep order of key-value pair declaration
+
+
+dict['keyName']
+	\\ print value of String key
+	
+	
+dict[keyVar]
+	\\ print value of Variable key
+
+
+for x, q in dictionary.items():
+	print(x, q)
+	\\ assign key to x, value to q
+
+
+for q in dictionary.keys():
+	x = dictionary[q]
+	\\ x == value of key q, x[0] == key q
+	print(q)
+	\\ print keys
+	
+	
+for q in dictionary.values():
+	print(q)
+	\\ assign key or value to q
+	
+	
+sorted(dict.keys())
+sorted(dict.values())
+	\\ sort keys or values
+	
+	
+sorted(dict, key=data.get)
+	\\ sort dictionary by value and return the matching keys
+
+
+sorted(dict.items(), key=lamda x:x[1], reverse=True)
+	\\ return array of tuples, descending order by values
+	
+	
+dict['newKey'] = 'value'
+dict.update({"newKey": "Value"})
+	\\ insert item
+	
+
+del dict['keyName']
+	\\ remove key
+	
+
+dict.popitem()
+	\\ remove last item; before version 3.6.7 it removes random item
+	
+	
+copyOfDict = dictz.copy()
+	\\ new dependent copy
+	
+	
+copyOfDict = copy.deepcopy(dictz)
+	\\ new independent copy
+	
+	
+dict.clear()
+	\\ remove all items
+
+
+for item in (d1, d2):
+    d3.update(item)
+	\\ concatenate multiple dictz
+
+	
+for z in tuple:
+    dict.update({z[0]:z[1]})
+OR
+dict(tuple)
+	\\ convert tuple to dict

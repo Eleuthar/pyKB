@@ -1,0 +1,54 @@
+
+
+FORMATTING
+```````````
+print("txt: %2d, txq: %5.2f" % (1, 55555.33)
+	\\ %[flags][width][.precision]type
+
+
+print("txt {0[key1]}, txt {1[key2]}.format(dictionary))
+	\\ positional arguments
+
+
+print("{0:>5}".format(strVar))
+	\\ width of 5 spaces to the right
+
+
+print("{0:_>5}".format(strVar))
+	\\ pad with underscore 5 spaces to the right
+
+
+print("{0:^5}".format(var))
+	\\ center within available space
+
+
+print(strVar.center || ljust || rjust(40, "-")
+	\\ position, width, padding
+
+
+
+
+KEYWORD ARG
+````````````
+end = EOL; default = new line, can be replaced with any char or symbol
+sep = separator
+
+ ~ string between ' ' will not require escaping " " and viceversa
+
+
+
+CONVERSION
+```````````
+ ~ print() will always convert from:
+	* octal or hexadecimal to decimal
+	* scientific to float.
+	
+
+
+OUTPUT functions
+~~~~~~~~~~~~~~~~~
+
+var = input("insert value")
+
+min\max(<int list>)
+	\\ return min or max value of the list
