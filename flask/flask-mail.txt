@@ -1,0 +1,50 @@
+pip install Flask-Mail
+
+
+from flask-mail import *
+from random import randint
+
+
+app.config
+	['MAIL_SERVER']
+	['MAIL_PORT']
+	['MAIL_USE_TLS']
+	['MAIL_DEBUG']
+	['MAIL_USERNAME']
+	['MAIL_PASSWORD']
+	['MAIL_DEFAULT_SENDER']
+	['MAIL_MAX_EMAILS']
+	['MAIL_SUPPRESS_SEND']
+		\\ suppress mail if app.testing == true
+	['MAIL_ASCII_ATTACHMENTS']
+
+
+Flask-mail.Message(subject, recipients, body, html, sender, cc bcc, to, date, charste, extra-headers, mail-options, rcpt_options)
+	\\ init Message class instance
+
+
+msg = Message('subject', sender= 'admin@gmail.com', recipients = [to@gmail.com])
+
+
+otp = randint(000000, 999999)
+
+
+msg.body = str(otp)
+
+
+mail.send(msg)
+
+
+if otp == user_otp:
+	return 'OK'
+
+
+with app.open_resource('img.png') as fp:
+	msg.attach('img.png', 'image\png', fp.read())
+
+
+
+
+
+
+

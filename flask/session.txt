@@ -1,0 +1,15 @@
+# the duration for which a user logs in & out the server
+# session data is stored on the server, on top of cookies & signed by server
+
+
+
+session['<key>'] = request.form['<key>']
+
+
+session.pop('<key>', None)
+	\\ avoid KeyError with 2nd arg None, if <key> is missing
+
+
+
+
+

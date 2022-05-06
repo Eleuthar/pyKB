@@ -1,0 +1,14 @@
+# data tracking user activities 
+# set by server, stored on client 
+
+
+
+resp = make_response(render_template('success.html'))
+resp.set_cookie(<title>,<content>,[<expiry time>])
+return resp
+	\\ set cookie on response object
+
+	
+request.cookies.get(<title>)
+	\\ read cookie stored on client machine
+

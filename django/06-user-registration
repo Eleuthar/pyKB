@@ -1,0 +1,82 @@
+######## PROJECT\URLS.py ########
+
+
+from users import views as user_views
+
+
+path('register/', user_views.register, name='register'),
+
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+######## VIEWS ########
+
+
+from django.shortcuts import render
+
+\\from django.contrib.auth.forms import UserCreationForm can be improved by inheriting class defined in custom file 'forms.py
+
+from django.contrib import messages
+from .forms import UserRegisterForm
+
+
+\\ register view will generate the form via python class
+def register(request):
+	\\ if method == POST, the filled data will be validated, as the POST request will contain the data in the message body
+	\\ submitted data is converted to python type as 'cleaned_data'
+	\\ flash message to alert Valid Data via imported message types: debug, info, success, warning, error
+	\\ anything that is not a POST data will generate a blank form
+
+	if request.method == 'POST':
+		form = UserRegisterForm(request.POST)
+		if form.is_valid():
+			form.save()
+			username = form.cleaned_data.get('username')
+			messages.success(request, f'Your account has been created! You are now able to log in')
+
+			\\ redirect user to login page after registration; if no login page is defined, redirect to homepage
+			return redirect('login')
+	else:
+		form = UserRegisterForm()
+
+	return render (request, 'users/register.html', {'form':form})
+
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+######## FORMS.PY ########
+
+
+from django import forms
+from django.contrib.auth.model import User
+from django.contrib.auth.forms import UserCreationForm
+
+class UserRegisterForm(UserCreationForm):
+	email = forms.EmailField()
+	
+	\\ nested namespace for configurations in one place
+	class Meta:
+		model = User
+		fields = ['username', 'email', 'password1', 'password2']
+
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+####### PROJECT\SETTINGS.PY #######
+
+
+INSTALLED_APPS = [
+	'users.apps.UsersConfig',
+	'crispy_forms',
+]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

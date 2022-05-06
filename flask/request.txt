@@ -1,0 +1,61 @@
+\\ the request object contains all data sent by the client
+\\ request.form = dictionary of form param & their values
+\\ request.args = is parsed from the URL, after "?"
+\\ request.cookies = dictionary stored on client side to track user session
+\\ request.method is the current request method (get or post)
+
+
+
+
+LOGIN.HTML
+~~~~~~~~~~~~~~
+
+<html>
+	<body>
+		<form action = "http://localhost:5000/login" method="post">
+		<table>
+			<tr>
+				<td>Name<td>
+				<td><input type="text" name="uname"></td>
+			</tr>
+			<tr>
+				<td>Password<td>
+				<td><input type="password" name="pvd"></td>
+			</tr>
+		</table>
+		</form>
+
+	</body>
+</html>
+
+
+
+
+POST_HANDLER.py
+~~~~~~~~~~~~~~~~~~
+
+@app.route('/login', methods=['POST'])
+def login():
+	uname = request.form['uname']
+	pvd = request.form['pvd']
+
+	if uname == 'admin' and pvd == '1337H@xorz':
+		return 'Welcome %s' %uname
+
+
+
+
+GET_HANDLER.py
+~~~~~~~~~~~~~~~~~
+
+@app.route('/login', methods=['GET'])
+def login():
+	uname = request.args.get('uname')
+	pvd = request.args.get('pvd')
+
+	if uname == 'admin' and pvd == '1337H@xorz':
+		return 'Welcome %s' %uname
+
+
+
+

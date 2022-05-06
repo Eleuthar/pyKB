@@ -1,0 +1,94 @@
+####### USERS\FORMS.PY #######
+
+
+# define model form that works with a specific database model
+# import Profile to create profile form
+
+from .models import Profile
+
+
+class UserUpdateForm(forms.ModelForm):
+	email = forms.EmailField()
+	
+	class Meta:
+		model = User
+		fields = ['username', 'email']
+
+
+class ProfileUpdateForm(forms.ModelForm):
+	class Meta:
+		model = Profile
+		fields = ['image']
+
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+####### USERS\VIEWS.PY #######
+
+
+from .forms import UserUpdateForm, ProfileUpdateForm
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+	    u_form: UserUpdateForm(request.POST, instance=request.user)	 
+        p_form: ProfileUpdateForm(request.POST,
+	                              request.FILES,
+	                              instance=request.user.profile)
+	    if u_form.is_valid() and p_form.is_valid():
+	        u_form.save()
+	        p_form.save()
+	        messages.success(r equest, f'Your account has been updated!')
+	        # avoid reloading POST request
+	        return redirect('profile')
+	else:
+        u_form: UserUpdateForm(instance=request.user)
+	    p_form: ProfileUpdateForm(instance=request.user.profile)
+
+        # 'instance' populates the fields with the current user data
+    
+	context = {
+		'u_form': u_form,
+		'p_form': p_form,
+
+	return render(request, 'users/profile.html', context)
+
+
+
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    
+
+
+####### USERS\MODELS.PY #######
+
+        
+# import PIL after pip install pillow
+from PIL import image
+
+
+# within class Profile
+    def save(self):
+        # override the save method of the parent class 'Profile'
+        # editing will be done on the super().saved image
+        super().save()
+
+        img = Image.open(self.image.path)
+        
+        if img.height > 300 or img.width > 300:
+            output_size = (300, 300)
+            img.thumbnail(output_size)
+            img.save(self.image.path)
+        
+        
+        
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+
+####### USERS\TEMPLATES\USERS\PROFILE.HTML #######
+####### BLOG\TEMPLATES\BLOG\HOME.HTML #######
+
+

@@ -1,0 +1,56 @@
+
+\\ HTML templates can be rendered by the return statement
+\\ templates must be located under the "templates" directory
+\\ HTML templates provide dynamic data representation via Jinja2 engine
+\\ the rule must contain parameter for the data to be represented:
+\\ templates also serve CSS & JS files from the '/static' directory
+
+
+
+
+@app.route('/uzr/<uname>')
+def alert(uname):
+	return render_template('alert.html', name=uname)
+
+	\\ the HTML template will use the parameter 'name' inside delimiter
+
+
+
+
+INHERITED BLOCK
+~~~~~~~~~~~~~~~~
+
+{% extends 'base.html' %}
+{% block content %}
+	<h1> {{ specific content }} </h1>
+{% endblock content %}
+
+	\\ inherited template content block from base.html to be extended by child html page
+	\\ base.html must contain a div enclosing the {% block content %} {% endblock %}
+
+
+
+
+DELIMITERS
+~~~~~~~~~~~~
+
+{% if... for... %}
+	<p> {{ }} </p>
+{% endif%}
+	\\ statement will be enclosed line by line, as the statement may contain expression that need to be enclosed in {{...}}
+
+
+{{ name }}
+	\\ expression
+	\\ this delimiter can contain href value:
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+
+{# ... #}
+	\\ comment not included in template output
+
+
+# ... ##
+	\\ line statement
+
+

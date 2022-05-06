@@ -1,0 +1,17 @@
+# prerequisite: HTML form with encryption set to multipart\form-data
+
+# file is stored in the request.files[] Object
+
+
+app.config['UPLOAD_FOLDER']
+	\\ set the upload destination on server
+
+
+app.config['MAX_CONTENT_PATH']
+	\\ set the maximum size of the uploaded file
+
+
+q = request.files['file']
+	\\ ['file'] is taken from the HTML form's file input name
+
+q.save(q.filename)

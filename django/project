@@ -1,0 +1,20 @@
+####### URLS.PY #######
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+	path('admin/', admin.site.urls),
+	path('blog/', include('blog.urls'),
+]
+
+
+####### SETTINGS.PY #######
+INSTALLED_APPS = [ 
+	'blog.apps.BlogConfig',
+	'users.apps.UsersConfig',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+]	  

@@ -1,0 +1,51 @@
+EXAMPLE #1
+~~~~~~~~~~~~~~~~~
+
+@app.route("/")
+def hello():
+    return 'Hello world!'
+
+    \\ 1st arg is rule parameter, the URL bound with the decorated function
+
+
+OR WITHOUT DECORATOR
+
+
+app.add_url_rule('rule', 'endpoint', function)
+
+
+
+
+EXAMPLE #2
+~~~~~~~~~~~~~~~~~~~ 
+@app.route('/home/<VARIABLE>')
+	
+	OR !!!
+
+@app.route('/home/<DATATYPE:VARIABLE>')
+
+
+def home(VARIABLE):
+	return 'Greetingz, ' + name
+
+	\\ use variable in rule parameter
+	\\ default datatype is string
+
+
+
+
+DYNAMIC URL BUILDING
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+@app.route('/uzr/<name>')
+def uzr(name):
+
+	if name == 'admin':
+		return redirect(url_for(admin))
+
+	elif name == 'regular':
+		return redirect(url_for(regular))
+
+	else:
+		abort(406)
+		\\ return Unauthorized 406 response	in case of err	

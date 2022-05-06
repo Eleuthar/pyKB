@@ -1,0 +1,83 @@
+# declare, serve form & render in JINJA
+
+
+######### external module forms.py
+
+from flask_wtf import Form
+
+from wtforms import TextField, IntegerField, TextAreaField, SubmitField, RadioField, SelectField
+
+from wtforms import validators, ValidationError
+
+
+
+class ContactForm(Form):
+
+	name = TextField("Candidate Name", [validators.Required("Please enter your name")]
+
+	gender = RadioField('Gender', choices = [('M', 'Male'), ('F', 'Female')]
+
+	submit = SubmitField('Submit')
+
+
+
+
+############ main module
+
+from flask import Flask, render_template, request, flash
+
+from forms import ContactForm
+
+
+
+@app.route('/contact', methods = ['GET', 'POST'])
+
+	form = ContactForm()
+	
+	if form.validate() == False:
+		flash('All fields are required')
+
+	return render_template('contact.html', form = form)
+
+
+
+
+########### contact.html
+
+<html>
+<body>
+<h2>Registration form</h2>
+
+
+{% for mzg in form.name.errors %}
+	<div> {{ mzg }} </div>
+{% endfor %}
+
+	\\ only fields with validators.Required
+
+
+
+<form action = "/success" method = 'POST'>
+	{{ form.hidden_tag() }}
+
+		\\ render all hidden fields in one block to implement CSRF protection
+
+	{{ form.name.label }} <br/>
+	{{ form.name }} <br/>
+
+	{{ form.gender.label }} <br/>
+	{{ form.gender }} <br/>
+
+	{{ form.submit }}
+
+
+	</fieldset>
+</form>
+
+</body>
+</html>
+
+
+
+
+

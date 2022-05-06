@@ -1,0 +1,24 @@
+# define flash message in server side
+# show alert in client side rendered template
+
+
+
+flash("you are logged in")
+	\\ in server side
+	\\ optional 2nd arg for category: error, information, warning
+
+
+{% with messages = get_flashed_messages() %}
+	\\ optional 1st arg 'with_categories' if flash has category
+	\\ optional 2nd arg 'category_filter' display specified msg
+
+	{% if messages %}
+		{% for mzg in messages %}
+			<p>{{ mzg }}</p>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+	\\ client side flash extraction
+
+<a href="{{url_for('login')}}"> login </a>

@@ -1,0 +1,20 @@
+# virtualenv venv
+# . venv/bin/activate
+# pip install flask
+
+
+from flask import Flask
+
+
+app = Flask(__name__)
+
+
+if __name__ == '__main__':
+    app.debug = True
+    app.run()
+        OR  
+    app.run(debug = True)
+
+    \\ run application on the local dev server
+    \\ all arg are optional: host, port=5000, debug=false, options to be fwd to Werkzeug server
+
