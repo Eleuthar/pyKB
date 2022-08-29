@@ -51,7 +51,8 @@ time.ctime()
 	\\ return 'Sat Feb  5 13:07:07 2022'
 	\\ can use timestamp arg
 
-
+datetime.fromtimestamp(tstamp).strftime('%d/%m/%Y %H:%M')
+	\\ return readable time from timestamp
 
 
 DATETIME
