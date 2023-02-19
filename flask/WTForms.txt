@@ -11,6 +11,8 @@ from wtforms import validators, ValidationError
 
 
 class ContactForm(Form):
+# flask_wtf.Form allows to call validate_on_submit() which checks to see if the request was a POST first before calling validate() on the underlying form
+
 	name = TextField("Candidate Name", [validators.Required("Please enter your name")]
 	gender = RadioField('Gender', choices = [('M', 'Male'), ('F', 'Female')]
 	submit = SubmitField('Submit')
