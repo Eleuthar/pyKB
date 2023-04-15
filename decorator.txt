@@ -9,31 +9,23 @@ from functools import wraps
 def mapper(fnc):
 
     @wraps(fnc)
-    def inner(list_of_valuez):
-    
+    def inner(list_of_valuez):    
         '''This is the inner()'''
-
         return [fnc(value) for value in list_of_values]
 
     return inner
 
 
-
 @mapper
-def camelcase(z):
-    
+def camelcase(z):    
     ''' Turn ztringz_like_thiz into ZtringzLikeDiz ''' 
-
     return ''.join([word.capitalize() for word in z.split('-')])
 
 names = [ 'rick_ross', 'A$Ap_rocky', 'znoop_dg' ]
 
 
-
 print(camelcase.__doc__)
     \\ without @wraps, it would print mapper doc
-
-
 
 
 
@@ -48,9 +40,8 @@ import random
 def power_of(arg):
 
     def decorator(fnc):
-
+    
         def inner():
-
             return fnc() ** exponent
 
         return inner
