@@ -2,7 +2,7 @@ argparse vs getopt
 https://peps.python.org/pep-0008/
 logging, structlog ?
 function docstring
-https://www.asapdevelopers.com/python-code-complexity/
+https://www.asapdevelopers.com/python-code-complexity/ >>>>>>> radon
 type annotations
 https://book.pythontips.com/en/latest/index.html
 https://docs.quantifiedcode.com/python-anti-patterns/index.html
