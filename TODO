@@ -7,8 +7,11 @@ type annotations
 https://book.pythontips.com/en/latest/index.html
 https://docs.quantifiedcode.com/python-anti-patterns/index.html
 type hints
-black as auto formatter & other styling formats
 use classes & modules, tests & documentation
 pathlib.Path objects and their variants (PurePath, PurePosixPath, etc.)
-Use linter like ruff, flake8
+Use linter like ruff, flake8, black
 Use a tool like mypy in strict mode to check your type compliance
+Understanding of the threading limitations of Python, and multi-process architecture
+Knowledge of user authentication and authorization between multiple system, server and environments
+Understanding of fundamental design principles behind a scalable application
+Familiarity with event-driven programming in Python
