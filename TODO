@@ -1,4 +1,5 @@
-argparse vs getopt
+argparse
+__init__.py
 https://peps.python.org/pep-0008/
 logging, structlog ?
 function docstring
