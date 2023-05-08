@@ -1,0 +1,4 @@
+parser = argparse.ArgumentParser()
+parser.add_argument("-s", "--source_path", type=str, help="The source directory that needs to be replicated")
+argz = parser.parse_args()
+argz.<argName>
