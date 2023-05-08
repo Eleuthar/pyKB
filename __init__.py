@@ -1,6 +1,6 @@
 '''
-multiple modules setup
-```````````````````````
+Mark directories on disk as Python package directories
+
 codename/
     __init__.py
     package1.py (has class1 and is a script)
