@@ -1,11 +1,6 @@
-logging, structlog ?
 https://www.asapdevelopers.com/python-code-complexity/ >>>>>>> radon
-type annotations
 https://book.pythontips.com/en/latest/index.html
 https://docs.quantifiedcode.com/python-anti-patterns/index.html
-type hints
-use classes & modules, tests & documentation
-pathlib.Path objects and their variants (PurePath, PurePosixPath, etc.)
 Use linter like ruff, flake8, black
 Use a tool like mypy in strict mode to check your type compliance
 Understanding of the threading limitations of Python, and multi-process architecture
