@@ -1,0 +1,3 @@
+https://www.asapdevelopers.com/python-code-complexity/ >>>>>>> radon
+Use linter like ruff, flake8, black
+Use a tool like mypy in strict mode to check your type compliance
