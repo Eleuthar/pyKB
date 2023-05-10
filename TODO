@@ -1,8 +1,5 @@
-https://www.asapdevelopers.com/python-code-complexity/ >>>>>>> radon
 https://book.pythontips.com/en/latest/index.html
 https://docs.quantifiedcode.com/python-anti-patterns/index.html
-Use linter like ruff, flake8, black
-Use a tool like mypy in strict mode to check your type compliance
 
 Understanding of the threading limitations of Python, and multi-process architecture
 Knowledge of user authentication and authorization between multiple system, server and environments
