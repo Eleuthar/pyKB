@@ -1,8 +1,9 @@
-https://book.pythontips.com/en/latest/index.html
-https://docs.quantifiedcode.com/python-anti-patterns/index.html
-
+numpy
+pandas
 DASH
 SNOWFLAKE \ SPARK
 Knowledge of user authentication and authorization between multiple system, server and environments
 Understanding of fundamental design principles behind a scalable application
 Familiarity with event-driven programming
+https://book.pythontips.com/en/latest/index.html
+https://docs.quantifiedcode.com/python-anti-patterns/index.html
