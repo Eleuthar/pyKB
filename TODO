@@ -3,6 +3,7 @@ numpy
 pandas
 DASH
 SNOWFLAKE \ SPARK
+statistical models
 Knowledge of user authentication and authorization between multiple system, server and environments
 Understanding of fundamental design principles behind a scalable application
 Familiarity with event-driven programming
