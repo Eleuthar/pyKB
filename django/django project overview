@@ -1,0 +1,128 @@
+{
+    "project": {
+        "django version": "4.2",
+        "make": "django-admin startproject {project_name}",
+		"port": 8000,
+        "runserver": "python manage.py runserver {port}"
+        "content": [               
+			"__init__.py",
+			"settings.py",
+			"urls.py",
+			"asgi.py",
+			"wsgi.py"
+		],
+
+		"urls.py": [
+			"from django.contrib import admin",
+			"from django.urls import include, path"
+		],		
+		"urlpatterns = [
+			"path('appX/', include('appX.urls')",
+			"path('admin/', admin.site.urls)"
+		],
+		
+		"settings.py": {
+			
+			"INSTALLED_APPS": [
+				"appX.apps.AppXConfig"
+			],
+			
+			"DB engine option": [
+				"django.db.backends.sqlite3",
+				"django.db.backends.postgresql",
+				"django.db.backends.mysql",
+				"django.db.backends.oracle",
+				"_GRANT ALL PRIVILEGES ON *.* TO 'uzr'@'localhost';"
+			],
+			
+			"TIME_ZONE": "EEST",
+			
+			"DATABASES": {
+				"default": {
+					"ENGINE": "django.db.backends.sqlite3",
+					"NAME": "BASE_DIR / 'db.sqlite3'",
+					"HOST": "hostname",
+					"USER": "username",
+					"PORT": "port",
+				}
+			}
+		}
+	},
+	
+	
+
+    "appX": {
+        "content": ["admin.py","apps.py","models.py","tests.py","urls.py","views.py","migrations\\"
+		],
+		
+		"templates": "",
+		
+		"models.py": [
+			"from django.db import models"
+		],
+		"models.py syntax": {			
+			"class Name1(models.Model)": [
+				"column_name1 = models.CharField(max_length=200)",
+				"column_name2 = models.IntegerField(default=0)",
+				"column_name3 = models.DateTimeField('<optional overriding col name>')",
+			],
+			"class Name2(models.Model)": [
+				"column_name4 = models.ForeignKey(Name1, on_delete=models.CASCADE)",
+				"column_name5 = models.IntegerField(default=0)",
+			],
+			"relationship": {
+				"ForeignKey": "many-to-one",
+				"OneToOneField": "1-to-1",
+				"ManyToManyField": "many-to-many"
+			]
+		},
+			
+		"views.py":[
+			"from django.http import HttpResponse",
+			"def index"
+		],
+		
+		"urls.py":[
+			"from django.urls import path",
+			"from . import views"			
+		],
+		"urlpatterns": [
+			"path('', views.index, <view function arg: dict>, name='index')"
+		]
+	},
+	
+	
+	
+	"ACTIONS": {		
+		
+		"command": [
+			{
+				"name": "python manage.py check",
+				"description": "Check for any problems without making migrations or touching the database"
+			},
+			{
+				"name": "django-admin sqlmigrate appX 0001",
+				"description": "Prints the SQL for the named migration"
+			},
+			{
+				"name": "python manage.py makemigrations",
+				"description": "Translation to SQL syntax stored under 'appX\migrations' as 0001_initial.py. To run after each change in models.py."
+			},
+			{
+				"name": "python manage.py migrate",
+				"description": "Create database tables for apps in Project.settings.INSTALLED_APPS; Apply changes in models.py"
+			}	
+		],
+		
+		"DB type": {
+			"PostgreSQL": "\dt",
+			"MySQL": "SHOW TABLES;",
+			"SQLite": ".tables",
+			"Oracle": "SELECT TABLE_NAME FROM USER_TABLES;"
+		},
+		
+		"python manage.py shell": {
+			
+		}
+	}
+}
