@@ -4,10 +4,13 @@ Dependency injection
 numpy
 pandas
 DASH
-SNOWFLAKE \ SPARK
+SNOWFLAKE \ SPARK \ AIRFLOW
 statistical models
 Knowledge of user authentication and authorization between multiple system, server and environments
 Understanding of fundamental design principles behind a scalable application
-Familiarity with event-driven programming
-https://book.pythontips.com/en/latest/index.html
 https://docs.quantifiedcode.com/python-anti-patterns/index.html
+
+
+https://cloud.google.com/vertex-ai/docs/start/introduction-unified-platform
+https://github.com/GoogleCloudPlatform/training-data-analyst/tree/master/self-paced-labs/vertex-ai
+https://github.com/GoogleCloudPlatform/training-data-analyst
