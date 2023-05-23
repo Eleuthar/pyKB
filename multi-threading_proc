@@ -1,1 +1,53 @@
 
+MANUAL
+```````
+
+import threading
+import multiprocessing
+
+
+def func_name():
+    pass
+    
+
+threads = []
+
+for _ in range(5):
+
+    # p = multiprocessing.Process
+    t = threading.Thread(target=func_name)
+    t.start()
+    threads.append(t)
+     
+for thread in threads:
+    thread.join()
+
+    
+    
+
+
+POOL EXECUTOR
+``````````````
+import time
+import concurrent.futures
+
+
+def go_nap(z):
+    time.sleep(z)
+
+# replace Thread with Process if job is CPU bound instead of IO bound
+with concurrent.futures.ThreadPoolExecutor() as executor:
+        
+    # use arg list with map
+    argz = [5,4,3,2,1]
+    
+    # return in the finish order
+    rezultz = [executor.submit(go_nap, arg) for arg in argz]
+    
+    for q in concurrent.futures.as_completed(rezultz):
+        print(q.result())
+        
+        # OR 
+    
+    # return in the order of execution start
+    rezultz = executor.map(go_nap, argz)
