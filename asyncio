@@ -1,3 +1,14 @@
+OVERVIEW
+``````````
+1. Define async function (coroutine)
+2. loop = asyncio.get_event_loop()
+3. task_obj = loop.create_task(some_coroutine(*arg, **kwarg))
+4. loop.run_until_complete(task_obj)
+	4.1 task_obj.cancel() -> CancelledError 
+5. loop.close()
+
+
+
 Coroutines 
 ```````````
 * use async libs for full async effect
@@ -93,6 +104,7 @@ async def main(loop):
 	async with aiohttp.ClientSession(loop=loop) as session:
 		tasks = [download_coroutine(session, url) for url in urlz]
 		await asyncio.gather(*tasks)
+
 
 if __name__ == '__main__':
 	loop = asyncio.get_event_loop()
