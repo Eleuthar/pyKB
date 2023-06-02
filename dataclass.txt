@@ -1,0 +1,17 @@
+
+"""
+Used to automatically generate special methods to classes including __str__, __repr__ to reduce boilerplate code
+Uses the instance data defined within __init__ to generate dunder
+"""
+
+from dataclasses import dataclass
+
+@dataclass
+class Person:
+	name: str,
+	age: int
+
+
+p = Person('John Doe', 34)
+
+# now dunder methods will use the variables during instantiation

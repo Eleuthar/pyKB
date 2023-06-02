@@ -1,0 +1,178 @@
+{
+	"project": {
+		"django version": "4.2",
+		"make": "django-admin startproject {project_name}",
+		"port": 8000,
+		"runserver": "python manage.py runserver {port}",
+		"content": [
+			"__init__.py",
+			"settings.py",
+			"urls.py",
+			"asgi.py",
+			"wsgi.py"
+		],
+		"urls.py": [
+			"from django.contrib import admin",
+			"from django.urls import include, path"
+		],
+		"urlpatterns": [
+			"path('appX/', include('appX.urls')",
+			"path('admin/', admin.site.urls)",
+			"path('route', 'view_function', 'view_function_dict_kwargs', 'name')"
+		],
+		"settings.py": {
+			"INSTALLED_APPS": [
+				"appX.apps.AppXConfig"
+			],
+			"DB engine option": [
+				"django.db.backends.sqlite3",
+				"django.db.backends.postgresql",
+				"django.db.backends.mysql",
+				"django.db.backends.oracle",
+				"_GRANT ALL PRIVILEGES ON *.* TO 'uzr'@'localhost';"
+			],
+			"TIME_ZONE": "EEST",
+			"DATABASES": {
+				"default": {
+					"ENGINE": "django.db.backends.sqlite3",
+					"NAME": "BASE_DIR / 'db.sqlite3'",
+					"HOST": "hostname",
+					"USER": "username",
+					"PORT": "port"
+				}
+			}
+		}
+	},
+	"appX": {
+		"content": [
+			"admin.py",
+			"apps.py",
+			"models.py",
+			"tests.py",
+			"urls.py",
+			"views.py",
+			"migrations\\"
+		],
+		"appX\\templates\\appX\\page.html": [
+			// <form action="{% url 'appX:view_function' object.id %}" method="post">
+			// {% csrf_token %}
+			// {% for iterator in object.object_set.all %}
+			// <input type="radio" name="obj_name" id="obj{{ forloop.counter }}">
+			// {% endfor %}
+
+		],
+		"models.py": [
+			"from django.db import models"
+		],
+		"models.py ORM syntax": {
+			"class Name1(models.Model)": [
+				"column_name1 = models.CharField(max_length=200)",
+				"column_name2 = models.IntegerField(default=0)",
+				"column_name3 = models.DateTimeField('<optional overriding col name>')"
+			],
+			"class Name2(models.Model)": [
+				"column_name4 = models.ForeignKey(Name1, on_delete=models.CASCADE)",
+				"column_name5 = models.IntegerField(default=0)"
+			],
+			"relationship": {
+				"ForeignKey": "many-to-one",
+				"OneToOneField": "1-to-1",
+				"ManyToManyField": "many-to-many"
+			}
+		},
+		"views.py": [
+			"from django.views import generic",
+			"from django.shortcuts import get_object_or_404, render",
+			"from django.http import HttpResponse, HttpResponseRedirect",
+
+			"def viewfun(request, question_id):",
+
+			"question = get_object_or_404(Question, pk=request.POST['choice'])",
+			"return HttpResponseRedirect(reverse('appX:view_function_name'))",
+				"OR",
+			"question = get_object_or_404(Question, pk=question_id)",
+			"return render(request, 'appX/detail.html', {'question': question})",
+
+			"OR",
+			"from django.http import Http404",
+			"except ModelClassName.DoesNotExist",
+			"raise Http404('Item does not exist')",
+
+			"OR",
+			"from django.template import loader",
+			"template = loader.get_template('appX/index.html')",
+			"return HttpResponse(template.render(content, request))"
+		],
+		"urls.py": [
+			"from django.urls import path",
+			"from . import views"
+		],
+		"urlpatterns": [
+			"path('', views.index, <view function arg: dict>, name='index')",
+			"path('<int:question_id>/, views.detail, name='detail')",
+			"path('<int:question_id>/results, views.results, name='results')"
+		],
+		"admin.py": [
+			"from django.contrib import admin",
+			"from .models import ClassName",
+			"admin.site.register(ClassName)"
+		]
+	},
+	"ACTIONS": {
+		"command": [
+			{
+				"name": "python manage.py check",
+				"description": "Check for any problems without making migrations or touching the database"
+			},
+			{
+				"name": "django-admin sqlmigrate appX 0001",
+				"description": "Prints the SQL for the named migration"
+			},
+			{
+				"name": "python manage.py makemigrations",
+				"description": "Display translation to SQL syntax stored under 'appX\\migrations' as 0001_initial.py. To run after each change in models.py. If approved, will be applied by <migrate> cmd."
+			},
+			{
+				"name": "python manage.py migrate",
+				"description": "Create database tables if not yet existing, for apps in Project.settings.INSTALLED_APPS; Apply changes in models.py; will create tables with the naming convention: <appX>_<models.ClassName>; FK will be appended an ID"
+			},
+			{
+				"admin account": "python manage.py createsuperuser",
+				"admin page": "http://localhost:8000/admin/"
+			}
+		],
+		"DB type": {
+			"PostgreSQL": "\\dt",
+			"MySQL": "SHOW TABLES;",
+			"SQLite": ".tables",
+			"Oracle": "SELECT TABLE_NAME FROM USER_TABLES;"
+		},
+		"python manage.py shell": {
+			"description": "Use object properties to interact with DB models via shell",
+			"pro tip": "use dataclasses.dataclass decorator to auto generate dunder methods, useful within shell",
+			"commands": [
+				"from appX.models import ModelClassZ, ModelClassQ",
+				"ModelClassZ.objects.all",
+				"q = ModelClassZ()",
+				"ModelClassZ.objects.filter(tableColumn=value)",
+				"ModelClassZ.objects.get(tableColumn=value)",
+				"q.save()"
+			]
+		}
+	},
+	"flow": [
+		"startproject",
+		"startapp",
+		"project\\settings.INSTALLED_APPS",
+		"<APP>\\apps.<APP>Config",
+		"<APP>\\apps.models",
+		"register model in admin - optional",
+		"makemigrations",
+		"migrate",
+		"createsuperuser",
+		"define view function",
+		"import view in urls & append urlpatterns",
+		"<APP>\\templates\\<APP>\\<htmlPages>"
+	]
+}
+

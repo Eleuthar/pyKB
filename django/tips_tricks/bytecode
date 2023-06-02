@@ -1,5 +1,0 @@
-\\ disassemble functions for optimization
-
-import dis
-dis.dis("function")
-
