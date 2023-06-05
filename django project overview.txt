@@ -1,0 +1,151 @@
+flow
+`````
+startproject
+startapp
+project\\settings.INSTALLED_APPS
+<APP>\\apps.<APP>Config
+<APP>\\apps.models
+register model in admin - optional
+makemigrations
+migrate
+createsuperuser
+define view function
+import view in urls & append urlpatterns
+<APP>\\templates\\<APP>\\<htmlPages>
+POST \ PUT \ GET via Django DB API: .get, .save()
+request.POST['keyName'] && HttpResponseRedirect(reverse("<app>:<url name>", args=(var,) ))
+    prevent data duplication on browser Back button
+
+
+project
+````````
+urls
+	from django.contrib import admin
+	from django.urls import include, path
+		
+urls.urlpatterns
+	path('appX/', include('appX.urls')
+	path('admin/', admin.site.urls)
+
+settings.INSTALLED_APPS
+	appX.apps.AppXConfig
+	GRANT ALL PRIVILEGES ON *.* TO 'uzr'@'localhost'
+
+
+appZ
+````
+models.py
+	from django.db import models
+
+	class Question(models.Model):
+		question_text = models.CharField(max_length=200)
+		pub_date = models.DateTimeField('<optional overriding col name>')
+
+	class Option(models.Model):
+		question = models.ForeignKey(Question, on_delete=models.CASCADE)
+		option_text	= models.CharField(max_length=200)
+		votes = models.IntegerField(default=0)
+
+	\\ each Question record corresponds to an "option_set" where the Question.pk == Option.fk
+	\\ property is accessed with '__' instead of '.'
+	q = Question.objects.get(pk=1)
+	q.option_set.filter(option_text__contains="some regex")
+	q.option_set.create(option_text="NEW QUESTION", votes=5)
+	Option.objects.filter(question__pub_date__year=timezone.now().year)
+	Option.objects.filter(question__question_text__startswith="some regex")
+
+
+urls.py
+	from django.urls import path
+	from . import views
+
+
+urls.urlpatterns
+	path('route', 'view_function', 'view_function_dict_kwargs', 'name')
+	path('', views.index, <view function arg: dict>, name='index'),
+	path('<int:question_id>/, views.detail, name='detail'),
+	path('<int:question_id>/results, views.results, name='results')
+
+
+admin.py
+	from django.contrib import admin
+	from .models import ClassName
+
+	admin.site.register(ClassName)
+
+
+views.py
+	from django.views import generic
+	from django.template import loader
+	from django.shortcuts import get_object_or_404, render
+	from django.http import HttpResponse, HttpResponseRedirect, Http404
+	from django.urls import reverse
+
+	from .models import Question, Option
+
+
+    \\ get_object_or_404
+	question = get_object_or_404(Question, pk=request.POST['choice']),
+	return HttpResponseRedirect(reverse('appX:view_function_name')),
+        OR
+    question = get_object_or_404(Question, pk=question_id),
+    return render(request, 'appX/detail.html', {'question': question}),
+
+	\\ Http404
+	except ModelClassName.DoesNotExist,
+	raise Http404('Item does not exist'),
+
+	\\ loader
+	template = loader.get_template('appX/index.html'),
+	return HttpResponse(template.render(content, request))
+
+
+    \\ class based view
+    class IndexView(generic.ListView):
+        template_name = "<url path>"
+        context_object_name = "<template key>"
+
+        def get_queryset(self):
+            
+
+
+
+appX/templates/appX/index.html
+    \\ templates use context keys
+	\\ dynamic url:
+	    {% url '<url name>' <path variable> %}
+	    OR
+	    {% url '<app name>:<url name>' <path variable> %}
+	    polls.urls.py.app_name = "<app name>"
+
+
+ACTIONS
+````````
+$ python manage.py check
+	\\ Check for any problems without making migrations or touching the database
+
+$ django-admin sqlmigrate appX 0001
+	\\ Print the SQL for the named migration
+	
+$ python manage.py makemigrations
+	\\ Display translation to SQL syntax stored under 'appX\\migrations' as 0001_initial.py. 
+	\\ To run after each change in models.py. If approved, will be applied by <migrate> cmd.
+			
+$ python manage.py migrate
+	\\ Apply changes in models.py;
+	\\ Create tables if not yet existing, for apps in Project.settings.INSTALLED_APPS
+			\\ naming: <appX>_<models.ClassName>; FK will be appended an ID
+
+$ python manage.py shell:
+	\\ PRO TIP: use dataclasses.dataclass decorator to generate dunder methods, object has no comparison operator
+
+	\\ commands:
+			from appX.models import ModelClassZ
+			ModelClassZ.objects.all
+			q = ModelClassZ()
+			ModelClassZ.objects.filter(tableColumn=value)
+			ModelClassZ.objects.get(tableColumn=value)
+			q.save()
+
+
+

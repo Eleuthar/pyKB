@@ -1,7 +1,8 @@
 
 class <name1>:
 	clzVar = 0		# class variable, unique & shared among objects
-	def __init__(self):
+	
+	def __init__(self, name, age):
 		self.__privateVar = []
 		name1.clzVar += 1
 		
@@ -10,10 +11,12 @@ class <name1>:
 		
 	
 class <name2>(name1):
-	def __init__(self):
-		name1.__init__(self)
+
+	def __init__(self, name, age, id):
+	
+		name1.__init__(self, name, age)
 			OR !!
-		super().__init__()
+		super().__init__(name, age)
 			self.__subclassVar = 0
 
 
