@@ -62,10 +62,17 @@ urls.py
 
 urls.urlpatterns
 	path('route', 'view_function', 'view_function_dict_kwargs', 'name')
-	path('', views.index, <view function arg: dict>, name='index'),
-	path('<int:question_id>/, views.detail, name='detail'),
-	path('<int:question_id>/results, views.results, name='results')
+	
+	path('', views.index, name='index'),
+	path('<int:pk>/, views.detail, name='detail'),
+	path('<int:pk>/results, views.results, name='results')
+	
+	or
+	path('', views.IndexView.as_view(), name='index'),
+	path('<int:pk>/, views.DetailView.as_view(), name='detail'),	
+	path('<int:pk>/results, views.ResultsView.as_view(), name='results')
 
+	
 
 admin.py
 	from django.contrib import admin
@@ -106,8 +113,22 @@ views.py
         context_object_name = "<template key>"
 
         def get_queryset(self):
-            
+        	return Question.objects.order_by("-pub_date")[:5]
+        
+        
+    class DetailView(generic.DetailView):
+		model = Question
+		template_name = "polls/detail.html"
 
+
+	class ResultsView(generic.DetailView):
+		model = Question
+		template_name = "polls/results.html"
+
+
+		\\ override template_name expected to be:
+			 <app name>/<model name>_list.html
+ 			 <app name>/<model name>_detail.html
 
 
 appX/templates/appX/index.html
@@ -117,6 +138,7 @@ appX/templates/appX/index.html
 	    OR
 	    {% url '<app name>:<url name>' <path variable> %}
 	    polls.urls.py.app_name = "<app name>"
+
 
 
 ACTIONS
