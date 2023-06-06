@@ -40,6 +40,11 @@ models.py
 	class Question(models.Model):
 		question_text = models.CharField(max_length=200)
 		pub_date = models.DateTimeField('<optional overriding col name>')
+		
+		def get_absolut_url(self):
+			return reverse('post-detail', kwargs={'<urlParam>': self.urlParam})
+		
+		
 
 	class Option(models.Model):
 		question = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -79,6 +84,17 @@ admin.py
 	from .models import ClassName
 
 	admin.site.register(ClassName)
+	
+
+	
+appX/templates/appX/index.html
+    \\ templates use context keys
+	\\ dynamic url:
+	    {% url '<url name>' <path variable> %}
+	    OR
+	    {% url '<app name>:<url name>' <path variable> %}
+	    polls.urls.py.app_name = "<app name>"
+	    
 
 
 views.py
@@ -108,6 +124,7 @@ views.py
 
 
     \\ class based view
+    
     class IndexView(generic.ListView):
         template_name = "<url path>"
         context_object_name = "<template key>"
@@ -119,25 +136,26 @@ views.py
     class DetailView(generic.DetailView):
 		model = Question
 		template_name = "polls/detail.html"
-
-
-	class ResultsView(generic.DetailView):
-		model = Question
-		template_name = "polls/results.html"
-
+		context_object_name = '<template object>'
+		ordering = [-<key>]	
 
 		\\ override template_name expected to be:
 			 <app name>/<model name>_list.html
  			 <app name>/<model name>_detail.html
+ 			 
+	 class PostCreateView(, generic.CreateView):
+	 	model = Post
+	 	fields = ['title', 'content']
+	 	
+	 	\\ override
+	 	def form_valid(self, form):
+	 		form.instance.author = self.request.user
+			return super().form_valid(form)
+
+	\\ mixin multiple inheritance
+	
 
 
-appX/templates/appX/index.html
-    \\ templates use context keys
-	\\ dynamic url:
-	    {% url '<url name>' <path variable> %}
-	    OR
-	    {% url '<app name>:<url name>' <path variable> %}
-	    polls.urls.py.app_name = "<app name>"
 
 
 
