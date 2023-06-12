@@ -1,0 +1,20 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+! Dunder methods are meant to be called by interpreter only !
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+__getitem__
+    \\ make an indexed object iterable, allowing [] methods: obj.__getitem__(index)
+    \\ must be implemented along with __len__
+    \\ if an object must become only iterable, __iter__ must be used instead of __getitem__
+
+
+__next__
+    \\ implement __next__ to make an object function as iterator
+
+
+
+
+
+
+

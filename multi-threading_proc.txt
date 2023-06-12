@@ -1,6 +1,35 @@
 
-MANUAL
-```````
+Global Interpreter Lock
+`````````````````````````
+* Enforces one thread at a time can access a resource
+
+lock = threading.Lock()
+lock.acquire()
+lock.release()
+
+
+
+SEMAPHORE
+``````````
+* Synchronize threads & limit access to a resource 
+
+semaphore = threading.BoundedSemaphore(var=5)
+semaphore.acquire()
+semaphore.release()
+
+
+
+DAEMON
+````````
+* Daemon thread is defaulted to False
+* The main thread does not depend on daemon & does not wait for daemon to end
+* The daemon thread ends along with the main thread, not using thread.join()
+* NON-DAEMON thread cannot be killed
+
+
+
+MANUAL THREAD \ PROC
+`````````````````````
 
 import threading
 import multiprocessing
@@ -9,13 +38,12 @@ import multiprocessing
 def func_name():
     pass
     
-
 threads = []
 
 for _ in range(5):
 
     # p = multiprocessing.Process
-    t = threading.Thread(target=func_name)
+    t = threading.Thread(target=func_name, daemon=False)
     t.start()
     threads.append(t)
      
@@ -23,8 +51,6 @@ for thread in threads:
     thread.join()
 
     
-    
-
 
 POOL EXECUTOR
 ``````````````

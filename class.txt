@@ -20,61 +20,55 @@ class <name2>(name1):
 			self.__subclassVar = 0
 
 
-	
-  	SINGLE VS DOUBLE UNDERSCORE
-	`````````````````````````````````
-        * _single_leading = declare private member & class in module, which are ignored in "from module import *" aka weak internal use indicator
-
-        * __double_leading = mangle attribute name to avoid conflict between classes
+@classmethod vs @staticmethod
+`````````````````````````````````
+Class methods can access and modify class-level attributes. They have access to the class object and can modify class variables or create new instances of the class.
 
 
+SINGLE VS DOUBLE UNDERSCORE
+`````````````````````````````````
+* _single_leading = declare private member & class in module, which are ignored in "from module import *" aka weak internal use indicator
+    Usage: object>._<ClassName>__var
+
+* __double_leading = mangle attribute name to avoid conflict between classes
 
 
-	ENCAPSULATION
-	````````````````````
-	* storage under private variable with double underscore
-	
+ENCAPSULATION
+````````````````````
+* storage under private variable with double underscore
 
 
-	
-	INHERITANCE
-	````````````````	
-	* define subclass by pointing to superclass
-	
-	* mandatory invoke superclass constructor before any other initialization
-	
-	* super() allows access to nearest superclass without needing to know its name and to use the "self" argument
-	
-	* super() allows access to any of the resources available inside the superclass (ex. private var)
-	
-	* subclass can open the superclass class variable
-	
-	* superclass instance variables can be opened only by invoking the super() constructor
-	
-	
+INHERITANCE
+````````````````	
+* define subclass by pointing to superclass
+
+* mandatory invoke superclass constructor before any other initialization
+
+* super() allows access to nearest superclass without needing to know its name and to use the "self" argument
+
+* super() allows access to any of the resources available inside the superclass (ex. private var)
+
+* subclass can open the superclass class variable
+
+* superclass instance variables can be opened only by invoking the super() constructor
 
 
-	POLYMORPHISM
-	````````````````````
-	* when a subclass can modify the behaviour of its superclass; such a method is virtual: overridden method is called by another method in superclass.
-	
-	* the overridden method calls another method that does the actual new implementation
+POLYMORPHISM
+````````````````````
+* when a subclass can modify the behaviour of its superclass; such a method is virtual: overridden method is called by another method in superclass.
 
-	
+* the overridden method calls another method that does the actual new implementation
 
 
-	COMPOSITION
-	``````````````````
-	* form an object using different other objects
-	
-	* project a class as a container able to store and use other objects (derived from other classes), where each object implements a partial behavior
-	
-	
+COMPOSITION
+``````````````````
+* form an object using different other objects
+
+* project a class as a container able to store and use other objects (derived from other classes), where each object implements a partial behavior
 
 
 
 <<<<<<<<<<<<<<<<<<<<<<<<	CMD		<<<<<<<<<<<<<<<<<<<<<<
-
 
 hasattr(ClassName\object, <attribute>)
 	\\ return boolean if a class or object has a certain property
@@ -100,7 +94,6 @@ isinstance(<value>, <dataType>)
 	\\ instance variables are stored under
 
 
-<object>._<ClassName>__var  \ __method()
 	\\ private method || private instance variable
 	
 	

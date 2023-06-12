@@ -47,21 +47,17 @@ import random
 
 def power_of(arg):
 
-    def decorator(fnc):
-
+    def decorator(fnc):       
         def inner():
-
             return fnc() ** exponent
-
         return inner
 
-
    if callable(arg):
-        exponent = 2
-        return decorator(arg)
-    else:
-        exponent = arg
-        return decorator
+	    exponent = 2
+	    return decorator(arg)
+	else:
+	    exponent = arg
+	    return decorator
 
 
 

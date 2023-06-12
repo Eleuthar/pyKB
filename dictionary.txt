@@ -1,4 +1,13 @@
+index = key.hash() % len(array)
+
+OPEN ADDRESSING - Handling collision via LINEAR PROBING: the value goes in the next right-hand available
+
+CLOSED ADDRESSING - Each index contains a linked list
+
+
+
 !!! Dictionaries in python version < 3.6 don't keep order of key-value pair declaration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 dict['keyName']

@@ -1,33 +1,17 @@
-
 LITERAL
 ```````
- ~ literals consist of string or number (integer, float, hexa, E)
- 
-
  ~ if integer is prefixed with 0o or 0O, it is treated as octal number, therefore it must contain only digits from the 0-7 range, ex: 0o123 = 83
- 
  
  ~ if the prefix is 0x, then it is treated as hexadecimal, ex: 0x123 = 291
  
- 
  ~ scientific notation makes use of exponent: 3 * 10 ^ 8 = 3E8
- 
  
  ~ print() will always convert from:
 	* octal or hexadecimal to decimal
 	* scientific to float.
 
 
-	
-NULL VALUE
-```````````
- ~ "None" literal is a NoneType object used to represent null values
+STR - LIST - BYTEARRAY - NumPy.array
+`````````````````````````````````````
+Are mapped to e C struct: PyVarObject which has an "ob_size" field holding the number of items in collection.
 
-
-
-VAR SWAP
-~~~~~~~~~
-
-var1 = 1
-var2 = 2
-var1, var2 = var2, var1

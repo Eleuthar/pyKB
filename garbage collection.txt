@@ -1,0 +1,9 @@
+Methods & variables are created on stack memory
+
+Objects & instance variables are created on heap memory
+
+A new stack frame is created on invocation of a function\method and is destroyed on return.
+
+Python calls in the background gc.collect() to removes dead objects that no longer have a reference.
+
+Defining "__del__" method implements destructor via "del obj".
