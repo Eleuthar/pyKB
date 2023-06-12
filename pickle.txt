@@ -1,0 +1,17 @@
+* Serialize objects AKA marshalling || flattening
+* Not secure, unpickle only trustworthy data
+
+
+import pickle
+
+
+obj = ['Toyota', 'BMW', 'Audi, 'Suzuki', 'Honda']
+
+# pickling
+with open('pickleDemo.pkl', 'wb') as pickle_file:
+    pickle.dump(obj, pickle_file)
+
+# unpickling
+with open('pickleDemo.pkl', 'rb') as pickle_file:
+    unpickled_obj = pickle.load(pickle_file)
+

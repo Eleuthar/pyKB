@@ -1,0 +1,23 @@
+Implement cache or mapping holding large objects.
+
+Weakref can be implemented for list and dict only via subclassing.
+
+Objects with "__slots__" must contain an element "__weakref__" to enable weakref.
+
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~ WEAKREF LIST ~~~~~~~~~~~~~~~~~~~
+import weakref
+
+class Z(list):
+    pass
+
+z_obj = Z("arrayElementz")
+normal_list = z_obj
+weak_list = weakref.ref(z_obj)
+weak_list_obj = weak_list()
+proxy_list = weakref.proxy(z_obj)
+
+for objects in [normal_list, weak_list_obj, proxy_list]:
+    print(f"Number of weak references: {weakref.getweakrefcount(objects)}")

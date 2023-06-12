@@ -6,25 +6,7 @@ A new stack frame is created on invocation of a function\method and is destroyed
 
 Defining "__del__" method implements destructor via "del obj".
 
-Python counts the references then calls gc.collect to remove dead objects that no longer have a reference.
+Python counts the references then calls gc.collect to gather dead objects that no longer have a reference, reference counter ignoring weakref.
 
-Reference counter is ignoring weakref.
-Weakref can be implemented for list and dict only via subclassing.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~ WEAKREF LIST ~~~~~~~~~~~~~~~~~~~
-import weakref
-
-class Z(list):
-    pass
-
-z_obj = Z("arrayElementz")
-normal_list = z_obj
-weak_list = weakref.ref(z_obj)
-weak_list_obj = weak_list()
-proxy_list = weakref.proxy(z_obj)
-
-for objects in [normal_list, weak_list_obj, proxy_list]:
-    print(f"Number of weak references: {weakref.getweakrefcount(objects)}")
-
-
+gc.finalize() triggers cleanup 
 
