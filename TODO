@@ -1,5 +1,27 @@
-selenium webscraping
-SOLID principle
+https://www.youtube.com/watch?v=pTB30aXS77U
+	\\ SOLID principles
+	
+https://www.youtube.com/watch?v=ftmdDlwMwwQ
+	\\ async web crawler
+	
+https://www.youtube.com/watch?v=Z3r6JEnRGvE
+	\\ weakref
+	
+https://www.youtube.com/watch?v=yWzMiaqnpkI&t=12s
+	\\ Metaclasses
+	
+https://www.youtube.com/watch?v=CvQ7e6yUtnw&t=413s
+	\\ dataclass
+	
+https://www.youtube.com/watch?v=x58W9A2lnQc&t=57s
+	\\ numba
+	
+
+
+
+semaphore
+decorator
+closure
 Dependency injection
 numpy
 pandas

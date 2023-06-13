@@ -1,0 +1,29 @@
+"""
+Decorate IO\CPU bound function to automatically use async API or multi-processing API
+"""
+
+from unsync import unsync
+
+
+def main():
+    tasks = [
+        io_fun1(),
+        io_fun2(),
+        io_fun3(),
+        io_fun4(),
+        io_fun5()
+    ]
+
+    # await on tasks
+    [ task.result() for task in tasks ]
+
+
+@unsync(cpu_bound=True)
+def cpu_intensive_function():
+    pass
+
+
+# asyncio
+@unsync
+def IO_intensive_function():
+    pass

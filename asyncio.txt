@@ -1,0 +1,66 @@
+OVERVIEW
+``````````
+1. Define async function (coroutine)
+2. loop = asyncio.get_event_loop()
+3. task_obj = loop.create_task(some_coroutine(*arg, **kwarg))
+4. loop.run_until_complete(task_obj)
+	4.1 task_obj.cancel() -> CancelledError 
+5. loop.close()
+
+
+
+Coroutines 
+```````````
+* use async libs for full async effect
+* prime via 'next()', allow execution to advance to 'yield' expression
+* send values to coroutine via 'send()'
+* consume values sent to them via '(yield)'
+* can suspend and resume execution
+* close it via 'close()'
+
+
+# define coroutine until Py 3.5
+@asyncio.coroutine
+def ex_coro():
+	yield from fun()
+
+# since Py 3.5
+async def ex_coroutine():
+	await fun()
+
+
+# turn generator into coroutine
+def grep(pattern):
+	print('Looking for ", pattern)
+	while True:
+		line = (yield)
+		if pattern in line:
+			print(line)
+
+grepper = grep('patterns')
+next(grepper)
+	\\ Output: "Looking for patterns"
+grepper.send('ZZZZZ')
+grepper.send("XXXXX")
+grepper.close()
+
+
+
+Scheduling calls
+````````````````
+* import functools to force asyncio to receive kwarg for stopping the loop
+
+# call infinite loop
+loop.run_forever()
+
+loop.call_soon(functools.partial(function_name, *arg, **kwarg))
+loop.call_soon_threadsafe(function_name, *arg)
+loop.call_later(<int>, function_name, *arg)
+
+# grab loop's time instead of computer time
+current_time = loop.time()
+loop.call_at(current_time + 300, function_name, loop)
+
+
+
+
