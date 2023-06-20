@@ -1,0 +1,7 @@
+Omologue of switch statement as of Python 3.10:
+
+match <expression>:
+    case <value>:
+        pass
+    case _:
+        <default behavior>

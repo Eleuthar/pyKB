@@ -1,13 +1,7 @@
 IMPORTANT
 ````````````````
 ~ positional argument must follow order
-
-ex:
-def z(q,x):
-	return x ** q
-
-z(x=4, 2) >> SYNTAX ERROR
-
+~ in place method returns None as no new object was created and the receiver was changed, aka list.sort()
 
 
 LAMBDA

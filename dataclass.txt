@@ -4,8 +4,13 @@ Used to automatically generate special methods to classes including __str__, __r
 Uses the instance data defined within __init__ to generate dunder
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, inspect
 
+
+# make instance immutable
+@dataclass(frozen=True)
+
+# now dunder methods will use the variables during instantiation
 @dataclass
 class Person:
 	name: str,
@@ -14,4 +19,6 @@ class Person:
 
 p = Person('John Doe', 34)
 
-# now dunder methods will use the variables during instantiation
+# view the auto-defined functions
+inspect.getmembers(<ClassName>, inspect.isfunction)
+

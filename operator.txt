@@ -1,8 +1,9 @@
  
 OPERATOR
 `````````
- ** = exponent (uses right > left side binding)
+~ exponent aka "**" (uses right > left side binding)
 
+ ~ variable assigned with the walrus operator aka ":=" remain accessible after usage in listcomp
  
  ~ data & operators (+,-,*,/,//,%,**) form expression. The simplest is a literal itself
  

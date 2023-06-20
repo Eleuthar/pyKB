@@ -1,3 +1,8 @@
-namedtuple
-```````````
+
+deque
+    \\ double-ended queue for adding & removing opposite list ends
+
+
+namedtuple(<name>, (**kwargs,))
+    \\ if *args is provided instead of kwarg, args is keys
 

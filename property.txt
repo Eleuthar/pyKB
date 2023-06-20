@@ -21,18 +21,11 @@ class Uzr:
         self.lname = lname
         
     @fullname.deleter
-    def fullname(self)
+    def fullname(self):
         self.fname = None
         self.lname = None
         
         
 # will print        
 uzr_1 = Uzr('Bob', 'Joker')
-print(uzr_1.fname, uzr_1.lname)
-print(uzr_1.fullname)
-
-# this will rename the above
-uzr_1.fullname = 'Joe Rogan'
-
-# set attributes to None
-del uzr_1.fullname
+print(uzr_1.__dict__)

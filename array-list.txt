@@ -1,0 +1,50 @@
+ARRAY
+~~~~~
+~ best for large number seq
+~ hold only the packed bytes representing the machine value
+~ declare only positive range, of the same type
+
+floatz = array.array('d', (random() for _ in range(10**7)))
+    \\ 'd' is the underlying C type used to store each item
+
+floats[-1]
+    \\ 0.07802343889111107
+
+fp = open('floats.bin', 'wb')
+floatz.tofile(fp)
+fp.close()
+floatzz = array('d')
+fp = open('floats.bin', 'rb')
+floatzz.fromfile(fp)
+fp.close()
+floats2[-1]
+    \\ 0.07802343889111107
+floatzz == floatz
+    \\ True
+	
+	
+
+SLICE
+~~~~~~
+
+lzt2 = lzt1[start:end]
+	\\ slice a new copy within range, not including end index; [:] = duplicate entire list content
+	
+lzt[:end]
+	\\ from beginning to end index
+	
+lzt[start:]
+	\\ from start index to last index
+
+del lzt<slice>
+    \\ empty the list
+
+lzt = [[[X-axis loop] Y-axis loop] Z-axis loop]
+	\\ 3D list comprehension; index value access reversed: lzt[z][y][x]
+	\\ xample: x = hotel room, y = hotel floor, z = building
+		
+copyOfLzt = copy.deepcopy(Lzt)
+	OR
+copyOfLzt = [row[:] for row in Lzt]
+	\\ create independent copy of 2D array
+	
