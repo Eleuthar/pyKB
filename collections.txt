@@ -1,8 +1,43 @@
+defaultdict
+    \\ doesn't trigger KeyError if key does not exist
+	\\ doesn't support item reassignment
+    
 
-deque
+OrderedDict
+    \\ enforce dict item declaration order
+
+
+Counter
+    \\ number of occurrences
+    colours = (
+        ('Yasoob', 'Yellow'),
+        ('Ali', 'Blue'),
+        ('Arham', 'Green'),
+        ('Ali', 'Black'),
+        ('Yasoob', 'Red'),
+        ('Ahmed', 'Silver'),
+    )
+    favs = Counter(name for name, colour in colours)
+    print(favs)
+    # Output: Counter({
+    #    'Yasoob': 2,
+    #    'Ali': 2,
+    #    'Arham': 1,
+    #    'Ahmed': 1
+    # })
+
+
+deque([j,h,g,b,n], maxlen=8)
     \\ double-ended queue for adding & removing opposite list ends
+    \\ Can: append(), popleft(), pop(), extend([q,z,x]), extendleft([q,z,x]
 
 
-namedtuple(<name>, (**kwargs,))
+namedtuple(<name>, (*args || **kwargs,))
     \\ if *args is provided instead of kwarg, args is keys
 
+
+Enum
+    \\ class Z(Enum):
+        item1 = 1
+        item2 = 2
+    # Z.item1 == 1

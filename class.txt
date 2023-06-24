@@ -52,6 +52,8 @@ INHERITANCE
 
 * superclass instance variables can be opened only by invoking the super() constructor
 
+* __slots__ prevents using multiple inheritance and using __dict__ for attrib
+
 
 POLYMORPHISM
 ````````````````````

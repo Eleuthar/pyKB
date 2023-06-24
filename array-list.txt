@@ -4,15 +4,16 @@ ARRAY
 ~ hold only the packed bytes representing the machine value
 ~ declare only positive range, of the same type
 
+
 floatz = array.array('d', (random() for _ in range(10**7)))
     \\ 'd' is the underlying C type used to store each item
-
-floats[-1]
+floatz[-1]
     \\ 0.07802343889111107
-
 fp = open('floats.bin', 'wb')
 floatz.tofile(fp)
 fp.close()
+
+
 floatzz = array('d')
 fp = open('floats.bin', 'rb')
 floatzz.fromfile(fp)

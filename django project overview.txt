@@ -14,50 +14,69 @@ import view in urls & append urlpatterns
 <APP>\\templates\\<APP>\\<htmlPages>
 POST \ PUT \ GET via Django DB API: .get, .save()
 request.POST['keyName'] && HttpResponseRedirect(reverse("<app>:<url name>", args=(var,) ))
-    prevent data duplication on browser Back button
+    \\ prevent data duplication on browser Back button
+
 
 
 project
-````````
+`````````````````````
 urls
 	from django.contrib import admin
 	from django.urls import include, path
+	from django.contrib.auth import views as auth_views
+	from django.conf import settings
+	from django.conf.urls.static import static
+	from users import views as user_views
+		
+	if settings.DEBUG:
+    	urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+		
 		
 urls.urlpatterns
-	path('appX/', include('appX.urls')
-	path('admin/', admin.site.urls)
+	path('admin/', admin.site.urls),
+    path('register/', user_views.register, name='register'),
+    path('profile/', user_views.profile, name='profile'),
+    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),    
+    path('password-reset/',
+         auth_views.PasswordResetView.as_view(
+             template_name='users/password_reset.html'
+         ),
+         name='password_reset'),
+    
+    path('', include('blog.urls')),
 
 settings.INSTALLED_APPS
 	appX.apps.AppXConfig
 	GRANT ALL PRIVILEGES ON *.* TO 'uzr'@'localhost'
+	\\ globals
+	LOGIN_REDIRECT, LOGIN_URL, EMAIL_*
+
 
 
 appZ
-````
+```````````````````
+
 models.py
 	from django.db import models
+	from django.contrib.auth.models import User
+
+	class Profile(models.Model):
+		user = models.OneToOneField(User, on_delete=models.CASCADE)
+		image = models.ImageField(default='default.jpg', upload_to='profile_pics')
+		def __str__(self):
+			return f'{self.user.username} Profile'
 
 	class Question(models.Model):
 		question_text = models.CharField(max_length=200)
 		pub_date = models.DateTimeField('<optional overriding col name>')
-		
 		def get_absolut_url(self):
 			return reverse('post-detail', kwargs={'<urlParam>': self.urlParam})
 		
-		
-
 	class Option(models.Model):
 		question = models.ForeignKey(Question, on_delete=models.CASCADE)
 		option_text	= models.CharField(max_length=200)
 		votes = models.IntegerField(default=0)
-
-	\\ each Question record corresponds to an "option_set" where the Question.pk == Option.fk
-	\\ property is accessed with '__' instead of '.'
-	q = Question.objects.get(pk=1)
-	q.option_set.filter(option_text__contains="some regex")
-	q.option_set.create(option_text="NEW QUESTION", votes=5)
-	Option.objects.filter(question__pub_date__year=timezone.now().year)
-	Option.objects.filter(question__question_text__startswith="some regex")
 
 
 urls.py
@@ -68,13 +87,8 @@ urls.py
 urls.urlpatterns
 	path('route', 'view_function', 'view_function_dict_kwargs', 'name')
 	
-	path('', views.index, name='index'),
-	path('<int:pk>/, views.detail, name='detail'),
-	path('<int:pk>/results, views.results, name='results')
-	
-	or
-	path('', views.IndexView.as_view(), name='index'),
-	path('<int:pk>/, views.DetailView.as_view(), name='detail'),	
+	path('<int:pk>/results/, views.results, name='results')
+	# OR
 	path('<int:pk>/results, views.ResultsView.as_view(), name='results')
 
 	
@@ -82,7 +96,6 @@ urls.urlpatterns
 admin.py
 	from django.contrib import admin
 	from .models import ClassName
-
 	admin.site.register(ClassName)
 	
 
@@ -91,9 +104,10 @@ appX/templates/appX/index.html
     \\ templates use context keys
 	\\ dynamic url:
 	    {% url '<url name>' <path variable> %}
-	    OR
+		    OR	
+		polls.urls.py.app_name = "<app name>"
 	    {% url '<app name>:<url name>' <path variable> %}
-	    polls.urls.py.app_name = "<app name>"
+	    
 	    
 
 
@@ -103,7 +117,7 @@ views.py
 	from django.shortcuts import get_object_or_404, render
 	from django.http import HttpResponse, HttpResponseRedirect, Http404
 	from django.urls import reverse
-
+	from django.contrib.auth.decorators import login_required
 	from .models import Question, Option
 
 
@@ -124,7 +138,7 @@ views.py
 
 
     \\ class based view
-    
+    ~~~~~~~~~~~~~~~~~~~
     class IndexView(generic.ListView):
         template_name = "<url path>"
         context_object_name = "<template key>"
@@ -143,7 +157,7 @@ views.py
 			 <app name>/<model name>_list.html
  			 <app name>/<model name>_detail.html
  			 
-	 class PostCreateView(, generic.CreateView):
+	 class PostCreateView(generic.CreateView):
 	 	model = Post
 	 	fields = ['title', 'content']
 	 	
@@ -156,7 +170,18 @@ views.py
 	
 
 
+FORMS.py
+	from django import forms
+	from django.contrib.auth.model import User
+	from django.contrib.auth.forms import UserCreationForm
 
+	class UserRegisterForm(UserCreationForm):
+		email = forms.EmailField()
+		
+		\\ nested namespace for configurations in one place
+		class Meta:
+			model = User
+			fields = ['username', 'email', 'password1', 'password2']
 
 
 ACTIONS
@@ -177,15 +202,21 @@ $ python manage.py migrate
 			\\ naming: <appX>_<models.ClassName>; FK will be appended an ID
 
 $ python manage.py shell:
-	\\ PRO TIP: use dataclasses.dataclass decorator to generate dunder methods, object has no comparison operator
+	\\ each FK model ex. Question record corresponds to an "option_set" where the Question.pk == Option.fk
+	\\ property is accessed with '__' instead of '.'
 
-	\\ commands:
-			from appX.models import ModelClassZ
-			ModelClassZ.objects.all
-			q = ModelClassZ()
-			ModelClassZ.objects.filter(tableColumn=value)
-			ModelClassZ.objects.get(tableColumn=value)
-			q.save()
+	from appX.models import ModelClassZ
+	ModelClassZ.objects.all
+	q = ModelClassZ()
+	ModelClassZ.objects.filter(tableColumn=value)
+	ModelClassZ.objects.get(tableColumn=value)
+	
+	q = Question.objects.get(pk=1)
+	q.option_set.filter(option_text__contains="some regex")
+	q.option_set.create(option_text="NEW QUESTION", votes=5)
+	Option.objects.filter(question__pub_date__year=timezone.now().year)
+	Option.objects.filter(question__question_text__startswith="some regex")
+	q.save()
 
 
 

@@ -17,21 +17,20 @@ https://www.youtube.com/watch?v=x58W9A2lnQc&t=57s
 	\\ numba
 	
 
-
-
-semaphore
-decorator
-closure
-Dependency injection
 numpy
+numba
+collections
+typing
+
+Dependency injection
 pandas
 DASH
 SNOWFLAKE \ SPARK \ AIRFLOW
 statistical models
 Knowledge of user authentication and authorization between multiple system, server and environments
 Understanding of fundamental design principles behind a scalable application
-https://docs.quantifiedcode.com/python-anti-patterns/index.html
 
+https://docs.quantifiedcode.com/python-anti-patterns/index.html
 
 https://cloud.google.com/vertex-ai/docs/start/introduction-unified-platform
 https://github.com/GoogleCloudPlatform/training-data-analyst/tree/master/self-paced-labs/vertex-ai

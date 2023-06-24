@@ -1,0 +1,52 @@
+
+~~~~~~~~~~~~~~~~~~~~~~ RUN ~~~~~~~~~~~~~~~~~~~~~~~
+$ pytest -v
+    \\ run test in all files
+
+$ pytest <filename> -v --maxfail 1
+    \\ run test functions from filename
+    \\ stop execution on 1 fail
+
+$ pytest -k <pattern> -v
+    \\ run only test function containing pattern
+    \\ alternative to marker
+
+$ pip install pytest-xdist
+$ pytest -n 4
+    \\ run tests in parallel using X workers
+
+$ pytest <filename> -v --junitxml="output.xml"
+    \\ dump execution output in xml
+
+
+~~~~~~~~~~~~~~~~~~~~~~ MARK ~~~~~~~~~~~~~~~~~~~~~~~~~
+@pytest.mark.<marker>
+$ pytest -m <marker> -v
+    \\ decorate function to apply grouping marker
+    \\ run test only for marked function
+    \\ alternative to pattern arg "-k"
+
+@pytest.mark.parametrize( "num", output", [(1,11), (2,22), (3,33)] ) 
+def test_multiplier_11(num, output): 
+    assert 11*num == output
+
+@pytest.mark.xfail
+    \\ execute irrelevant test but result is not printed
+
+@pytest.mark.skip
+    \\ skip test
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ FIXTURE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@pytest.fixture
+def input_val():
+    input = 4
+    return input
+    \\ if not found in the test file, will be looked up in "conftest.py"
+
+def test_div(input_val)
+    assert input_val % 3 == 0
+    \\ Functions that provide data \ objects \ resources to test functions.
+    \\ Decorate a function as a fixture and use it as argument for another function.
+
+

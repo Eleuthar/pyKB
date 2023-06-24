@@ -35,7 +35,7 @@ async def ex_coroutine():
 
 # turn generator into coroutine
 def grep(pattern):
-	print('Looking for ", pattern)
+	print('Looking for ', pattern)
 	while True:
 		line = (yield)
 		if pattern in line:
