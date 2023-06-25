@@ -3,38 +3,25 @@
 $ pytest -v
     \\ run test in all files
 
+
 $ pytest <filename> -v --maxfail 1
     \\ run test functions from filename
     \\ stop execution on 1 fail
+
 
 $ pytest -k <pattern> -v
     \\ run only test function containing pattern
     \\ alternative to marker
 
+
 $ pip install pytest-xdist
 $ pytest -n 4
     \\ run tests in parallel using X workers
 
+
 $ pytest <filename> -v --junitxml="output.xml"
     \\ dump execution output in xml
 
-
-~~~~~~~~~~~~~~~~~~~~~~ MARK ~~~~~~~~~~~~~~~~~~~~~~~~~
-@pytest.mark.<marker>
-$ pytest -m <marker> -v
-    \\ decorate function to apply grouping marker
-    \\ run test only for marked function
-    \\ alternative to pattern arg "-k"
-
-@pytest.mark.parametrize( "num", output", [(1,11), (2,22), (3,33)] ) 
-def test_multiplier_11(num, output): 
-    assert 11*num == output
-
-@pytest.mark.xfail
-    \\ execute irrelevant test but result is not printed
-
-@pytest.mark.skip
-    \\ skip test
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ FIXTURE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,5 +35,57 @@ def test_div(input_val)
     assert input_val % 3 == 0
     \\ Functions that provide data \ objects \ resources to test functions.
     \\ Decorate a function as a fixture and use it as argument for another function.
+
+
+import tempfile
+
+@pytest.fixture
+def temp_dir():
+	with tempfile.TemporaryDirectory() as tmpdir:
+		yield tmpdir
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~ MARK ~~~~~~~~~~~~~~~~~~~~~~~~~
+@pytest.mark.<marker>
+$ pytest -m <marker> -v
+    \\ decorate function to apply grouping marker
+    \\ run test only for marked function
+    \\ alternative to pattern arg "-k"
+
+
+@pytest.mark.parametrize( "num", output", [(1,11), (2,22), (3,33)] ) 
+def test_multiplier_11(num, output): 
+    assert 11*num == output
+
+
+@pytest.fixture(params=(1,2,3,4))
+def get_int(request):
+	yield request.param + 2
+	\\ arg another fun as alternative to parametrize
+
+
+@pytest.mark.xfail
+    \\ execute irrelevant test but result is not printed
+
+
+@pytest.mark.skip
+    \\ skip test
+
+
+@pytest.mark.usefixtures('<fixture decorated pattern>')
+	\\ apply fixture to function without needing to arg it
+
+
+@pytest.mark.usefixtures(autouse=True, scope='session | function | module')
+	\\ apply fixture to all functions in scope
+
+
+@pytest.mark.usefixtures(name='newName')
+	\\ replaces decorator function name with 'newName' to use as arg for another func
+
+
+
+
 
 
