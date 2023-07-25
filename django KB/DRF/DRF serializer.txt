@@ -1,0 +1,76 @@
+APIView GET
+```````````
+queryset = MODEL.objects.all()
+serializer = MODELSerializer(queryset, many=True|False) 	\\ GET
+return Response(serializer.data)
+
+
+APIView POST
+````````````
+serializer = MODELSerializer(data=request.data)	 \\ POST
+serializer.is_valid(raise_exception=ValueError)
+serializer.create(validated_data=request.data)
+return Response(serializer.data, status=rest_framework.status.HTTP_201_CREATED)
+return Response(serializer.error_messages, status=rest_framework.status.HTTP_400_BAD_REQUEST)
+
+
+
+instance
+data
+validated_data
+is_valid().errors
+create()
+update()
+save()
+classmethod(many_init(cls, *args, **kwargs)) # def
+to_representation()
+
+
+
+EXAMPLE
+`````````
+
+class PlayerSerializer(serializers.ModelSerializer):
+
+	class Meta:
+    	model = Player
+        fields = ('name', 'number', 'position')
+      
+
+class TeamSerializer(serializers.ModelSerializer):
+
+   players = PlayerSerializer(many=True, read_only=True,)
+
+   class Meta:
+		model = Team
+        fields = ('team_name', 'team_slogan', 'players')
+      
+      
+# IS THE SAME AS BELOW
+
+
+class TeamSerializer(serializers.ModelSerializer):
+
+	players = SerializerMethodField(method_name=players_related_to_team)		
+	
+    class Meta:
+        model = Team
+        fields = ('team_name', 'team_slogan', 'players')
+	
+	def get_players_related_to_team(self, instance):
+		players = instance.players.order_by('name')
+		return PlayerSerializer(players, many=True).data
+		
+		
+
+NEW USER record after defining the serializer
+``````````````````````````````````````````````
+# OR create the model instance via user creation signal
+
+
+<model instance> = <MODEL>Serializer.create
+	(
+		<MODEL>Serializer(),
+		validated_data = validated_data.pop('user')
+	)
+

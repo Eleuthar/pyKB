@@ -1,0 +1,13 @@
+from functools import lru_cache
+import pandas as pd
+
+
+@lru_cache(maxsize=100)
+def read_data(fname):
+	return pd.read_data(fname)
+
+read_data()
+
+# uncache
+read_data.cache_clear()
+

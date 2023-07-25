@@ -1,0 +1,57 @@
+from django.db import models
+from django.contrib.auth.models import User
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+		METHOD
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+save < INSERT, UPDATE
+create < INSERT
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	ForeignKey, OneToOneField, ManyToManyField
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\\ can handle ON_DELETE, related_name
+\\ related_name sets related column named <related_model>_id
+\\ allow writing to a related field by overriding create() & update()
+
+def create(self, validated_data):
+	request = self.context['request']
+	related_field_pk = request.data.get('<field>')
+	# deserialized
+	validated_data['related_field_id'] = deserialized
+
+\\ allow reverse
+def get_absolute_url(self):
+        return reverse('post-detail', kwargs={'<urlParam>': self.urlParam})
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	select_related x prefetch_related
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+q = MODEL.objects.select_related(<model prop>).get(id=4)
+	\\ JOIN query for FK || 1-1
+	
+q = MODEL.objects.prefetch_related(<RELATED MODEL>__<RELATED MODEL>)
+	\\ for MANY-MANY
+	\\ prefetch cache is cleared upon calling add\remove\clear\set on related managers
+	\\ models.prefetch_related_objects(<objects>, <__ relation>)
+		||
+	   <MODEL>.objects.prefetch_related(models.Prefetch('< __ relation>', queryset=<MODEL>.objects.order_by('<prop>')))
+
+
+~~~~~~~~~~~~~~~~
+	EXAMPLE
+~~~~~~~~~~~~~~~~
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
+    image = models.ImageField(default='default.jpg', upload_to='profile_pics')
+    
+    def __str__(self):
+        return f'{self.user.username} Profile'
+

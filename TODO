@@ -1,3 +1,15 @@
+filter_backends = (DjangoFilterBackend, OrderingFilter,)
+
+viewset
+	ModelViewSet
+	serializer_class X detail_serializer_class
+
+select_related and prefetch_related
+
+
+
+
+
 https://www.youtube.com/watch?v=pTB30aXS77U
 	\\ SOLID principles
 	

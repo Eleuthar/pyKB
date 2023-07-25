@@ -20,7 +20,7 @@ floatzz.fromfile(fp)
 fp.close()
 floats2[-1]
     \\ 0.07802343889111107
-floatzz == floatz
+floatzz == floatz 
     \\ True
 	
 	

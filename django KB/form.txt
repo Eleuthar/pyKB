@@ -1,0 +1,51 @@
+ARCH
+`````````
+GET < empty form < enter data < POST < validate 
+	< Error < Form with old data < Fix < enter data
+	< Store data < Redirect to OK url < GET OK url
+
+
+
+from django.forms import Form, BasicForm
+from django.contrib.auth.model import User
+from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import ValidationError
+from django.core import validators
+
+
+EX. 1
+````````
+# forms.py
+class BasicForm(forms.Form):
+	title = forms.CharField(
+		validators = [
+			validators.MinLengthValidator(2, "Enter 2 or more char")
+		]
+	)
+	acquire_date = forms.DateField()
+
+
+# views.py
+class SimpleForm(DumpPostView):
+	form = BasicForm()
+	ctx = {'form': form}
+	return render(request, 'form/form.html', ctx)
+
+
+class SimpleUpdate(DumpPostView):
+	def get(self, request):
+		# will be displayed in form
+		old_data = <MODEL data>
+		form = BasicForm(old_data)
+		ctx = {'form': form}
+		return render(request, 'form/form.html', ctx)
+
+
+class UserRegisterForm(UserCreationForm):
+	email = forms.EmailField()
+
+	class Meta:
+		\\ nested namespace for configurations in one place
+		model = User
+		fields = ['username', 'email', 'password1', 'password2']
+

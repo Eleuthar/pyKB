@@ -1,0 +1,34 @@
+from rest_framework import viewsets
+
+
+"""
+Exposes .list() for many items, .retrieve() for single item & .create()
+Register viewset with router class
+Bind view name to functions
+"""
+
+
+views.py:
+
+	def list(self, request):
+		queryset = <MODEL>.objects.all()
+		serializer = <MODEL>Serializer(queryset, many=True)
+		return Response(serializer.data)
+	
+	def retrieve(self, request, pk=None):
+		queryset = <MODEL>.objects.all()
+		if pk is not None:
+			obj = get_object_or_404(queryset, pk=pk)
+			serializer = <MODEL>Serializer(obj)
+			return Response(serializer.data)
+
+
+urls.py:
+	
+	<app view name> = <APP>ViewSets.as_view({
+		'get': 'list'
+	})
+
+	<app view name> = <APP>ViewSets.as_view({
+		'get': 'retrieve'
+	})

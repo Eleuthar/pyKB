@@ -1,0 +1,39 @@
+
+$ python manage.py check
+	\\ Check for any problems without making migrations or touching the database
+
+
+$ django-admin sqlmigrate appX 0001
+	\\ Print the SQL for the named migration
+
+	
+$ python manage.py makemigrations
+	\\ Display translation to SQL syntax stored under 'appX\\migrations' as 0001_initial.py. 
+	\\ To run after each change in models.py. If approved, will be applied by <migrate> cmd.
+
+			
+$ python manage.py migrate
+	\\ Apply changes in models.py;
+	\\ Create tables if not yet existing, for apps in Project.settings.INSTALLED_APPS
+	\\ naming: <appX>_<models.ClassName>; FK will be appended an ID
+
+
+$ python manage.py shell:
+	\\ each FK model ex. Question record corresponds to an "option_set" where the Question.pk == Option.fk
+	\\ property is accessed with '__' instead of '.'
+
+	from appX.models import ModelClassZ
+
+	q = ModelClassZ()
+	q.objects.all
+	q.objects.filter(tableColumn=value)
+	q.objects.get(tableColumn=value)
+	
+	z = Question.objects.get(pk=1)
+	z.option_set.filter(option_text__contains="some regex")
+	z.option_set.create(option_text="NEW QUESTION", votes=5)
+	
+	Option.objects.filter(question__pub_date__year=timezone.now().year)
+	Option.objects.filter(question__question_text__startswith="some regex")
+	q.save()
+

@@ -1,0 +1,41 @@
+django.utils.http.urlencode
+django.contrib.auth.urls
+django.contrib.auth.mixins.LoginRequiredMixin
+
+
+
+* Expected template under /registration/login.html
+* "next" kwarg handles routing after login
+
+
+urlpattern = path('accounts/', include('django.contrib.auth.urls'))
+
+
+{% if form.errors %}
+{% endif %}
+
+
+{% url 'login' %}?next={{ request.path }}
+{% url 'logout' %}?next={% url '<name>' %}"
+
+
+{% if next %}
+	{% if user.is_authenticated %}
+	\\ the page doesn't rely entirely on authentication alone, but account privilege
+
+
+{% csrf_token %}
+	\\ only for POST form
+
+{{ form.as_p }}
+	\\ generates the form fields & label
+
+
+
+user.email
+user.id
+user.username
+user.is_authenticated
+user.get_full_name
+
+

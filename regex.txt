@@ -1,5 +1,7 @@
 import re
 
+XSS_validator = '<(?:[^>=]|='[^']*'|=\"[^\"]*\"|=[^'\"][^\\s>]*)*>'
+
 txt = 'the rain in spain'
 
 

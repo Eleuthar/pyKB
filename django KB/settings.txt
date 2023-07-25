@@ -1,0 +1,8 @@
+
+settings.INSTALLED_APPS
+	appX.apps.AppXConfig
+	GRANT ALL PRIVILEGES ON *.* TO 'uzr'@'localhost'
+	\\ globals
+	LOGIN_REDIRECT, LOGIN_URL, EMAIL_*
+
+

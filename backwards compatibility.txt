@@ -1,0 +1,7 @@
+from __future__ import \
+	with_statement,
+	print_function
+	
+from future.builtins.disabled import *
+# using removed Python2 builtin will trigger NameError exception
+

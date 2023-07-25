@@ -1,0 +1,25 @@
+~ Customizing "get_queryset()" can remove .queryset, needing to set basename
+~ 
+
+ 
+
+from rest_framework import routers
+from rest_framework.decorators import action
+from <APP> import <PERMISSION>
+
+router = routers.SimpleRouter()
+router.register(r'<prefix>', <ViewSet>)
+urlpatterns = router.urls
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Routing extra action
+	URL PATTERN: ^<prefix>/{pk}/<method_name>/$
+	URL NAME: '<prefix>s-<method_name>'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class <Prefix>ViewSet(ModelViewSet):
+	@action(methods=['post'], detail=True, permission_classes=[<PERMISSION>])
+	def <method_name>(self, request, pk=None):
+	
+

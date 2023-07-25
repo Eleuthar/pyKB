@@ -1,0 +1,18 @@
+APP/templates/APP/index.html
+
+\\ templates use context keys
+
+\\ dynamic url:
+
+    {% url '<url name>' <path variable> %}
+	    OR	
+	polls.urls.py.app_name = "<app name>"
+    {% url '<app name>:<url name>' <path variable> %}
+    
+\\ date pipeline
+	{{ post.date_posted|date:"F d, Y" }}
+
+
+\\ crispy forms
+	{{ form | crispy }}
+

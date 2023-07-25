@@ -1,0 +1,60 @@
+MIXIN.PY
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class CUDNextedMixin(object):
+
+	@staticmethod
+	def cud_nested(
+		queryset: QuerySet,
+		data: List[Dict],
+		serializer: Type[Serializer],
+		context: Dict
+	):
+		updated_ids = list()
+		for_create = list()
+		for item in data:
+		    item_id = item.get("id")
+		if item_id:
+		    instance = queryset.get(id=item_id)
+		    update_serializer = serializer(
+		        instance=instance, data=item, context=context
+		    )
+		    update_serializer.is_valid(raise_exception=True)
+		    update_serializer.save()
+		    updated_ids.append(instance.id)
+		else:
+		    for_create.append(item)
+
+		    delete_queryset = queryset.exclude(id__in=updated_ids)
+		    delete_queryset.delete()
+
+		    create_serializer = serializer(data=for_create, many=True, context=context)
+		    create_serializer.is_valid(raise_exception=True)
+		    create_serializer.save()
+		
+
+
+
+SERIALIZER_MIXIN.PY
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+from rest_framework import serializers
+
+
+class AccountSerializer(serializers.ModelSerializer, CUDNestedMixin):
+    phone_numbers = PhoneSerializer(
+        many=True,
+        source="phone_set",
+    )
+
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "phone_numbers")
+
+    def update(self, instance, validated_data):
+        self.cud_nested(
+            queryset=instance.phone_set.all(),
+            data=self.initial_data["phone_numbers"],
+            serializer=PhoneSerializer,
+            context=self.context,
+        )
+        ...
+        return instance

@@ -1,0 +1,32 @@
+~~~~~~~~~~~~~~~~
+	Http404
+~~~~~~~~~~~~~~~~
+except ModelClassName.DoesNotExist:
+	raise Http404('Item does not exist')
+	
+
+~~~~~~~~~~~~~~~
+	loader
+~~~~~~~~~~~~~~~
+template = loader.get_template('appX/index.html')
+return HttpResponse(template.render(content, request))
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	get_object_or_404 - exclude check_object_permission
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+question = get_object_or_404(Question, pk=request.POST['choice'])
+return HttpResponseRedirect(reverse('appX:view_function_name'))
+    # OR
+question = get_object_or_404(Question, pk=question_id)
+context = {'question': question}
+return render(request, 'appX/detail.html', context)
+	
+	
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	get_queryset - multiple param
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+queryset = MODEL.objects.all()
+attrib1 = self.request.query_params.get('<prop>', None)
+attrib2 = self.request.query_params.get('<prop>', None)
+...

@@ -1,0 +1,17 @@
+from django.conf.urls import patterns, include, url
+from django.contrib import admin
+from rest_framework import routers
+from rest_framework.urlpatterns import format_suffix_patterns
+
+
+
+admin.autodiscover()
+router = routers.DefaultRouter()
+
+# Append content type suffix format .api, .json, .html
+urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'html'])
+
+
+VIEWS.PY
+``````````
+def get(self, format=None | 'csv' | 'json' | 'html' | 'api')

@@ -39,7 +39,7 @@ sep = separator
 
 CONVERSION
 ```````````
- ~ print() will always convert from:
+ ~ print() will always convert from byte to human readable
 	* octal or hexadecimal to decimal
 	* scientific to float.
 	

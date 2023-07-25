@@ -1,0 +1,65 @@
+from django.views import generic
+
+
+* View provides HTTP CRU methods
+* Mixin provides context & delete method
+* Generic override must call super().<overriden method>
+
+
+Default mixin prop
+```````````````````
+pk instead of 'model_id'
+model = None
+queryset = None
+	\\ override to filter more specific info
+context_object_name = <model>_list
+response_class = TemplateResponse
+success_url = None
+form_class = None
+content_type
+slug_field = 'slug'
+template_name = <app name>/<model name>_list.html
+template_name = <app name>/<model name>_detail.html
+fields = ['title', 'content']
+form_valid(), form_invalid()
+
+
+
+Override
+`````````
+def get_context_data(self, **kwargs):
+	# Preserve the behavior of the parent class
+    # Call the base implementation first to get a context
+    context = super().get_context_data(**kwargs)
+    # Add a new QuerySet along the main model (ex. Publisher)
+    context["book_list"] = Book.objects.all()
+    return context
+
+
+def form_valid(self, form):
+	form.instance.author = self.request.user
+	return super().form_valid(form)
+
+
+
+UPDATE VIEW
+`````````````
+TemplateResponseMixin
+	SingleObjectTemplateResponseMixin
+		.template_name_field
+		.template_name_suffix
+	
+
+BaseUpdateView
+	ModelFormMixin.fields
+		FormMixin
+			.initial
+			.success_url
+			.form_class
+			.prefix
+			ContextMixin.extra_context
+		SingleObjectMixin
+			.model, .query_set, .slug_field, .
+
+
+	ProcessFormView
