@@ -21,7 +21,7 @@ class <Name>(APIView):
 		serializer = <MODEL>Serializer(obj)
 		return Response(serializer.data)
 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	def.post(self, request, *args, **kwargs):		
+	def.post(self, request, *args, **kwargs):
 		obj = self.get_object(pk)
 		serializer = <MODEL>Serializer(obj)
 		return Response(serializer.data)				

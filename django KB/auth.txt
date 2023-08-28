@@ -1,0 +1,208 @@
+~ Extending AbstractBaseUser > extend BaseUserManager
+	def: 
+		_create_user \\ normalize_email, new user model, user.set_password(pvd), user.save(using=self.db)
+		create_user \\ extra_fields.setdefault("is_superuser", False)
+		create_superuser 
+			\\ extra_fields.setdefault("is_staff", True)
+			\\ extra_fields.setdefault("is_superuser", True)
+		
+~ set field as required by removing "blank=True" from model or adding "required=True" to form field
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~ PVD RESET ~~~~~~~~~~~~~~~~~~~~~~~
+
+~ pvd reset = request pvd reset link with uuid & token
+~ pvd reset done = inform link emailed
+~ pvd reset confirm = enter pvd x 2
+~ pvd reset complete = info pvd is set
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~ VIEWS.PY ~~~~~~~~~~~~~~~~~~~~~~~
+
+from django.shortcuts import render,redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import  login_required
+from .models import Post
+from .forms import PostForm
+
+
+@login_required
+def delete_post(request, id):
+    queryset = Post.objects.filter(author=request.user)
+    post = get_object_or_404(queryset, pk=id)
+    context = {'post': post}    
+    
+    if request.method == 'GET':
+        return render(request, 'blog/post_confirm_delete.html',context)
+    elif request.method == 'POST':
+        post.delete()
+        messages.success(request,  'The post has been deleted successfully.')
+        return redirect('posts')        
+
+
+@login_required    
+def edit_post(request, id):
+    queryset = Post.objects.filter(author=request.user)
+    post = get_object_or_404(queryset, pk=id)
+
+    if request.method == 'GET':
+        context = {'form': PostForm(instance=post), 'id': id}
+        return render(request,'blog/post_form.html',context)
+    
+    elif request.method == 'POST':
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'The post has been updated successfully.')
+            return redirect('posts')
+        else:
+            messages.error(request, 'Please correct the following errors:')
+            return render(request,'blog/post_form.html',{'form':form})
+
+
+@login_required
+def create_post(request):
+    if request.method == 'GET':
+        context = {'form': PostForm()}
+        return render(request,'blog/post_form.html',context)
+    elif request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.author = request.user
+            user.save()
+            messages.success(request, 'The post has been created successfully.')
+            return redirect('posts')
+        else:
+            messages.error(request, 'Please correct the following errors:')
+            return render(request,'blog/post_form.html',{'form':form})          
+    
+    
+def home(request):
+    posts = Post.objects.all()
+    context = {'posts': posts  }
+    return render(request,'blog/home.html', context)  
+
+
+# ~~~~~~~~~~~~~~~ forms.py ~~~~~~~~~~~~~~~    
+    
+from django.forms import ModelForm
+from .models import Post
+
+class PostForm(ModelForm):
+    class Meta:
+        model = Post
+        fields = ['title','content']    
+        
+
+# ~~~~~~~~~~~~~~~ Template ~~~~~~~~~~~~~~~
+
+base.html
+```````````
+{%load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <script src="{% static 'js/app.js' %}" defer></script>
+    <title>My Site</title>
+  </head>
+  <body>
+  	<header>
+  		{%if request.user.is_authenticated %}
+  			<a href="{% url 'posts' %}">My Posts</a>
+  			<a href="{% url 'post-create' %}">New Post</a>
+  			<span>Hi {{ request.user.username | title }}</span>
+  			<a href="{% url 'logout' %}">Logout</a>
+  		{%else%}
+  			<a href="{% url 'login' %}">Login</a>
+  			<a href="{% url 'register' %}">Register</a>
+  		{%endif%}
+  	</header>
+  	<main>
+	  	{% if messages %}
+			<div class="messages">
+			{% for message in messages %}
+				<div class="alert {% if message.tags %}alert-{{ message.tags }}"{% endif %}>
+					{{ message }}
+				</div>
+			{% endfor %}
+			</div>
+		{% endif %}
+		    
+	    {%block content%} 
+	    {%endblock content%}
+  	</main>
+	
+  </body>
+</html>
+
+
+home.html
+```````````
+{% extends 'base.html' %}
+	
+{% block content %}
+<h1>My Posts</h1>
+	{% for post in posts %}
+		<h2>{{ post.title }}</h2>
+		<small>Published on {{ post.published_at | date:"M d, Y" }} by {{ post.author | title}}</small>
+		<p>{{ post.content }}</p>
+		
+		{% if request.user.is_authenticated and request.user == post.author %}
+		<p>
+			<a href="{% url 'post-edit' post.id %}">Edit</a> 
+			<a href="{% url 'post-delete' post.id%}">Delete</a>
+		</p>
+		{% endif %}
+		
+	{% endfor %}
+{% endblock content %}
+
+
+login.html
+````````````
+{% extends 'base.html' %}
+
+{% block content %}
+<form method="POST" novalidate>
+	{% csrf_token %}
+	<h2>Login</h2>
+	{{form.as_p}}
+	<input type="submit" value="Login" />
+	<p>Don't have an account? <a href="{%url 'register' %}">Register</a></p>
+</form>
+
+{% endblock content%}
+
+
+register.html
+```````````````
+{% extends 'base.html' %}
+
+{% block content %}
+	<form method="POST" novalidate>
+		\\ optional "novalidate" form attribute to enforce Django's validation instead of browser
+	
+		{% csrf_token %}
+		<h2>Sign Up</h2>
+			
+		{% for field in form %}
+		<p>
+			{% if field.errors %}
+			<ul class="errorlist">
+				{% for error in field.errors %}
+				<li>{{ error }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+		 	{{ field.label_tag }} {{ field }}
+		</p>
+		{% endfor %}
+		<input type="submit" value="Register" />
+		<p>Already has an account? <a href="{%url 'login' %}">Login</a></p>
+	</form>
+{% endblock content%}
+

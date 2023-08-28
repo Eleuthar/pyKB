@@ -32,3 +32,11 @@ urls.py:
 	<app view name> = <APP>ViewSets.as_view({
 		'get': 'retrieve'
 	})
+	
+	
+ModelViewSet
+		def get_serializer_class(self):
+			if self.action == 'retrieve':
+				if hasattr(self, 'detail_serializer_class'):
+					return self.detail_serializer_class
+			return super().get_serializer_class()

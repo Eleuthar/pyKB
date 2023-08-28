@@ -1,20 +1,49 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-		METHOD
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+name VS verbose_name
+``````````````````````
+"name" kwarg overrides the corresponding attribute name
+"verbose_name" is displayed in DB
 
-save < INSERT, UPDATE
-create < INSERT
+
+NULL VS BLANK
+``````````````
+* null allows "NULL" in DB
+* blank sets form field optional
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            Complex Search - Q 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from django.db.models import Q
+
+# request = "https://domain.com/search?q=<item>
+# q = <item>
+
+query_dict = request.GET.get('q')
+query = int(query_dict.get("<form input name>")
+qs = Article.objects.filter(title__icontains=query)
+context = {"qs": qs}
+
+    OR
+
+lookup = Q(title__icontains=query)
+qs = Article.objects.filter(lookups)
+
+# can pipe further query
+lookup = Q(title__icontains=query) | Q(content__icontains=query)
+
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	ForeignKey, OneToOneField, ManyToManyField
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-\\ can handle ON_DELETE, related_name
+\\ can handle ON_DELETE, related_name (replace MODEL_set)
 \\ related_name sets related column named <related_model>_id
 \\ allow writing to a related field by overriding create() & update()
 
@@ -24,9 +53,13 @@ def create(self, validated_data):
 	# deserialized
 	validated_data['related_field_id'] = deserialized
 
-\\ allow reverse
+\\ avoid hardcoding & allow reverse to detailed model view
 def get_absolute_url(self):
-        return reverse('post-detail', kwargs={'<urlParam>': self.urlParam})
+	return reverse(
+		'post-detail',
+		kwargs={'<urlParam>': self.urlParam}
+	)
+{{ Z.get_absolute_url }} > {% url "article-detail" slug="qqq %}"
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,9 +82,23 @@ q = MODEL.objects.prefetch_related(<RELATED MODEL>__<RELATED MODEL>)
 ~~~~~~~~~~~~~~~~
 
 class Profile(models.Model):
+
+    UZR_TYPES = [
+        ('A', 'Admin'),
+        ('P', 'Premium'),
+        ('R', 'Regular')
+    ]
     user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
     image = models.ImageField(default='default.jpg', upload_to='profile_pics')
     
     def __str__(self):
         return f'{self.user.username} Profile'
+
+p = Profile('TZT', 'P')
+p.get_uzr_type_display
+	\\ 'Premium' returned by get_FOO_display method of models with choices set
+	
+Profile._state.adding: bool
+Profile._state.db: str
+	\\ db alias of instance origin DB
 

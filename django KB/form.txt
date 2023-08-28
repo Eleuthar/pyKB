@@ -1,31 +1,184 @@
-ARCH
-`````````
-GET < empty form < enter data < POST < validate 
-	< Error < Form with old data < Fix < enter data
-	< Store data < Redirect to OK url < GET OK url
+pip install django-crispy-forms
+pip install crispy-bootstrap4
+settings.INSTALLED_APPS.append('crispy_forms')
+settings.INSTALLED_APPS.append('crispy_bootstrap4')
+settings.CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 
+# ~~~~~~~~~~~~~~~~~ Import ~~~~~~~~~~~~~~~~~
 
 from django.forms import Form, BasicForm
 from django.contrib.auth.model import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.core import validators
+from django.forms.models import inlineformset_factory, formset_factory
+from django.shortcuts import render,redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 
-EX. 1
-````````
-# forms.py
+
+# ~~~~~~~~~~~~~~ widget ~~~~~~~~~~~~~~~~
+
+class PictureWidget(Widget):
+	needs_multipart_form = True
+
+	def render(self, name, value, attrs=None, **kwargs):
+		html = f" \
+			<img src='{settings.MEDIA_URL}/{value}'/> \
+			<br> \
+			<input type='file' name='{name}' \
+		/>"
+		return html
+
+* View.form_class.base_fields['<field_name>'].widget = <Widget>
+
+
+# ~~~~~~~~~~~~~~ request data within form ~~~~~~~~~~~~~~~
+
+class MyModelCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'example/create.html'
+    model = MyModel
+    form_class = MyModelForm
+    success_message = "%(my_object)s added to your site."
+
+    def get_form_kwargs(self):
+        kw = super(MyModelCreateView, self).get_form_kwargs()
+        kw['request'] = self.request # the trick!
+        return kw
+
+# ~~~~~~~~~~~~~~~~~ forms.py ~~~~~~~~~~~~~~~~~
+
 class BasicForm(forms.Form):
+	template_name = "form_snippet.html"
 	title = forms.CharField(
 		validators = [
 			validators.MinLengthValidator(2, "Enter 2 or more char")
 		]
 	)
 	acquire_date = forms.DateField()
+	
+
+class UserRegisterForm(UserCreationForm):
+	email = forms.EmailField()
+
+	class Meta:
+		\\ nested namespace for configurations in one place
+		model = User
+		fields = ['username', 'email', 'password1', 'password2']
 
 
-# views.py
+Widget
+`````````
+'attrs' dict allows adding HTML attributes: class, id, etc
+
+forms.DateField(
+	widget = forms.DateInput(
+		attrs = {
+			'type': 'date',
+			'max': datetime.now().date()
+		}
+	)
+)
+
+forms.ChoiceField(
+		choices=<TUPLE OF TUPLES: int, str>
+		widget=forms.RadioSelect()
+)
+
+
+Formset
+```````````
+\\ override __iter__ & __getitem__ to change form rendering order
+
+\\ initial kwarg to diff vs user input
+
+\\ max_num is None == no limit, default == 1000
+
+\\ default extra == 1, overridden by max_num (0 == no limit)
+	\\ if max_num > extra, remaining forms will be blank
+	\\ if initial obj count > max_num, all initial obj will be rendered
+	\\ validate_max will validate only the amount of max_num forms
+	
+\\ absolute_max: limit the number of forms instantiated upon POST request
+	\\ is None == 2000 == default
+	\\ is not None == max_num + 1000
+	\\ absolute_max < max_num == ValueError
+
+
+
+
+BookFormSet = formset_factory(
+	<FORM MODEL>,
+	extra = int, 
+	max_num = int, 		
+	validate_max = True
+)
+	formset = BookFormSet(
+		initial = [{}],
+)
+
+
+author = Author.objects.get(name=<STR>)
+
+# 2 field model: title, pub_date
+data = {
+	"form-TOTAL_FORMS": "2",
+	"form-INITIAL_FORMS": "0",
+		\\ ManagementForm, invalid if not provided
+	"form-#-DELETE": 
+	"form-0-title": "Test",
+    "form-0-pub_date": "1904-06-16",
+    "form-1-title": "Test",
+    "form-1-pub_date": "",  # <-- this date is missing but required
+}
+
+book_formset = BookFormSet(data)
+book_formset.is_valid()
+	\\ will trigger error: [{}, {'pub_date': ['This field is required.']}]
+
+BaseFormSet.total_error_count() -> int
+book_formset.has_changed() -> bool
+
+BaseFormSet.clean():
+	if any(self.errors): 
+		return
+	else:
+		\\ to override as per custom criteria
+
+
+
+# ~~~~~~~~~~~~~~~ foo views.py ~~~~~~~~~~~~~~~
+def index(request):		
+	if request.method == 'POST':
+		zform = MyForm(request.POST)
+		rendered_form = form.render("form_snippet.html")
+		context = {"form": rendered_form}
+		
+		if zform.is_valid():
+			zform.cleaned_data...
+				return render(request, "<TEMPLATE>.html, context)
+				
+	zform = MyForm()
+	rendered_form = form.render("form_snippet.html")
+	context = {"form": rendered_form}
+	
+	return render(request, "<TEMPLATE>.html, context)
+	
+
+
+# ~~~~~~~~~~~~~~~ form_snippet.html ~~~~~~~~~~~~~~~
+
+{% for field in form %}
+	<div class="fieldWrapper">
+		{{ field.errors }}
+		{{ field.label_tag }} {{ field }}
+
+
+
+# ~~~~~~~~~~~~~~~ cls views.py ~~~~~~~~~~~~~~~
+
 class SimpleForm(DumpPostView):
 	form = BasicForm()
 	ctx = {'form': form}
@@ -40,12 +193,4 @@ class SimpleUpdate(DumpPostView):
 		ctx = {'form': form}
 		return render(request, 'form/form.html', ctx)
 
-
-class UserRegisterForm(UserCreationForm):
-	email = forms.EmailField()
-
-	class Meta:
-		\\ nested namespace for configurations in one place
-		model = User
-		fields = ['username', 'email', 'password1', 'password2']
 

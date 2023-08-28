@@ -19,7 +19,7 @@ $ python manage.py migrate
 
 
 $ python manage.py shell:
-	\\ each FK model ex. Question record corresponds to an "option_set" where the Question.pk == Option.fk
+	\\ each FK model ex. Question record corresponds to a "<related model>_set" where the Question.pk == Option.fk
 	\\ property is accessed with '__' instead of '.'
 
 	from appX.models import ModelClassZ

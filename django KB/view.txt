@@ -1,3 +1,14 @@
+ListView -> object_list
+	\\ returns context named "object_list"	
+	
+context_object_name = '<key name>'
+	\\ override 'object' or '<MODEL>' name of context passed to template
+	
+shortcuts.redirect
+	\\ accept as arg: View, Model, Url, unlike "HttpResponseRedirect"
+
+
+
 ~~~~~~~~~~~~~~~~
 	Http404
 ~~~~~~~~~~~~~~~~

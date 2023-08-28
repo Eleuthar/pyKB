@@ -1,0 +1,63 @@
+"""
+NEW
+````
+password
+last_login
+is_superuser
+groups
+user_permissions
+username
+first_name
+last_name
+email
+is_staff
+is_active
+date_joined
+
+EDIT
+`````
+username
+password1
+password2
+"""
+# forms.py
+class MemberRegisterForm(UserCreationForm):
+    first_name = forms.CharField(
+        max_length=125,
+        min_length=4, 
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'First Name'})
+    )    
+    last_name = forms.CharField(
+        max_length=125, 
+        min_length=4, 
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Last Name'})
+    )
+    # role = MemberChoiceForm.role_option
+    # department = MemberChoiceForm.dept_option
+    img_signature = forms.ImageField(required=True)
+
+    class Meta(UserCreationForm.Meta):
+        model = apps.get_model('account', 'Member')
+         # transform UserCreationForm.Meta.fields value from str to tuple
+        temp_meta_field = [str(m) for m in UserCreationForm.base_fields]
+        temp_meta_field += [
+            "role",
+            "department",
+            "img_signature",
+        ]
+        model = apps.get_model('account', 'Member')
+        fields = tuple(temp_meta_field)
+
+    def save(self, commit=True):
+        member = super(MemberRegisterForm, self).save(commit=False)
+        member.first_name = self.cleaned_data['first_name']
+        member.last_name = self.cleaned_data['last_name']
+        member.username = self.cleaned_data['username']
+        member.role = self.cleaned_data['role']
+        member.department = self.cleaned_data['department']
+        member.img_signature = self.cleaned_data['img_signature']
+        if commit:
+            member.save()
+            return member
