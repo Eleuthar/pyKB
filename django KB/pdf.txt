@@ -1,0 +1,62 @@
+# read only PDf
+
+from pypdf import PdfReader
+from pathlib import Path
+
+
+pdf_path = (
+     Path.home()
+     / "creating-and-modifying-pdfs"
+     / "practice_files"
+     / "Pride_and_Prejudice.pdf"
+)
+
+pdf_reader = PdfReader(pdf_path)
+txt_file = Path.home() / "Pride_and_Prejudice.txt"
+content = [
+    f"{pdf_reader.metadata.title}",
+    f"Number of pages: {len(pdf_reader.pages)}"
+]
+
+for page in pdf_reader.pages:
+    content.append(page.extract_text())
+
+txt_file.write_text("\n".join(content))
+
+
+
+
+# ~~~~~~~~~~~~ create PDF from scratch ~~~~~~~~~~~~~~~~
+
+"""
+1 space point = 1/72 \ inch \ 2,5 cm
+1 cm == 28,34 pt
+1 inch == 72,0 pt
+default font = Helvetica, Courier, Times-Roman (12 pt)
+A4 = 21 x 29,7 cm \\ 588 x 840 pt
+
+"""
+
+from django.http import FileResponse
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.lib.units import cm, inch
+from reportlab.lib.pagesizes import LETTER, LEGAL, TABLOID, A4
+import io
+
+
+# store pdf data in buffer
+buffer = io.BytesIO()
+
+# # if not generated in RAM
+# p = Canvas("qt.pdf", pagesize=(LETTER))
+p = Canvas(buffer)
+p.setFont("Times-Roman", 17)
+p.drawString(X, Y, "FONT (17 pt)")
+p.showPage()
+p.save()
+buffer.seek(0)
+
+# FileResponse sets header "Content-Disposition" to provide option to save file
+return FileResponse(buffer, as_attachment=True, filename="PV.pdf")
+
+
