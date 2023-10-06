@@ -1,1 +1,4 @@
-site-packages\django\contrib\admin\locale\ro\LC_MESSAGES\django.po
+copy site-packages\django\contrib\admin\locale\ro\LC_MESSAGES\django.po BASE_DIR/<proj>/locale/ro/LC_MESSAGES
+
+# settings.py
+LOCALE_PATHS = os.path.join(BASE_DIR, 'geofleet', 'locale_extra')
