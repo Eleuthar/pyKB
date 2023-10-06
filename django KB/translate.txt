@@ -2,3 +2,16 @@ copy site-packages\django\contrib\admin\locale\ro\LC_MESSAGES\django.po BASE_DIR
 
 # settings.py
 LOCALE_PATHS = os.path.join(BASE_DIR, 'geofleet', 'locale_extra')
+
+msgfmt -o .\locale\ro\LC_MESSAGES\django.mo .\locale\ro\LC_MESSAGES\django.po
+
+
+# view test
+from django.utils import translation
+from django.utils.translation import ugettext as _
+
+def home(request):
+     title = _("Welcome")
+     if 'lang' in request.GET:
+           translation.activate(request.GET.get('lang'))
+     return render(request, 'home.html', {"title": title})
