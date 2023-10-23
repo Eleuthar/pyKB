@@ -60,3 +60,17 @@ buffer.seek(0)
 return FileResponse(buffer, as_attachment=True, filename="PV.pdf")
 
 
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~ FLOWABLE ~~~~~~~~~~~~~~~~~~~~~~~
+
+DocTemplate < PageTemplate < Frame | Table | Paragraph < Flowable
+
+
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.rl_config import defaultPageSize
+from reportlab.lib.units import inch
+
+PAGE_HEIGHT=defaultPageSize[1]; 
+PAGE_WIDTH=defaultPageSize[0]
+styles = getSampleStyleSheet()
