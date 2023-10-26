@@ -29,7 +29,7 @@ txt_file.write_text("\n".join(content))
 # ~~~~~~~~~~~~ create PDF from scratch ~~~~~~~~~~~~~~~~
 
 """
-1 space point = 1/72 \ inch \ 2,5 cm
+1 space point = 1/72 \ 1 inch || 2,5 cm
 1 cm == 28,34 pt
 1 inch == 72,0 pt
 default font = Helvetica, Courier, Times-Roman (12 pt)
