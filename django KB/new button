@@ -1,0 +1,11 @@
+from django.template.loader import render_to_string
+
+
+def connect(self, obj):
+    html = render_to_string('file.html')
+    return html
+
+fields = ["connect"]
+readonly_fields = ('connect',)
+connect.allow_tags=True
+connect.short_description = ''
