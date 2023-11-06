@@ -7,6 +7,8 @@ context_object_name = '<key name>'
 shortcuts.redirect
 	\\ accept as arg: View, Model, Url, unlike "HttpResponseRedirect"
 
+request.GET dict uses the form element "name" for cleaning
+
 
 
 ~~~~~~~~~~~~~~~~
