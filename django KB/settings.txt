@@ -1,36 +1,17 @@
-from django.forms.renderers import TemplatesSetting
+Admin dashboard model ordering
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+settings.py
+``````````````
+from django.contrib import admin
 
-INSTALLED_APPS = [ appX.apps.AppXConfig ]
-	\\ GRANT ALL PRIVILEGES ON *.* TO 'uzr'@'localhost'
+def get_app_list(self, request, app_label=None):
+	""" make use of the admin.site.register(Model, ModelAdmin) declaration order for manual ordering """
+    app_dict = self._build_app_dict(request, app_label)
+    if not app_dict:
+        return
+    return list(app_dict.values())
 
-TEMPLATES = [ 
-	{
-		'DIRS': [
-			os.path.join(BASE_DIR, 'templates')
-		],
-	}
-]
+admin.AdminSite.get_app_list = get_app_list
 
-class CustomFormRenderer(TemplatesSetting):
-	form_template_name = "form_snippet.html"
-	
-
-Globals
-``````````
-STATICFILES_FINDERS
-	\\ lookup static files mentioned under STATICFILES_DIRS
-	
-FORM_RENDERER = "project.settings.CustomFormRenderer"
-LOGIN_REDIRECT
-LOGIN_URL
-EMAIL_*
-
-
-https://www.toptal.com/django/django-top-10-mistakes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-STATICFILES_DIRS x STATIC_ROOT
-
-STATICFILES_STORAGE
-Template loader
 
