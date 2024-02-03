@@ -1,11 +1,30 @@
-database-level query optimization techniques ~ optimizing the database schema, tuning database parameters
+list_select_related < list_display
+
+sortable_by
+
+Meta.ordering
+
+LIST_PER_PAGE = XXX
 
 select_related() and prefetch_related()
 
 only() or defer()
+
+QuerySet.explain()
 
 subqueries ~ OuterRef, Subquery, Count
 
 annotations \ aggregation
 
 DB indexing
+
+database-level query optimization techniques ~ optimizing the database schema, tuning database parameters
+
+
+HUGE DATA
+````````````
+Disable Full Result Count
+Remove Date Hierarchy Drilldowns
+Large Table Paginator (Count Estimation)
+Cache Model Properties
+Disable search \ Minimize Number of Search Fields
