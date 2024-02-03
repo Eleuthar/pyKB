@@ -1,0 +1,11 @@
+database-level query optimization techniques ~ optimizing the database schema, tuning database parameters
+
+select_related() and prefetch_related()
+
+only() or defer()
+
+subqueries ~ OuterRef, Subquery, Count
+
+annotations \ aggregation
+
+DB indexing
