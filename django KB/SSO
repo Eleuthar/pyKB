@@ -1,0 +1,114 @@
+~~~~~~~~~~~
+LOGIN.HTML
+~~~~~~~~~~~
+{% extends "admin/login.html" %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        {# Change Django default CSS behavior #}
+        .login #content {
+            padding: 20px 20px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .login #content br.clear {
+            display: none;
+        }
+
+        {# Custom CSS #}
+        .alternative-login-section {
+            padding-top: 20px;
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+
+    <section class="alternative-login-section">
+        <a href="{% url 'oidc_authentication_init' %}">Try single sign-on (SSO) 🔐</a>
+    </section>
+
+
+~~~~~~~~~~
+BASE.HTML
+~~~~~~~~~~
+{% extends "admin/base.html" %}
+
+{% load i18n static %}
+
+{% block userlinks %}
+    {% if site_url %}
+        <a href="{{ site_url }}">{% translate 'View site' %}</a> /
+    {% endif %}
+    {% if user.is_active and user.is_staff %}
+        {% url 'django-admindocs-docroot' as docsroot %}
+        {% if docsroot %}
+            <a href="{{ docsroot }}">{% translate 'Documentation' %}</a> /
+        {% endif %}
+    {% endif %}
+    {% if user.has_usable_password %}
+        <a href="{% url 'admin:password_change' %}">{% translate 'Change password' %}</a> /
+    {% endif %}
+    {# Just changed 'admin:logout' to 'oidc_logout' #}
+    <a href="{% url 'oidc_logout' %}">{% translate 'Log out' %}</a>
+{% endblock %}
+
+
+~~~~~~~~~~~~
+SETTINGS.PY
+~~~~~~~~~~~~
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "django_admin_auth_sso.support.oidc_helpers.CustomOIDCAuthenticationBackend",
+]
+
+CUSTOM_OIDC_GROUPS_CLAIM = os.environ.get("CUSTOM_OIDC_GROUPS_CLAIM", "groups")
+BASE_URL = os.getenv("BASE_URL", "http://app.local:8000")
+AUTH0_DOMAIN = getenv_or_raise_exception("AUTH0_DOMAIN")
+AUTH0_LOGOUT_ENDPOINT = f"https://{AUTH0_DOMAIN}/v2/logout"
+OIDC_RP_CLIENT_ID = getenv_or_raise_exception("AUTH0_APP_CLIENT_ID")
+OIDC_RP_CLIENT_SECRET = getenv_or_raise_exception("AUTH0_APP_CLIENT_SECRET")
+
+ALLOW_LOGOUT_GET_METHOD = True
+LOGIN_REDIRECT_URL = f"{BASE_URL}/admin/"
+LOGOUT_REDIRECT_URL = f"{BASE_URL}/admin/logout/"
+OIDC_OP_JWKS_ENDPOINT = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
+OIDC_RP_SIGN_ALGO = "RS256"
+
+# enable log out on the identity provider side - on Auth0, including the Django admin. 
+OIDC_OP_LOGOUT_URL_METHOD = "django_admin_auth_sso.support.oidc_helpers.provider_logout"
+
+try:
+    document = requests.get(f"https://{AUTH0_DOMAIN}/.well-known/openid-configuration").json()
+    OIDC_OP_AUTHORIZATION_ENDPOINT = document["authorization_endpoint"]
+    OIDC_OP_TOKEN_ENDPOINT = document["token_endpoint"]
+    OIDC_OP_USER_ENDPOINT = document["userinfo_endpoint"]
+except requests.exceptions.ConnectionError:
+    print("Skipping configuration for OIDC! It won't work correctly")
+    OIDC_OP_AUTHORIZATION_ENDPOINT = None
+    OIDC_OP_TOKEN_ENDPOINT = None
+    OIDC_OP_USER_ENDPOINT = None
+OIDC_RP_SCOPES = os.environ.get("OIDC_RP_SCOPES", "openid profile email")
+OIDC_VERIFY_SSL = True
+
+
+
+def provider_logout(request):
+    params = {
+        "returnTo": settings.LOGOUT_REDIRECT_URL,
+        "client_id": settings.OIDC_RP_CLIENT_ID,
+    }
+    return build_url_with_query_strings(settings.AUTH0_LOGOUT_ENDPOINT, params)
+
+# Then we have the settings for urls.py, which is vital for the contract with the identity provider to work correctly (like having the callback endpoint):
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("oidc/", include("mozilla_django_oidc.urls")),
+]
+
+
