@@ -1,0 +1,2 @@
+Map a new attribute to a field.
+The attribute is an imported function
