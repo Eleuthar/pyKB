@@ -1,5 +1,5 @@
 Model.objects.select_related('g').defer('g__r', 'g__t')
-    \\ equivalent to .only()
+    \\ .only() \ .defer() approach for select_related
 
 
 Prefetch(lookup, qs, to_attr=None)
