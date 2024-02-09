@@ -1,9 +1,15 @@
+Model.objects.select_related('g').defer('g__r', 'g__t')
+    \\ equivalent to .only()
+
+
 Prefetch(lookup, qs, to_attr=None)
     \\ to_attr <<< stores the result in a dynamic model instance attribute
 
 
-ParentObj.objects.prefetch_related('member__email', 'member__name').filter(parent_prop='prop_value')
+ParentObj.objects.prefetch_related('m2m_model').filter(parent_prop='prop_value')
+
 Group.objects.prefetch_related(Prefetch('user_set', Member.objects.only('email',))).filter(name='group_name')
+    
     \\ complex queryset requires a Prefetch object using the lookup & queryset
     \\ "Group" is a special example, the overriden user FK ('Member') is still mapped as 'user_set'
 
