@@ -1,2 +1,12 @@
 Map a new attribute to a field.
-The attribute is an imported function
+The attribute is an imported function or an expression.
+Create temporary dynamic field reflecting a model or instance property
+
+
+Booking.objects.annotate(photo_quant=Count('commentphoto')).filter(photo_quant=0)
+    \\ get all objects with no M2M commentphoto attached
+
+
+Booking.objects.annotate(photo_quant=Count('commentphoto', distinct=True, filter=Q(commentphoto__description__contains='REGEX')).filter(photo_quant=4)
+    \\ full param
+
