@@ -1,24 +1,13 @@
-list_select_related < list_display
-
-sortable_by
-
-Meta.ordering
-
+DB index
 LIST_PER_PAGE = XXX
-
+list_select_related < list_display
+sortable_by
+Meta.ordering
 select_related() and prefetch_related()
-
 only() or defer()
-
 QuerySet.explain()
-
-subqueries ~ OuterRef, Subquery, Count
-
+OuterRef, Subquery, Count
 annotations \ aggregation
-
-DB indexing
-
-database-level query optimization techniques ~ optimizing the database schema, tuning database parameters
 
 
 HUGE DATA
