@@ -19,6 +19,7 @@ Cache Model Properties
 Disable search \ Minimize Number of Search Fields
 
 
+
 list_display < list_select_related
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     list_display = ('user','action','company_name')
@@ -26,4 +27,8 @@ list_display < list_select_related
       
     def company_name(self,instance):
         return instance.user.company
+
+    # OR without custom method
+
+    list_display = ('user','action','user__company__name')
 
