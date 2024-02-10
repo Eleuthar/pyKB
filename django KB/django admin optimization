@@ -1,6 +1,6 @@
 DB index
 LIST_PER_PAGE = XXX
-list_select_related < list_display
+list_display < list_select_related
 sortable_by
 Meta.ordering
 select_related() and prefetch_related()
@@ -17,3 +17,13 @@ Remove Date Hierarchy Drilldowns
 Large Table Paginator (Count Estimation)
 Cache Model Properties
 Disable search \ Minimize Number of Search Fields
+
+
+list_display < list_select_related
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    list_display = ('user','action','company_name')
+    list_select_related = ('user__company', )
+      
+    def company_name(self,instance):
+        return instance.user.company
+
