@@ -1,6 +1,8 @@
 import operator
 from django.db.models import Q
 from your_app.models import your_model_object
+from functools import reduce
+
 
 q_list = [Q(question__startswith='Who'), Q(question__startswith='What')]
 your_model_object.objects.filter(reduce(operator.or_, q_list))
