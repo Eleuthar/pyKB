@@ -1,3 +1,5 @@
+Prevent garbage collector to remove reference to obj no longer used.
+
 Implement cache or mapping holding large objects.
 
 Weakref can be implemented for list and dict only via subclassing.
