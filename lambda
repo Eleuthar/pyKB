@@ -1,0 +1,38 @@
+varName = lambda param: expression
+
+\\ closure behavior
+\\ can be used with map(lambda, list) or filter(lambda, list)
+
+
+Example 1
+```````````
+
+two = lambda: 2
+sqr = lambda x: x*x
+pwr = lambda x,y: x**y
+>>> sqr(2) == 4
+	
+
+Example 2
+````````````
+
+list_1 = [x for x in range(5)]
+list_2 = list(map(lambda x: 2 ** x, list_1))
+print(list_2)
+
+# call function for each element
+for x in map(lambda x: x * x, list_2):
+    print(x, end=' ')
+
+
+Example 3
+````````````
+
+from random import seed, randint
+seed()
+data = [randint(-10,10) for x in range(5)]
+filtered = list(filter(lambda x: x > 0 and x % 2 == 0, data))
+# elements that return True from lambda, can pass the filter
+	
+		
+	
