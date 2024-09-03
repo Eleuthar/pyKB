@@ -1,0 +1,40 @@
+\\ store values when their context of creation does not exist anymore
+
+
+Example 1
+````````````
+def outer(par):
+    loc = par
+
+    def inner():
+        return loc
+    return inner
+
+var = 1
+fun = outer(var)
+print(fun())
+
+\\ an inner function returns the outer function's variable
+\\ the outer function returns the inner function (not the local variable's value). 
+\\ if the outer function simply returns the local variable, "fun" would no longer point to a function, but an integer which is not callable.
+
+
+Example 2
+`````````````
+def make_closure(par):
+    loc = par
+
+    def power(p):
+        return p ** loc
+    return power
+
+
+fsqr = make_closure(2)
+fcub = make_closure(3)
+
+for i in range(5):
+    print(i, fsqr(i), fcub(i))
+	
+\\ outer function param is used as local var for inner
+\\ inner function returns the function to outer
+\\ fsqr & fscub become the returned inner function -> power(p) == fsqr(p), where value of "p" is given by "i"
