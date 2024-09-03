@@ -1,43 +1,81 @@
-defaultdict
-    \\ doesn't trigger KeyError if key does not exist
-	\\ doesn't support item reassignment
-    
-
-OrderedDict
-    \\ enforce dict item declaration order
-
-
+namedtuple()
+deque
 Counter
-    \\ number of occurrences
-    colours = (
-        ('Yasoob', 'Yellow'),
-        ('Ali', 'Blue'),
-        ('Arham', 'Green'),
-        ('Ali', 'Black'),
-        ('Yasoob', 'Red'),
-        ('Ahmed', 'Silver'),
-    )
-    favs = Counter(name for name, colour in colours)
-    print(favs)
-    # Output: Counter({
-    #    'Yasoob': 2,
-    #    'Ali': 2,
-    #    'Arham': 1,
-    #    'Ahmed': 1
-    # })
+OrderedDict
+defaultdict
 
 
-deque([j,h,g,b,n], maxlen=8)
-    \\ double-ended queue for adding & removing opposite list ends
-    \\ Can: append(), popleft(), pop(), extend([q,z,x]), extendleft([q,z,x]
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 namedtuple(<name>, (*args || **kwargs,))
+	\\ factory function for creating tuple subclasses with named fields
     \\ if *args is provided instead of kwarg, args is keys
 
+	Example
+	````````
+	>>> Point = namedtuple('Point', ['x', 'y'])
+	>>> p = Point(11, y=22)
+	>>> p[0] + p[1]
+	33
+	>>> x, y = p
+	>>> x, y
+	(11, 22)
+	>>> p.x + p.y
+	33
+	>>> p
+	Point(x=11, y=22)
 
-Enum
-    \\ class Z(Enum):
-        item1 = 1
-        item2 = 2
-    # Z.item1 == 1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+deque
+	\\ list-like container with fast appends and pops on either end
+    \\ append(), popleft(), pop(), extend([q,z,x]), extendleft([q,z,x]
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Counter
+	\\ dict subclass for counting hashable objects:
+		\\ elements, most_common, subtract, total
+
+	Example 1
+	``````````
+	>>> q = Counter('gallahad')
+	Counter({'a': 3, 'l': 2, 'g': 1, 'h': 1, 'd': 1})
+
+
+	Example 2
+	``````````
+	>>> q = Counter(('Yasoob','Ali','Arham','Ali','Yasoob','Ahmed'))
+	Counter({'Yasoob': 2, 'Ali': 2, 'Arham': 1, 'Ahmed': 1})
+
+	Example 3
+	``````````
+	>>> c = Counter(a=4, b=2, c=0, d=-2)
+	>>> d = Counter(a=1, b=2, c=3, d=4)	
+	>>> c.subtract(d)	
+	>>> c
+	Counter({'a': 3, 'b': 0, 'c': -3, 'd': -6})
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+defaultdict
+	\\ faster and simpler with large data sets
+	\\ dict subclass that calls a factory function to supply missing values
+	\\ doesn't trigger KeyError if key does not exist
+	\\ doesn't support item reassignment
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+UserDict
+	\\ wrapper around dictionary objects for easier dict subclassing
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+UserList
+	\\ wrapper around list objects for easier list subclassing
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+UserString
+	\\ wrapper around string objects for easier string subclassing
+
