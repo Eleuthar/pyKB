@@ -1,3 +1,10 @@
+partial
+reduce
+singledispatch
+singledispatchmethod
+
+
+
 ~~~~~~~~~~~~~~~~~ partial ~~~~~~~~~~~~~~~~~
 
 \\ Function factory with partially provided argument
@@ -36,3 +43,83 @@ multiplying num1=5 by num2=6
 multiplying num1=30 by num2=7
 multiplying num1=210 by num2=8
 multiplying num1=1680 by num2=9
+
+
+
+~~~~~~~~~~~~~~~~~ singledispatch \ singledispatchmetod ~~~~~~~~~~~~~~~~~
+
+from functools import singledispatch, singledispatchmethod
+
+"""Handle different data types"""
+
+
+@singledispatch
+def handle_error(error):
+    raise NotImplemented("Cannot handle this error type")
+
+@handle_error.register(TypeError)
+def _(error):
+    print(f"Handling TypeError\n{error}")
+
+@handle_error.register(ValueError)
+def _(error):
+    print(f"Handling ValueError\n{error}")
+
+@handle_error.register(ZeroDivisionError)
+def _(error):
+    print(f"Handling ZeroDivisionError\n{error}")
+
+
+class MyNum:
+    def __init__(self, num):
+        self.num = num
+
+    @singledispatchmethod
+    def add_it(self, another):
+        raise NotImplemented("Cannot add")
+    
+    @add_it.register(int)
+    def _(self, another):
+        self.num += another
+    
+    @add_it.register(str)
+    def _(self, another):
+        self.num += int(another)
+
+    @add_it.register(list)
+    def _(self, another):
+        for x in another:
+            self.add_it(x)
+
+    @add_it.register(int)
+    def _(self, another):
+        self.num += another
+
+
+if __name__ == "__main__":
+
+    print("testing SingleDispatch")
+    try:
+        1 + "1"
+    except Exception as x:
+        handle_error(x)
+
+    try:
+        1 + "q"
+    except Exception as x:
+        handle_error(x)
+
+    try:
+        1 / 0
+    except Exception as x:
+        handle_error(x)
+
+
+    print("testing SingleDispatchMethod")
+    num = MyNum(5)
+    print(num.num)
+    num.add_it(14)
+    print(num.num)
+    num.add_it("7")
+    print(num.num)
+    num.add_it([1,"2",3])
