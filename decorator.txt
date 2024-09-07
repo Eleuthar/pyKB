@@ -3,16 +3,13 @@
 ~~~~~~~~~~~~~~~~~~~~~
 
 
-from functools import wraps
+from functools import wraps, update_wrapper
 
 
 def mapper(fnc):
 
     @wraps(fnc)
     def inner(list_of_valuez):
-    
-        '''This is the inner()'''
-
         return [fnc(value) for value in list_of_values]
 
     return inner
@@ -21,19 +18,15 @@ def mapper(fnc):
 
 @mapper
 def camelcase(z):
-    
-    ''' Turn ztringz_like_thiz into ZtringzLikeDiz ''' 
-
     return ''.join([word.capitalize() for word in z.split('-')])
 
 names = [ 'rick_ross', 'A$Ap_rocky', 'znoop_dg' ]
 
 
 
-print(camelcase.__doc__)
-    \\ without @wraps, it would print mapper doc
-
-
+\\ @wraps(fnc) OR update_wrapper(fnc, inner) copies metadata of the decorated function to the decorator and returns the decorator with the new properties
+\\ without @wraps, ``print(camelcase.__doc__)`` would print mapper doc
+	
 
 
 
@@ -46,12 +39,15 @@ import random
 
 
 def power_of(arg):
+	"""return a new function with the result of the decorated"""
 
-    def decorator(fnc):       
+    def decorator(fnc):
         def inner():
             return fnc() ** exponent
-        return inner
+		return inner
 
+   # default arg value if is function
+   # better approach than signature kwarg of "arg=2"
    if callable(arg):
 	    exponent = 2
 	    return decorator(arg)
@@ -63,11 +59,9 @@ def power_of(arg):
 
 @power_of(.5)
 def random_odd_digit():
-
     return random.choice([1, 3, 5, 7, 9])
 
 
 print(random_odd_digit())
-    \\ @power_of argument requires an extra layer of abstraction that will return the decorator function with argument for exponent
-    \\ without argument, the meta decorator returns inner
+    \\ without argument, use the default arg of 2
 
