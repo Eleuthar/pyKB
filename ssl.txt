@@ -1,0 +1,119 @@
+from requests.adapters import HTTPAdapter
+import requests
+import ssl
+import http.client
+import json
+import socket
+
+
+HOSTNAME = 'buzz.net'
+pinnd_cert = None
+
+requests.get(
+    'https://',
+    verify=pinnd_cert,
+    cert='/wrong_path/client.pem'
+)
+
+# client
+def create_default_context(
+    purpose=ssl.Purpose.SERVER_AUTH,
+    cafile=None,
+    capath=None, 
+    cadata=None
+):
+    ...
+
+# SERVER
+# Purpose.CLIENT_AUTH << context = SSLContext(PROTOCOL_TLS_SERVER)
+def create_default_context(
+    purpose=ssl.Purpose.CLIENT_AUTH,
+    cafile=None,
+    capath=None, 
+    cadata=None
+):
+    ...
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+qtx = ssl.create_default_context()
+zqt = socket.create_connection((HOSTNAME, 443))
+wrapp = qtx.wrap_socket(zqt, server_hostname=HOSTNAME)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+qtx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+qtx.minimum_version = ssl.TLSVersion.TLSv1_2
+qtx.maximum_version = ssl.TLSVersion.TLSv1_3
+qtx.verify_mode = ssl.CERT_REQUIRED
+qtx.load_default_certs()
+qtx.check_hostname = True
+
+zqt = socket.create_connection((HOSTNAME, 443))
+wrapp = qtx.wrap_socket(zqt, server_hostname=HOSTNAME)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# host_addr = '127.0.0.1'
+# host_port = 8082
+# server_sni_hostname = 'example.com'
+# server_cert = 'server.crt'
+# client_cert = 'client.crt'
+# client_key = 'client.key'
+
+
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+conn = context.wrap_socket(s, server_side=False, server_hostname=server_sni_hostname)
+conn.connect((host_addr, host_port))
+print("SSL established. Peer: {}".format(conn.getpeercert()))
+print("Sending: 'Hello, world!")
+conn.send(b"Hello, world!")
+print("Closing connection")
+conn.close()
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class LocalSSLContext(HTTPAdapter):
+    def init_poolmanager(self, *args, **kwargs):
+        context = ssl.create_default_context()
+        context.load_default_certs()
+        kwargs['ssl_context'] = context
+        return super(LocalSSLContext, self).init_poolmanager(*args, **kwargs)
+
+session = requests.Session()
+sslContext = LocalSSLContext()
+session.mount('https://www.example.com/', sslContext)
+response = session.get(url='https://www.example.com/')
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~ OR ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# server cert
+pinnd_cert = '/path/to/certificate.crt'
+# Create an SSL context
+context = ssl.create_default_context()
+# Load the certificate
+context.load_verify_locations(cafile=pinnd_cert)
+# Make a request with the trusted certificate
+response = requests.get('https://example.com', verify=context)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~ OR ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#Define the client certificate settings for https connection
+context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+context.load_cert_chain(certfile=certificate_file)
+ 
+# Create a connection to submit HTTP requests
+connection = http.client.HTTPSConnection(host, port=443, context=context)
+ 
+# Use connection to submit a HTTP POST request
+connection.request(method="POST", url=request_url, headers=request_headers, body=json.dumps(request_body_dict))
+ 
+# Print the HTTP response from the IOT service endpoint
+response = connection.getresponse()
+print(response.status, response.reason)
+data = response.read()
+
+
