@@ -1,0 +1,29 @@
+from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.exceptions import InvalidSignature
+
+
+
+
+# signing
+h256 = hashes.SHA256()
+mgf = padding.MGF1(h256)
+pad = padding.PSS(mgf=mgf, salt_length=padding.PSS.MAX_LENGTH)
+
+def zgn(mzg: bytes, private_key, pad, h256):
+    return base64.b64encode(private_key.sign(mzg, pad, h256))
+
+
+# Load the .p12 file
+p12_path = "qtxt.p12"
+p12_password = b"qqzz"
+with open(p12_path, "rb") as p12_file:
+    p12 = p12_file.read()
+
+# Parse the .p12 file
+pem = pkcs12.load_key_and_certificates(p12, p12_password, default_backend())
+http_session = rq.Session()
+http_session.cert = (pem[1], pem[0])
+http_session.verify = pem[2]
