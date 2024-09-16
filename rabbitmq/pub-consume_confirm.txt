@@ -1,0 +1,2 @@
+``basic_consume`` return ``Basic.Deliver``
+``basic_publish`` return ``Basic.Return``
