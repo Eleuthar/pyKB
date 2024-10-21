@@ -1,0 +1,10 @@
+### basic way of following link
+next_page = response.css("li.next a::attr(href)").get()
+if next_page is not None:            
+    next_page = response.urljoin(next_page)
+    yield scrapy.Request(next_page, callback=self.parse)
+
+	
+### follow link automatically using href by default 
+for anchor in response.css("li.next a"):
+    yield response.follow(anchor, callback=self.parse)
