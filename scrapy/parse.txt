@@ -1,10 +1,30 @@
-### basic way of following link
+# basic way of following link
 next_page = response.css("li.next a::attr(href)").get()
 if next_page is not None:            
     next_page = response.urljoin(next_page)
     yield scrapy.Request(next_page, callback=self.parse)
 
 	
-### follow link automatically using href by default 
+# follow link automatically using href by default 
 for anchor in response.css("li.next a"):
     yield response.follow(anchor, callback=self.parse)
+
+
+# get all <a> tags that have 2 children
+response.xpath("//div[@id='body']/a[count(child::*) = 2]")
+
+
+# get the value of an attribute named "value"
+input_attr_value = response.css('.next input[type="hidden"][name="page"]::attr(value)').get()
+
+
+# make a new request
+yield scrapy.Request(url=new_url, callback=self.parse)
+
+
+# form request
+yield scrapy.FormRequest(
+ url=response.url,
+ formdata={},
+ callback=self.parse,
+)
