@@ -1,0 +1,8 @@
+
+# Simulate response.follow for a relative URL
+link = response.css('a.next-page::attr(href)').get()  # Extract a relative URL
+next_request = response.follow(link)  # Create a request object
+
+# Fetch and parse the new page
+fetch(next_request.url)  # Simulate fetching the URL
+response = scrapy.http.Response(next_request.url)  # Create a response object
