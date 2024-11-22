@@ -20,12 +20,137 @@ Disable search \ Minimize Number of Search Fields
 
 
 
+
+1. Database Optimization
+`````````````````````````
+Use Efficient Queries
+    Use select_related() and prefetch_related() to reduce the number of queries in relationships.
+    Avoid using .all() when unnecessary and filter only the data you need.
+
+Index Your Database
+    Add database indexes (db_index=True) on fields frequently used in filtering or sorting.
+
+Optimize ORM Queries
+    Use annotate() and aggregate() instead of iterating over QuerySets.
+    Avoid N+1 queries by properly preloading related data.
+
+Use Raw SQL for Critical Queries
+    When ORM becomes a bottleneck, use raw() for custom SQL queries.
+
+Connection Pooling
+    Use a library like django-db-geventpool or configure your database to reuse connections.
+
+
+2. Caching
+````````````
+Leverage Django’s Cache Framework
+    Use caching for frequently accessed pages, database queries, or expensive computations.
+    Options include
+        File-based caching for small apps.
+        Redis or Memcached for scalable and fast in-memory caching.
+
+Cache Pages
+    Use @cache_page to cache entire views or parts of views.
+
+Cache Querysets
+    Store expensive QuerySets in the cache and invalidate them when data changes.
+
+Template Fragment Caching
+    Use {% cache %} template tags to cache parts of your templates.
+
+
+3. Optimize Django Settings
+````````````````````````````
+Static Files
+    Use a CDN (Content Delivery Network) to serve static files (e.g., AWS S3 or Cloudflare).
+    Set DEBUG = False in production to disable debug features.
+
+Middleware Optimization
+    Disable unused middleware to reduce request processing overhead.
+
+Compression
+    Use GZIPMiddleware or gunicorn/nginx compression to compress responses.
+
+Database Connection Settings
+    Use persistent connections with CONN_MAX_AGE in the database settings.
+
+4. Asynchronous Processing
+Offload Background Tasks
+    Use Celery or Django Q for long-running tasks like email sending or data processing.
+
+Async Views
+    Django supports async views since version 3.1. Use async def for views that involve I/O-bound tasks.
+
+
+5. Deployment Optimizations
+````````````````````````````
+Use a Production-Grade Server
+    Deploy using Gunicorn or uWSGI with optimal worker configurations.
+    Combine with Nginx for serving static files and load balancing.
+
+Optimize Worker Count
+    Set worker processes based on the formula (2 x CPU cores) + 1.
+
+Enable HTTP/2
+    Use HTTP/2 in your web server (e.g., Nginx) to reduce latency and improve connection handling.
+
+Load Balancing
+    Use a load balancer to distribute traffic across multiple server instances.
+
+
+6. Use CDN and Frontend Optimization
+`````````````````````````````````````
+Content Delivery Network
+    Serve static assets (CSS, JS, images) through a CDN to reduce server load.
+
+Minify Static Assets
+    Minify and combine CSS and JS files. Tools like django-compressor can help.
+
+Frontend Performance
+    Use lazy loading for images and defer non-essential JavaScript.
+
+
+7. Monitoring and Profiling
+````````````````````````````
+Use Profiling Tools
+    Tools like django-silk, django-debug-toolbar, or cProfile can help identify bottlenecks.
+
+Monitor with APM
+    Use tools like New Relic, Datadog, or Sentry to monitor application performance in real-time.
+
+Optimize Based on Logs
+    Review database query logs and adjust indexes or queries.
+
+
+8. Use Advanced Features
+`````````````````````````
+Database Sharding or Replication
+    Split read and write operations using database replication.
+    Use Django database routers for sharding or load balancing.
+
+Distributed Caching
+    Scale caching infrastructure with distributed systems like Redis Cluster.
+
+Asynchronous Django with ASGI
+    Use Daphne or Hypercorn to handle async requests more effectively, especially for WebSockets or streaming.
+
+
+9. Advanced Python Optimizations
+`````````````````````````````````
+Optimize Code
+    Avoid unnecessary loops and computations.
+    Use Python's built-in libraries like functools.lru_cache for caching function results.
+
+Use Faster Libraries
+    Replace default libraries with faster alternatives where applicable (e.g., ujson instead of json).
+
+
 list_display < list_select_related
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     list_display = ('user','action','company_name')
     list_select_related = ('user__company', )
       
-    def company_name(self,instance):
+    def company_name(self,instance)
         return instance.user.company
 
     # OR without custom method
