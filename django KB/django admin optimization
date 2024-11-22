@@ -1,6 +1,15 @@
 DB index
 LIST_PER_PAGE = XXX
+
 list_display < list_select_related
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    list_display = ('user','action','company_name')
+    list_select_related = ('user__company', )
+    def company_name(self,instance)
+        return instance.user.company
+    # OR without custom method
+    list_display = ('user','action','user__company__name')
+
 sortable_by
 Meta.ordering
 select_related() and prefetch_related()
@@ -143,17 +152,3 @@ Optimize Code
 
 Use Faster Libraries
     Replace default libraries with faster alternatives where applicable (e.g., ujson instead of json).
-
-
-list_display < list_select_related
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    list_display = ('user','action','company_name')
-    list_select_related = ('user__company', )
-      
-    def company_name(self,instance)
-        return instance.user.company
-
-    # OR without custom method
-
-    list_display = ('user','action','user__company__name')
-
