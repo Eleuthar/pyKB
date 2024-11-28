@@ -1,0 +1,86 @@
+
+3. Graph Algorithms
+
+Graphs are ubiquitous in problems like network design, navigation, and social media.
+
+    Breadth-First Search (BFS): Explores level by level.
+    Depth-First Search (DFS): Explores depth-wise.
+    Dijkstra's Algorithm: Finds the shortest path in weighted graphs.
+    A Search*: Advanced pathfinding algorithm using heuristics.
+    Kruskal's and Prim's Algorithms: Minimum spanning tree.
+    Topological Sorting: Ordering of vertices in a directed acyclic graph.
+
+4. Dynamic Programming (DP)
+
+DP is useful for optimization problems by breaking them into subproblems.
+
+    Fibonacci Sequence: Classic DP example.
+    Longest Common Subsequence (LCS): Solving similarity issues.
+    Knapsack Problem: Resource allocation.
+    Matrix Chain Multiplication: Optimizing matrix operations.
+
+5. String Algorithms
+
+String manipulation is a common task in development.
+
+    KMP Algorithm (Knuth-Morris-Pratt): Efficient substring search.
+    Rabin-Karp Algorithm: Uses hashing for pattern searching.
+    Z Algorithm: Matches patterns in linear time.
+    Trie Construction: Efficient prefix search and autocomplete.
+
+6. Divide and Conquer
+
+This paradigm is essential for many complex problems.
+
+    Binary Search: A classic example.
+    Merge Sort and Quick Sort: Already mentioned but also belong here.
+    Closest Pair of Points: Computational geometry problem.
+
+7. Greedy Algorithms
+
+Greedy approaches build solutions step-by-step.
+
+    Activity Selection Problem: Choosing activities with time constraints.
+    Huffman Coding: Data compression.
+    Greedy Coloring: Graph coloring problems.
+
+8. Backtracking
+
+Used for problems requiring all possible solutions.
+
+    N-Queens Problem: Placing queens on a chessboard.
+    Sudoku Solver: Fills in puzzles using constraints.
+    Subset Sum Problem: Finds subsets meeting specific criteria.
+
+9. Fundamental Data Structure Algorithms
+
+These complement your understanding of data structures.
+
+    Traversals:
+        In-order, Pre-order, Post-order (trees).
+        BFS and DFS (graphs).
+    Binary Search Tree Operations: Insert, delete, and search.
+    Heap Operations: Insert and extract.
+
+10. Mathematical Algorithms
+
+Math underpins many real-world problems.
+
+    Euclid's Algorithm: Finds greatest common divisor (GCD).
+    Sieve of Eratosthenes: Efficient prime number generation.
+    Fast Exponentiation: Efficient modular arithmetic.
+
+11. Recursive Algorithms
+
+Recursion is essential for problems like:
+
+    Factorial Calculation.
+    Tower of Hanoi.
+    Generating Permutations and Combinations.
+
+12. Randomized Algorithms
+
+Introduce probabilistic elements for optimization.
+
+    Randomized Quick Sort: Variant of quick sort.
+    Monte Carlo Algorithms: Useful for approximation.

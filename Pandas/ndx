@@ -1,0 +1,65 @@
+Data Structures
+    Series: One-dimensional labeled arrays.
+    DataFrames: Two-dimensional labeled data structures (tables).
+
+
+Data Loading
+    Read data from files: .csv, .xlsx, .json, databases, etc.
+    Save data back to various formats.
+    Use read_csv(), read_excel(), and related functions.
+
+
+Indexing and Selection
+    Access rows and columns using loc[], iloc[], and slicing.
+    Boolean indexing for conditional selection.
+
+
+Data Cleaning
+    Handling missing data: dropna(), fillna().
+    Removing duplicates: drop_duplicates().
+    Data type conversion: astype().
+    String operations: str accessor for text manipulation.
+    Renaming and reordering: rename(), reorder_levels().
+
+
+Data Transformation
+    Basic Operations: Arithmetic and statistical methods (mean(), sum(), etc.).
+    Apply and Lambda: Use apply() for custom functions.
+    GroupBy:
+        Aggregations: groupby().sum() or groupby().mean().
+        Splitting, applying, and combining data.
+    Pivot Tables and Crosstabs: Create summaries.
+    Reshaping:
+        Melting and pivoting with melt() and pivot().
+        Merging, joining, and concatenation.
+
+
+Exploratory Data Analysis (EDA)
+    Basic insights: .info(), .describe(), .head(), .tail().
+    Sorting data: sort_values(), sort_index().
+    Unique values and counts: unique(), value_counts().
+
+
+Visualization
+    Built-in plotting: plot().
+    Integration with Matplotlib and Seaborn for advanced visualizations.
+
+
+Performance Optimization
+    Work with large datasets:
+        Use chunk_size for large files.
+        Explore Dask for distributed computing if needed.
+    Vectorized operations for efficiency.
+    Reduce memory usage by downcasting data types.
+
+
+Advanced Techniques
+    Time Series: pd.date_range(), resampling, and rolling windows.
+    MultiIndexing: Hierarchical indices for complex datasets.
+    Custom Functions: Writing custom transformers for pipelines.
+
+
+Real-World Practice
+    Analyze real-world datasets like weather, stock prices, or sales.
+    Participate in Kaggle challenges.
+    Practice debugging and profiling Pandas code.
