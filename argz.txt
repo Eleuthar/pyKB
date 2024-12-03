@@ -1,4 +1,13 @@
-parser = argparse.ArgumentParser()
+class CustomArgParser(argparse.ArgumentParser):
+    def error(self, message):
+        self.print_usage()
+        print('Fisierul Excel trebuie sa fie in acelasi director cu scriptul.\n' + \
+        'Executati scriptul astfel: python REG.py <numele fisierului excel>')
+        exit(2)
+
+parser = CustomArgParser(description="Example script with custom error handling")
+#parser = argparse.ArgumentParser()
+
 parser.add_argument(
     "xx", type=str, 
     help='Fisierul Excel trebuie sa fie in acelasi director cu scriptul.\n' + \
