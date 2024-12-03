@@ -1,4 +1,7 @@
 parser = argparse.ArgumentParser()
-parser.add_argument("-s", "--source_path", type=str, help="The source directory that needs to be replicated")
+parser.add_argument(
+    "xx", type=str, 
+    help='Fisierul Excel trebuie sa fie in acelasi director cu scriptul.\n' + \
+        'Executati scriptul astfel: python REG.py <numele fisierului excel>')
 argz = parser.parse_args()
-argz.<argName>
+xxpath = argz.xx
