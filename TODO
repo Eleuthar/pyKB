@@ -1,49 +1,20 @@
-filter_backends = (DjangoFilterBackend, OrderingFilter,)
-
-viewset
-	ModelViewSet
-	serializer_class X detail_serializer_class
-
-select_related and prefetch_related
-
-ordering_fields
-
-
+https://docs.quantifiedcode.com/python-anti-patterns/index.html
 
 https://www.youtube.com/watch?v=pTB30aXS77U
 	\\ SOLID principles
 	
-https://www.youtube.com/watch?v=ftmdDlwMwwQ
-	\\ async web crawler
-	
-https://www.youtube.com/watch?v=Z3r6JEnRGvE
-	\\ weakref
-	
-https://www.youtube.com/watch?v=yWzMiaqnpkI&t=12s
-	\\ Metaclasses
-	
-https://www.youtube.com/watch?v=CvQ7e6yUtnw&t=413s
-	\\ dataclass
-	
 https://www.youtube.com/watch?v=x58W9A2lnQc&t=57s
 	\\ numba
-	
 
 numpy
-numba
-collections
-typing
-
-Dependency injection
 pandas
+Dependency injection
 DASH
 SNOWFLAKE \ SPARK \ AIRFLOW
-statistical models
-Knowledge of user authentication and authorization between multiple system, server and environments
 Understanding of fundamental design principles behind a scalable application
-
-https://docs.quantifiedcode.com/python-anti-patterns/index.html
-
+statistical models
 https://cloud.google.com/vertex-ai/docs/start/introduction-unified-platform
 https://github.com/GoogleCloudPlatform/training-data-analyst/tree/master/self-paced-labs/vertex-ai
 https://github.com/GoogleCloudPlatform/training-data-analyst
+
+
