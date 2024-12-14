@@ -1,9 +1,6 @@
 from urllib import request
-import openpyxl
-from openpyxl.styles import Alignment
+from openpyxl import load_workbook
 import argparse
-from re import match
-from pdb import set_trace
 
 
 class CustomArgParser(argparse.ArgumentParser):
@@ -36,19 +33,19 @@ def prompt_unit_price(frame, prod):
     while True:
         unit = input('Modificati pret unitar?\nApasati "Enter" pentru "DA"\nApasati "Esc" urmat de "Enter" pt "NU" ')
         if unit == '':
-            menu = edit_price(frame, prod, opt)
-            if menu in opt:
+            item = edit_price(frame, prod, opt)
+            if item in opt:
                 while True:
                     pret = input('Introduceti pret unitar nou cu zecimale separate de ",": ')
-                try:
-                    if pret[-3] == ',':
-                        pret = pret.replace('.', '').replace(',','.')
-                        frame['E'][9+menu].value = float(pret)
-                        break
-                    else:
+                    # expected xxx,xx
+                    if ',' not in pret or ('.' in pret and (pret.index('.') > pret.index(','))):
+                        print('Preturile unitare nu sunt formatate corespunzator')
                         continue
-                except:
-                    pret = input(f'Valoare invalida: {pret}.\n')
+                    elif '.' in pret and (pret.index('.') < pret.index(',')):
+                        pret = pret.replace('.', '').replace(',','.')
+                    else:
+                        frame['E'][9+item].value = float(pret.replace(',','.'))
+                        break
         else:
             break
 
@@ -105,9 +102,12 @@ def initialize(frame):
                 tgt.value = 0
             # unit price
             if q == 'E':
-                tgt.value = '%:.2f' % str(tgt.value)
-                if ',' in tgt.value:
-                    tgt.value = float(tgt.value.replace(",", "."))
+                if tgt.value[-3] == ',':
+                    tgt.value = float(tgt.value.replace('.', '').replace(',','.'))
+                else:
+                    print('Preturile unitare nu sunt formatate corespunzator')
+                    exit()
+                
             # move I quantity to C & reset I
             if q == 'I':
                 if tgt.value in (None, ''):
@@ -131,7 +131,7 @@ parser = CustomArgParser(description="Example script with custom error handling"
 parser.add_argument("file", type=str)
 argz = parser.parse_args()
 xxpath = argz.file
-workbook = openpyxl.load_workbook(xxpath, data_only=True)
+workbook = load_workbook(xxpath, data_only=True)
 
 prod = {
     1: {'prod':'Lumanari 100B', '$': 0},
