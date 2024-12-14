@@ -2,6 +2,7 @@ from urllib import request
 import openpyxl
 from openpyxl.styles import Alignment
 import argparse
+from re import match
 from pdb import set_trace
 
 
@@ -13,12 +14,11 @@ class CustomArgParser(argparse.ArgumentParser):
         exit(2)
 
 
-def menu_input(frame, prod, opt):
+def edit_price(frame, prod, opt):
     print('Pret unitar curent\n')
     
     while True:
         for x in range(1, 8):
-            set_trace() # <<<<<<<<<<<<<<<<<<<<<<<<<<
             pret = float(frame['E'][x+9].value)
             prod[x]['$'] = pret
             print(f"{x}. {prod[x]['prod']} = {pret:.2f}")
@@ -31,19 +31,22 @@ def menu_input(frame, prod, opt):
             print(f'Optiunea introdusa >> {menu} << este invalida\n')
 
 
-def prompt_unit_price(x, frame, prod):
+def prompt_unit_price(frame, prod):
     opt = [x for x in range(1,8)]
     while True:
         unit = input('Modificati pret unitar?\nApasati "Enter" pentru "DA"\nApasati "Esc" urmat de "Enter" pt "NU" ')
         if unit == '':
-            menu = menu_input(frame, prod, opt)
+            menu = edit_price(frame, prod, opt)
             if menu in opt:
                 while True:
                     pret = input('Introduceti pret unitar nou cu zecimale separate de ",": ')
                 try:
-                    pret = pret.replace(',','.')
-                    frame['E'][9+menu].value = float(pret)
-                    break
+                    if pret[-3] == ',':
+                        pret = pret.replace('.', '').replace(',','.')
+                        frame['E'][9+menu].value = float(pret)
+                        break
+                    else:
+                        continue
                 except:
                     pret = input(f'Valoare invalida: {pret}.\n')
         else:
@@ -53,7 +56,7 @@ def prompt_unit_price(x, frame, prod):
 # metoda temporara pt TRANSFER format fizic
 def paper_format_transfer(x, prod, frame, prev):
     added = 0
-    reg_quant = 'None'
+    quant = 0
     prod_name = prod[x-9]['prod']
     prod_quant =  prod[x-9]['$']
     prev_quant = prev[f'I{x}'].value
@@ -62,16 +65,20 @@ def paper_format_transfer(x, prod, frame, prev):
         prev_quant = 0
     else:
         prev_quant = int(prev_quant)
-    
-    while reg_quant != '' or reg_quant.isnumeric(): 
-        reg_quant = input(f'\nCantitate {prod_name} registru vechi (stoc anterior = {prev_quant}) >> ')
-    
-    if reg_quant == '':
-        reg_quant = 0
-    else:
-        reg_quant = int(reg_quant)
-        added = reg_quant-prev_quant
 
+    while True:
+        quant = input(f'\nCantitate {prod_name} registru vechi (stoc anterior = {prev_quant}) >> ')
+        if quant in ('', '0'):
+            quant = 0
+            break
+        elif quant.isnumeric():
+            quant = int(quant)
+            if quant < prev_quant:
+                print('Cantitatea este mai mica decat stocul anterior')
+                continue
+            else:
+                added = int(quant)-prev_quant
+                break
     frame[f'B{x}'] = added
     frame[f'C{x}'] = prev_quant
     print(f"Stoc anterior = {prev_quant}, Adaugari = {added}")
@@ -81,7 +88,7 @@ def in_out(mode, row):
     # mode == 'B'||'G'
     # row == 10:16 
     param = {'B': 'Intrari', 'G': 'Iesiri'}
-    nir = None
+    nir = 'None'
     while not nir.isnumeric():
         nir = input(param[mode] + " " + frame[f'A{row}'].value + f": ")
         if nir is None or nir == '':
@@ -91,15 +98,15 @@ def in_out(mode, row):
     
 def initialize(frame):
     for x in range(10,17):
-        for q in ('B', 'C', 'E', 'F', 'G', 'H', 'I', 'J'):
+        for q in ('B','C','E','F','G','H','I','J'):
             tgt = frame[f'{q}{x}']
             # Reset to 0
             if q in ('B','C','F','G','H','J'):
                 tgt.value = 0
             # unit price
             if q == 'E':
-                tgt.value = str(tgt.value)
-                if tgt.value[-3] == ',':
+                tgt.value = '%:.2f' % str(tgt.value)
+                if ',' in tgt.value:
                     tgt.value = float(tgt.value.replace(",", "."))
             # move I quantity to C & reset I
             if q == 'I':
@@ -107,7 +114,7 @@ def initialize(frame):
                     tgt.value = 0
                 frame[f'C{x}'].value = tgt.value
                 tgt.value = 0
-                
+
 
  # clear all 0 cells before saving the worksheet
 def zero_to_none_or_float(frame):
@@ -141,6 +148,8 @@ while True:
     frame = workbook.copy_worksheet(prev)
     total_f = frame['F18']
     total_f.value = 0
+    total_h = frame['H18']
+    total_h.value = 0
     total_j = frame['J18']
     total_j.value = 0
     enter_year = input('An registru: ')
@@ -166,7 +175,7 @@ while True:
         
         # H \\ Valoare totala iesiri
         frame[f'H{x}'].value = float(frame[f'E{x}'].value) * float(frame[f'G{x}'].value)
-        
+        total_h.value += frame[f'H{x}'].value
         # I \\ Cantitate stoc ramas
         frame[f'I{x}'].value = (int(frame[f'B{x}'].value) + int(frame[f'C{x}'].value)) - int(frame[f'G{x}'].value)
         
