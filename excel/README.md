@@ -22,3 +22,10 @@ Observatii
     \\ Intrare eronata `candele tip 0` 220 vs 240
     \\ Intrare eronata `candele tip 4` 34 vs 36
 
+for x in range(10,17):
+    for q in ('E','F','H','J'):
+        tgt = frame[f'{q}{x}']
+        if tgt.value is not None and isinstance(tgt.value, str):
+            tgt.data_type='n'
+            tgt.number_format='#,##0.00'
+            tgt.value = float(tgt.value.replace(',','.'))

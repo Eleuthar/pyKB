@@ -1,4 +1,3 @@
-from urllib import request
 from openpyxl import load_workbook
 import argparse
 
@@ -11,41 +10,39 @@ class CustomArgParser(argparse.ArgumentParser):
         exit(2)
 
 
-def edit_price(frame, prod, opt):
-    print('Pret unitar curent\n')
-    
+def prompt_unit_price(frame, prod, opt):
+    print('\nPret unitar curent')    
     while True:
-        for x in range(1, 8):
-            pret = float(frame['E'][x+9].value)
-            prod[x]['$'] = pret
-            print(f"{x}. {prod[x]['prod']} = {pret:.2f}")
-        menu = input('Introduceti numar articol de modificat: ')
+        for x in opt:
+            pret = '%.2f' % frame[f'E{x+9}'].value
+            print(f"{x}. {prod[x]['prod']} = {pret.replace('.', ',')}")
+        item = input('Introduceti numar articol de modificat: ')
         try:
-            menu = int(menu)
-            if menu in opt:
-                return menu
+            item = int(item)
+            if item in opt:
+                return item
         except:
-            print(f'Optiunea introdusa >> {menu} << este invalida\n')
+            print(f'Optiunea introdusa >> {item} << este invalida\n')
 
 
-def prompt_unit_price(frame, prod):
+def edit_price(frame, prod):
     opt = [x for x in range(1,8)]
     while True:
         unit = input('Modificati pret unitar?\nApasati "Enter" pentru "DA"\nApasati "Esc" urmat de "Enter" pt "NU" ')
         if unit == '':
-            item = edit_price(frame, prod, opt)
-            if item in opt:
-                while True:
-                    pret = input('Introduceti pret unitar nou cu zecimale separate de ",": ')
-                    # expected xxx,xx
-                    if ',' not in pret or ('.' in pret and (pret.index('.') > pret.index(','))):
-                        print('Preturile unitare nu sunt formatate corespunzator')
-                        continue
-                    elif '.' in pret and (pret.index('.') < pret.index(',')):
-                        pret = pret.replace('.', '').replace(',','.')
-                    else:
-                        frame['E'][9+item].value = float(pret.replace(',','.'))
-                        break
+            item = prompt_unit_price(frame, prod, opt)
+            while True:
+                pret = input('Introduceti pret unitar nou cu zecimale separate de ",": ')
+                # expected xxx,xx
+                if ',' not in pret or ('.' in pret and (pret.index('.') > pret.index(','))):
+                    print('Preturile unitare nu sunt formatate corespunzator')
+                    continue
+                elif '.' in pret and (pret.index('.') < pret.index(',')):
+                    pret = pret.replace('.', '').replace(',','.')
+                else:
+                    prod[item]['$'] = float(pret.replace(',','.'))
+                    frame[f'E{9+item}'].value = prod[item]['$']
+                    break
         else:
             break
 
@@ -65,8 +62,8 @@ def paper_format_transfer(x, prod, frame, prev):
 
     while True:
         quant = input(f'\nCantitate {prod_name} registru vechi (stoc anterior = {prev_quant}) >> ')
-        if quant in ('', '0'):
-            quant = 0
+        if quant == '':
+            quant = prev_quant
             break
         elif quant.isnumeric():
             quant = int(quant)
@@ -99,15 +96,7 @@ def initialize(frame):
             tgt = frame[f'{q}{x}']
             # Reset to 0
             if q in ('B','C','F','G','H','J'):
-                tgt.value = 0
-            # unit price
-            if q == 'E':
-                if tgt.value[-3] == ',':
-                    tgt.value = float(tgt.value.replace('.', '').replace(',','.'))
-                else:
-                    print('Preturile unitare nu sunt formatate corespunzator')
-                    exit()
-                
+                tgt.value = 0                
             # move I quantity to C & reset I
             if q == 'I':
                 if tgt.value in (None, ''):
@@ -123,14 +112,18 @@ def zero_to_none_or_float(frame):
             tgt = frame[f'{q}{x}']
             if tgt.value in (0, '0'):
                 tgt.value = None
-            elif q in ('E','F','H','J') and tgt.value is not None:
-                tgt.value = ('%.2f' % tgt.value).replace('.', ',')
+            # elif q in ('E','F','H','J'):
+            #     if tgt.value is not None:
+            #         tgt.data_type='n'
+            #         tgt.number_format='#,##0.00'
+            #         tgt.value = float(tgt.value.replace(',','.'))
 
 
 parser = CustomArgParser(description="Example script with custom error handling")
 parser.add_argument("file", type=str)
 argz = parser.parse_args()
 xxpath = argz.file
+# xxpath='REG.xlsx'
 workbook = load_workbook(xxpath, data_only=True)
 
 prod = {
