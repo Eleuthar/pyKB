@@ -1,3 +1,4 @@
+from pdb import set_trace
 from openpyxl import load_workbook
 import argparse
 
@@ -32,7 +33,9 @@ def edit_price(frame, prod):
         if unit == '':
             item = prompt_unit_price(frame, prod, opt)
             while True:
-                pret = input('Introduceti pret unitar nou cu zecimale separate de ",": ')
+                pret = input('"Esc" + "Enter" pentru a reveni la meniu.\nIntroduceti pret unitar nou cu zecimale separate de ",": ')
+                if pret == '\x1b':
+                    break
                 # expected xxx,xx
                 if ',' not in pret or ('.' in pret and (pret.index('.') > pret.index(','))):
                     print('Preturile unitare nu sunt formatate corespunzator')
@@ -125,7 +128,6 @@ argz = parser.parse_args()
 xxpath = argz.file
 # xxpath='REG.xlsx'
 workbook = load_workbook(xxpath, data_only=True)
-
 prod = {
     1: {'prod':'Lumanari 100B', '$': 0},
     2: {'prod':'Lumanari C20', '$': 0},
@@ -135,7 +137,7 @@ prod = {
     6: {'prod':'Candele tip 3', '$': 0},
     7: {'prod':'Candele, tip 4', '$': 0}
 }
-
+enter_year = input('An registru: ')
 while True:
     prev = workbook.worksheets[-1]
     frame = workbook.copy_worksheet(prev)
@@ -145,12 +147,11 @@ while True:
     total_h.value = 0
     total_j = frame['J18']
     total_j.value = 0
-    enter_year = input('An registru: ')
     enter_dm = input('Zi + luna registru (ex. 12 DEC): ').upper()
     frame['F2'].value = f'DATA: {enter_dm} {enter_year}'
     frame.title = enter_dm
     initialize(frame)
-    prompt_unit_price(frame, prod)
+    edit_price(frame, prod)
 
     # B & G 10:16 in\out parser
     for x in range(10, 17):
