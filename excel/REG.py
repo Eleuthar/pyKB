@@ -11,6 +11,10 @@ class CustomArgParser(argparse.ArgumentParser):
         exit(2)
 
 
+def gen_rep(frame):
+    ...
+
+
 def prompt_unit_price(frame, prod, opt):
     print('\nPret unitar curent')    
     while True:

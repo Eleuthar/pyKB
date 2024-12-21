@@ -21,5 +21,3 @@ Observatii
 * 7 ian
     \\ Intrare eronata `candele tip 0` 220 vs 240
     \\ Intrare eronata `candele tip 4` 34 vs 36
-* 31 mar
-    \\ C20 ? 
