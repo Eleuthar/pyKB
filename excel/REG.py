@@ -29,19 +29,7 @@ class CustomArgParser(argparse.ArgumentParser):
 
 def gen_rep(workbook, frame):
     """executed upon weekly input"""
-    total = 0
-    rep = workbook.worksheets[0]
-    month = frame.title.split()[1]
-    # import current week data
-    for x in range(10,17):
-        # column letters for quantity & amount
-        quant, amount = qrep[month]
-        tgt_quant = frame[f'G{x}']
-        tgt_$ = frame[f'H{x}']
-        rep[f'{quant}{x}'].value += 0 if tgt_quant.value is None else tgt_quant.value
-        rep[f'{amount}{x}'].value += 0 if tgt_$.value is None else tgt_$.value
-        total += rep[f'{amount}{x}'].value
-    rep[f'{amount}23'].value = total
+
 
 
 def prompt_unit_price(frame, prod, opt):
@@ -191,9 +179,16 @@ while True:
     frame.title = enter_dm
     initialize(frame)
     edit_price(frame, prod)
-
+    
+    # general report
+    month_total = 0
+    report = workbook.worksheets[0]
+    month = frame.title.split()[1]
+    # column letters for quantity & amount
+    quant, amount = qrep[month]
+    
     # B & G 10:16 in\out parser
-    for x in range(10, 17):
+    for x in range(10, 17):        
         # comment below after migration from paper
         paper_format_transfer(x, prod, frame, prev)
         
@@ -203,18 +198,27 @@ while True:
         in_out('G', x)
 
         # F \\ Valoare totala intrari
-        frame[f'F{x}'].value = (float(frame[f'B{x}'].value) + float(frame[f'C{x}'].value)) * float(frame[f'E{x}'].value)
+        frame[f'F{x}'].value = (frame[f'B{x}'].value + frame[f'C{x}'].value) * frame[f'E{x}'].value
         total_f.value += frame[f'F{x}'].value
         
         # H \\ Valoare totala iesiri
-        frame[f'H{x}'].value = float(frame[f'E{x}'].value) * float(frame[f'G{x}'].value)
+        frame[f'H{x}'].value = frame[f'E{x}'].value * frame[f'G{x}'].value
         total_h.value += frame[f'H{x}'].value
+        
         # I \\ Cantitate stoc ramas
         frame[f'I{x}'].value = (int(frame[f'B{x}'].value) + int(frame[f'C{x}'].value)) - int(frame[f'G{x}'].value)
         
         # J \\ Valoare stoc ramas
         frame[f'J{x}'].value = float(frame[f'E{x}'].value) * float(frame[f'I{x}'].value)
         total_j.value += frame[f'J{x}'].value
+        
+        # general report
+        quant_rep = report[f'{quant}{x}']
+        amount_rep = report[f'{amount}{x}']
+        quant_rep.value += frame[f'G{x}'].value
+        amount_rep.value += frame[f'H{x}'].value        
+        month_total += report[f'{amount}{x}'].value
+        report[f'{amount}23'].value = month_total
     
     zero_to_none_or_float(frame)
     workbook.save(xxpath)
