@@ -1,7 +1,23 @@
 from pdb import set_trace
 from openpyxl import load_workbook
 import argparse
+from copy import copy
 
+
+qrep = {
+    'IAN': ['B','C'],
+    'FEB': ['D','E'],
+    'MAR': ['F','G'],
+    'APR': ['H','I'],
+    'MAI': ['J','K'],
+    'IUN': ['L','M'],
+    'IUL': ['N','O'],
+    'AUG': ['P','Q'],
+    'SEP': ['R','S'],
+    'OCT': ['T','U'],
+    'NOV': ['V','W'],
+    'DEC': ['X','Y']
+}
 
 class CustomArgParser(argparse.ArgumentParser):
     def error(self, message):
@@ -11,8 +27,21 @@ class CustomArgParser(argparse.ArgumentParser):
         exit(2)
 
 
-def gen_rep(frame):
-    ...
+def gen_rep(workbook, frame):
+    """executed upon weekly input"""
+    total = 0
+    rep = workbook.worksheets[0]
+    month = frame.title.split()[1]
+    # import current week data
+    for x in range(10,17):
+        # column letters for quantity & amount
+        quant, amount = qrep[month]
+        tgt_quant = frame[f'G{x}']
+        tgt_$ = frame[f'H{x}']
+        rep[f'{quant}{x}'].value += 0 if tgt_quant.value is None else tgt_quant.value
+        rep[f'{amount}{x}'].value += 0 if tgt_$.value is None else tgt_$.value
+        total += rep[f'{amount}{x}'].value
+    rep[f'{amount}23'].value = total
 
 
 def prompt_unit_price(frame, prod, opt):
@@ -31,7 +60,7 @@ def prompt_unit_price(frame, prod, opt):
 
 
 def edit_price(frame, prod):
-    opt = [x for x in range(1,8)]
+    opt = [x for x in range(1,12)]
     while True:
         unit = input('Modificati pret unitar?\nApasati "Enter" pentru "DA"\nApasati "Esc" urmat de "Enter" pt "NU" ')
         if unit == '':
@@ -139,7 +168,13 @@ prod = {
     4: {'prod':'Candele tip 1', '$': 0},
     5: {'prod':'Candele tip 2', '$': 0},
     6: {'prod':'Candele tip 3', '$': 0},
-    7: {'prod':'Candele, tip 4', '$': 0}
+    7: {'prod':'Candele tip 4', '$': 0},
+    8: {'prod':'COLPORTAJ vin rosu', '$': 0},
+    9: {'prod':'COLPORTAJ vin alb', '$': 0},
+    10: {'prod':'COLPORTAJ vin "Via Domnului"', '$': 0},
+    11: {'prod':'COLPORTAJ calendar AG', '$': 0},
+    12: {'prod':'COLPORTAJ calendar foi', '$': 0},
+    13: {'prod':'COLPORTAJ bani', '$': 0}
 }
 enter_year = input('An registru: ')
 while True:
