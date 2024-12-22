@@ -1,7 +1,5 @@
-from pdb import set_trace
 from openpyxl import load_workbook
 import argparse
-from copy import copy
 
 
 qrep = {
@@ -25,11 +23,6 @@ class CustomArgParser(argparse.ArgumentParser):
         print('Fisierul Excel trebuie sa fie in acelasi director cu scriptul.\n' + \
         'Executati scriptul astfel: python REG.py <numele fisierului excel>')
         exit(2)
-
-
-def gen_rep(workbook, frame):
-    """executed upon weekly input"""
-
 
 
 def prompt_unit_price(frame, prod, opt):
@@ -104,7 +97,7 @@ def paper_format_transfer(x, prod, frame, prev):
 
 def in_out(mode, row):
     # mode == 'B'||'G'
-    # row == 10:16 
+    # row == 10:16 \\ 20
     param = {'B': 'Intrari', 'G': 'Iesiri'}
     nir = 'None'
     while not nir.isnumeric():
@@ -174,21 +167,23 @@ while True:
     total_h.value = 0
     total_j = frame['J18']
     total_j.value = 0
-    enter_dm = input('Zi + luna registru (ex. 12 DEC): ').upper()
+    enter_dm = 'x z'
+    while enter_dm.split()[1] not in qrep.keys():
+        enter_dm = input('Zi + luna registru (ex. 12 DEC): ').upper()
     frame['F2'].value = f'DATA: {enter_dm} {enter_year}'
     frame.title = enter_dm
     initialize(frame)
     edit_price(frame, prod)
     
     # general report
-    month_total = 0
     report = workbook.worksheets[0]
     month = frame.title.split()[1]
     # column letters for quantity & amount
     quant, amount = qrep[month]
     
     # B & G 10:16 in\out parser
-    for x in range(10, 17):        
+    for x in range(10, 17):
+        total = 0    
         # comment below after migration from paper
         paper_format_transfer(x, prod, frame, prev)
         
@@ -206,19 +201,19 @@ while True:
         total_h.value += frame[f'H{x}'].value
         
         # I \\ Cantitate stoc ramas
-        frame[f'I{x}'].value = (int(frame[f'B{x}'].value) + int(frame[f'C{x}'].value)) - int(frame[f'G{x}'].value)
+        frame[f'I{x}'].value = (frame[f'B{x}'].value + frame[f'C{x}'].value) - frame[f'G{x}'].value
         
         # J \\ Valoare stoc ramas
-        frame[f'J{x}'].value = float(frame[f'E{x}'].value) * float(frame[f'I{x}'].value)
+        frame[f'J{x}'].value = frame[f'E{x}'].value * frame[f'I{x}'].value
         total_j.value += frame[f'J{x}'].value
         
         # general report
         quant_rep = report[f'{quant}{x}']
         amount_rep = report[f'{amount}{x}']
         quant_rep.value += frame[f'G{x}'].value
-        amount_rep.value += frame[f'H{x}'].value        
-        month_total += report[f'{amount}{x}'].value
-        report[f'{amount}23'].value = month_total
+        amount_rep.value += frame[f'H{x}'].value
+        total += amount_rep.value
+        report[f'{amount}{23}'].value += total
     
     zero_to_none_or_float(frame)
     workbook.save(xxpath)

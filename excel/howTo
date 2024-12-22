@@ -1,4 +1,5 @@
 # insert row & duplicate previous
+from copy import copy
 workbook = load_workbook(xxpath, data_only=True)
 for frame in workbook.worksheets[2:]:
     frame.column_dimensions['A'].width = 27
@@ -15,9 +16,43 @@ for frame in workbook.worksheets[2:]:
     frame['A18'].value = 'COLPORTAJ vin alb'
     frame['A19'].value = 'COLPORTAJ vin „Via Domnului”'
 
-   
-    
 
-adaugat buc in D10:D20 * sheet
-enrich menu
 
+report = workbook.worksheets[0]
+qz = [q for q in workbook.worksheets if q.title.split()[1] in ['IUL','AUG','SEP','OCT','NOV']]
+
+for frame in qz:
+    total_f = frame['F18']
+    total_f.value = 0
+    total_h = frame['H18']
+    total_h.value = 0
+    total_j = frame['J18']
+    total_j.value = 0
+    for month in ['IUL','AUG','SEP','OCT','NOV']:
+        for x in range(10,17):
+            for q in ('B','C','E','F','G','H','I','J'):
+                tgt = frame[f'{q}{x}']
+                if tgt.value is None:
+                    tgt.value = 0         
+        quant, amount = qrep[month]
+        # B & G 10:16 in\out parser
+        for x in range(10, 17):
+            total = 0    
+            # F \\ Valoare totala intrari
+            frame[f'F{x}'].value = (frame[f'B{x}'].value + frame[f'C{x}'].value) * frame[f'E{x}'].value
+            total_f.value += frame[f'F{x}'].value            
+            # H \\ Valoare totala iesiri
+            frame[f'H{x}'].value = frame[f'E{x}'].value * frame[f'G{x}'].value
+            total_h.value += frame[f'H{x}'].value            
+            # I \\ Cantitate stoc ramas
+            frame[f'I{x}'].value = (frame[f'B{x}'].value + frame[f'C{x}'].value) - frame[f'G{x}'].value            
+            # J \\ Valoare stoc ramas
+            frame[f'J{x}'].value = frame[f'E{x}'].value * frame[f'I{x}'].value
+            total_j.value += frame[f'J{x}'].value            
+            # general report
+            quant_rep = report[f'{quant}{x}']
+            amount_rep = report[f'{amount}{x}']
+            quant_rep.value += frame[f'G{x}'].value
+            amount_rep.value += frame[f'H{x}'].value
+            total += amount_rep.value
+            report[f'{amount}{23}'].value += total

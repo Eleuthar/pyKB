@@ -1,6 +1,6 @@
 {
     "workbench.colorTheme": "Firefox Dark",
-    "editor.fontSize": 13,
+    "editor.fontSize": 12,
     "workbench.colorCustomizations": {
         // 45d4ff
         "editor.foreground": "#45d4ff",
