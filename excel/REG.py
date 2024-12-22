@@ -161,11 +161,11 @@ enter_year = input('An registru: ')
 while True:
     prev = workbook.worksheets[-1]
     frame = workbook.copy_worksheet(prev)
-    total_f = frame['F18']
+    total_f = frame['F23']
     total_f.value = 0
-    total_h = frame['H18']
+    total_h = frame['H23']
     total_h.value = 0
-    total_j = frame['J18']
+    total_j = frame['J23']
     total_j.value = 0
     enter_dm = 'x z'
     while enter_dm.split()[1] not in qrep.keys():
@@ -183,7 +183,6 @@ while True:
     
     # B & G 10:16 in\out parser
     for x in range(10, 17):
-        total = 0    
         # comment below after migration from paper
         paper_format_transfer(x, prod, frame, prev)
         
@@ -212,8 +211,8 @@ while True:
         amount_rep = report[f'{amount}{x}']
         quant_rep.value += frame[f'G{x}'].value
         amount_rep.value += frame[f'H{x}'].value
-        total += amount_rep.value
-        report[f'{amount}{23}'].value += total
+
+    report[f'{amount}23'].value += total_h.value
     
     zero_to_none_or_float(frame)
     workbook.save(xxpath)
