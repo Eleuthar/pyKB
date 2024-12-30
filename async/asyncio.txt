@@ -1,29 +1,27 @@
 # dedicated async libz: aiofiles, umongo, asyncpg (postgres), asyncio-redis
 
 
-
 OVERVIEW
 ``````````
-1. Define async function (coroutine)
-2. loop = asyncio.get_event_loop()
-3. task_obj = loop.create_task(some_coroutine(*arg, **kwarg))
-4. loop.run_until_complete(task_obj)
-	4.1 task_obj.cancel() -> CancelledError 
-5. loop.close()
-
-
-
-Coroutines 
-```````````
 * use async libs for full async effect
 * prime via 'next()', allow execution to advance to 'yield' expression
 * send values to coroutine via 'send()'
 * consume values sent to them via '(yield)'
 * can suspend and resume execution
 * close it via 'close()'
+* create_task
+    \\ return task - a handle over the coroutine execution; can cancel
+* gather
+    \\ wait for all tasks to complete
+    \\ return the results of the spawned coroutines
+    \\ cancel all tasks in one "cancel()" command
+    \\ Stops execution if one coroutine raises an error ?
 
 
-# define coroutine until Py 3.5
+
+Define coroutine
+``````````````````
+# until Py 3.5
 @asyncio.coroutine
 def ex_coro():
 	yield from fun()
@@ -33,7 +31,9 @@ async def ex_coroutine():
 	await fun()
 
 
-# turn generator into coroutine
+
+Turn generator into coroutine
+``````````````````````````````
 def grep(pattern):
 	print('Looking for ', pattern)
 	while True:
@@ -50,12 +50,19 @@ grepper.close()
 
 
 
+Runner
+`````````
+loop = asyncio.get_event_loop()
+task_obj = loop.create_task(some_coroutine(*arg, **kwarg))
+loop.run_until_complete(task_obj)
+	# can `task_obj.cancel()` -> CancelledError 
+loop.close()
+
+
+
 Scheduling calls
 ````````````````
 * import functools to force asyncio to receive kwarg for stopping the loop
-
-# call infinite loop
-loop.run_forever()
 
 loop.call_soon(functools.partial(function_name, *arg, **kwarg))
 loop.call_soon_threadsafe(function_name, *arg)
