@@ -9,34 +9,22 @@ def hello():
 
 
 OR WITHOUT DECORATOR
-
-
 app.add_url_rule('rule', 'endpoint', function)
 
 
-
-
 EXAMPLE #2
-~~~~~~~~~~~~~~~~~~~ 
-@app.route('/home/<VARIABLE>')
-	
-	OR !!!
-
+~~~~~~~~~~~~~~~~~~~
 @app.route('/home/<DATATYPE:VARIABLE>')
 
 
 def home(VARIABLE):
 	return 'Greetingz, ' + name
-
 	\\ use variable in rule parameter
 	\\ default datatype is string
 
 
-
-
 DYNAMIC URL BUILDING
 ~~~~~~~~~~~~~~~~~~~~~~~~
-
 @app.route('/uzr/<name>')
 def uzr(name):
 
