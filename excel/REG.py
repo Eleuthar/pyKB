@@ -2,6 +2,10 @@ from openpyxl import load_workbook
 import argparse
 
 
+# row number starting inventory
+ITEM_OFFSET = 9
+# general report labels: 
+# cantitate in, total in, cantitate out, total out, cantitate stoc, total stoc
 qrep = {
     'IAN': ['B','C'],
     'FEB': ['D','E'],
@@ -29,7 +33,7 @@ def prompt_unit_price(frame, prod, opt):
     print('\nPret unitar curent')    
     while True:
         for x in opt:
-            pret = '%.2f' % frame[f'E{x+9}'].value
+            pret = '%.2f' % frame[f'E{x+ITEM_OFFSET}'].value
             print(f"{x}. {prod[x]['prod']} = {pret.replace('.', ',')}")
         item = input('Introduceti numar articol de modificat: ')
         try:
@@ -58,7 +62,7 @@ def edit_price(frame, prod):
                     pret = pret.replace('.', '').replace(',','.')
                 else:
                     prod[item]['$'] = float(pret.replace(',','.'))
-                    frame[f'E{9+item}'].value = prod[item]['$']
+                    frame[f'E{ITEM_OFFSET+item}'].value = prod[item]['$']
                     break
         else:
             break
@@ -68,8 +72,8 @@ def edit_price(frame, prod):
 def paper_format_transfer(x, prod, frame, prev):
     added = 0
     quant = 0
-    prod_name = prod[x-9]['prod']
-    prod_quant =  prod[x-9]['$']
+    prod_name = prod[x-ITEM_OFFSET]['prod']
+    prod_quant =  prod[x-ITEM_OFFSET]['$']
     prev_quant = prev[f'I{x}'].value
 
     if prev_quant is None:
@@ -97,7 +101,7 @@ def paper_format_transfer(x, prod, frame, prev):
 
 def in_out(mode, row):
     # mode == 'B'||'G'
-    # row == 10:16 \\ 20
+    # row == 10:16
     param = {'B': 'Intrari', 'G': 'Iesiri'}
     nir = 'None'
     while not nir.isnumeric():
@@ -149,23 +153,17 @@ prod = {
     4: {'prod':'Candele tip 1', '$': 0},
     5: {'prod':'Candele tip 2', '$': 0},
     6: {'prod':'Candele tip 3', '$': 0},
-    7: {'prod':'Candele tip 4', '$': 0},
-    8: {'prod':'COLPORTAJ vin rosu', '$': 0},
-    9: {'prod':'COLPORTAJ vin alb', '$': 0},
-    10: {'prod':'COLPORTAJ vin "Via Domnului"', '$': 0},
-    11: {'prod':'COLPORTAJ calendar AG', '$': 0},
-    12: {'prod':'COLPORTAJ calendar foi', '$': 0},
-    13: {'prod':'COLPORTAJ bani', '$': 0}
+    7: {'prod':'Candele tip 4', '$': 0}
 }
 enter_year = input('An registru: ')
 while True:
     prev = workbook.worksheets[-1]
     frame = workbook.copy_worksheet(prev)
-    total_f = frame['F23']
+    total_f = frame['F17']
     total_f.value = 0
-    total_h = frame['H23']
+    total_h = frame['H17']
     total_h.value = 0
-    total_j = frame['J23']
+    total_j = frame['J17']
     total_j.value = 0
     enter_dm = 'x z'
     while enter_dm.split()[1] not in qrep.keys():
@@ -184,11 +182,11 @@ while True:
     # B & G 10:16 in\out parser
     for x in range(10, 17):
         # comment below after migration from paper
-        paper_format_transfer(x, prod, frame, prev)
+        # paper_format_transfer(x, prod, frame, prev)
         
         # regular flow
         # uncomment below after migration from paper where "Adaugari" is missing
-        # in_out('B', x)
+        in_out('B', x)
         in_out('G', x)
 
         # F \\ Valoare totala intrari
@@ -212,10 +210,11 @@ while True:
         quant_rep.value += frame[f'G{x}'].value
         amount_rep.value += frame[f'H{x}'].value
 
-    report[f'{amount}23'].value += total_h.value
+    report[f'{amount}17'].value += total_h.value
     
     zero_to_none_or_float(frame)
     workbook.save(xxpath)
     nxt = input('Adaugati registru nou?\nApasati "Enter" pentru a continua\nApasati "Esc" urmat de "Enter" pt a iesi')
     if nxt != '':
         break
+    
