@@ -12,9 +12,6 @@ for frame in workbook.worksheets[2:]:
             tgt.font = copy(orig.font)
             tgt.border = copy(orig.border)
             tgt.alignment = copy(orig.alignment)
-    frame['A17'].value = 'COLPORTAJ vin roșu'
-    frame['A18'].value = 'COLPORTAJ vin alb'
-    frame['A19'].value = 'COLPORTAJ vin „Via Domnului”'
 
 
 """
@@ -59,3 +56,20 @@ for frame in qz:
 
 workbook.save(xxpath)
 workbook.close()
+
+
+# merge cell
+
+align = q.cell(8,2).alignment
+font =  q.cell(8,2).font
+border = q.cell(8,2).border
+mark_chr = 'B'
+mark_col = 2
+for month in qrep:
+    prod[month] = []
+    for j in range(5):
+        mark=chr(mark+j)
+        prod[month].append(mark)
+    q.insert_cols(mark_col+5, 5)
+    q.merge_cells(start_row=x, start_column=1, end_row=x, end_column=4, value=month)
+    
