@@ -2,24 +2,7 @@ from openpyxl import load_workbook
 import argparse
 
 
-# row number starting inventory
 ITEM_OFFSET = 9
-# general report labels: 
-# cantitate in, total in, cantitate out, total out, cantitate stoc, total stoc
-qrep = {
-    'IAN': ['B','C'],
-    'FEB': ['D','E'],
-    'MAR': ['F','G'],
-    'APR': ['H','I'],
-    'MAI': ['J','K'],
-    'IUN': ['L','M'],
-    'IUL': ['N','O'],
-    'AUG': ['P','Q'],
-    'SEP': ['R','S'],
-    'OCT': ['T','U'],
-    'NOV': ['V','W'],
-    'DEC': ['X','Y']
-}
 
 class CustomArgParser(argparse.ArgumentParser):
     def error(self, message):
@@ -47,7 +30,7 @@ def prompt_unit_price(frame, prod, opt):
 def edit_price(frame, prod):
     opt = [x for x in range(1,12)]
     while True:
-        unit = input('Modificati pret unitar?\nApasati "Enter" pentru "DA"\nApasati "Esc" urmat de "Enter" pt "NU" ')
+        unit = input('Modificati pret unitar?\nApasati "Enter" pentru "DA"\nApasati "N" urmat de "Enter" pt "NU" ')
         if unit == '':
             item = prompt_unit_price(frame, prod, opt)
             while True:
@@ -69,7 +52,7 @@ def edit_price(frame, prod):
 
 
 # metoda temporara pt TRANSFER format fizic
-def paper_format_transfer(x, prod, frame, prev):
+def determine_input(x, prod, frame, prev):
     added = 0
     quant = 0
     prod_name = prod[x-ITEM_OFFSET]['prod']
@@ -108,7 +91,9 @@ def in_out(mode, row):
         nir = input(param[mode] + " " + frame[f'A{row}'].value + f": ")
         if nir is None or nir == '':
             nir = '0'
-    frame[f'{mode}{row}'].value = int(nir)
+    nir = int(nir)
+    frame[f'{mode}{row}'].value = nir
+    return nir
 
     
 def initialize(frame):
@@ -146,27 +131,47 @@ argz = parser.parse_args()
 xxpath = argz.file
 # xxpath='REG.xlsx'
 workbook = load_workbook(xxpath, data_only=True)
+# IAN-DEC = 8-79
+# intrare cantitate\total, iesire cantitate\total, stoc cantitate\total
 prod = {
-    1: {'prod':'Lumanari 100B', '$': 0},
-    2: {'prod':'Lumanari C20', '$': 0},
-    3: {'prod':'Candele tip 0', '$': 0},
-    4: {'prod':'Candele tip 1', '$': 0},
-    5: {'prod':'Candele tip 2', '$': 0},
-    6: {'prod':'Candele tip 3', '$': 0},
-    7: {'prod':'Candele tip 4', '$': 0}
+    1: {'prod':'Lumanari 100B', '$': 0, 'chr': 'D'},
+    2: {'prod':'Lumanari C20', '$': 0, 'chr': 'E'},
+    3: {'prod':'Candele tip 0', '$': 0, 'chr': 'F'},
+    4: {'prod':'Candele tip 1', '$': 0, 'chr': 'G'},
+    5: {'prod':'Candele tip 2', '$': 0, 'chr': 'H'},
+    6: {'prod':'Candele tip 3', '$': 0, 'chr': 'I'},
+    7: {'prod':'Candele tip 4', '$': 0, 'chr': 'J'}
+}
+# row number starting inventory
+
+# cantitate in, total in, cantitate out, total out, cantitate stoc, total stoc
+# IAN: 8, etc
+rep_ndx = {
+    'IAN': 8,
+    'FEB': 14,
+    'MAR': 20,
+    'APR': 26,
+    'MAI': 32,
+    'IUN': 38,
+    'IUL': 44,
+    'AUG': 50,
+    'SEP': 56,
+    'OCT': 62,
+    'NOV': 68,
+    'DEC': 74
 }
 enter_year = input('An registru: ')
 while True:
     prev = workbook.worksheets[-1]
     frame = workbook.copy_worksheet(prev)
-    total_f = frame['F17']
-    total_f.value = 0
-    total_h = frame['H17']
-    total_h.value = 0
-    total_j = frame['J17']
-    total_j.value = 0
+    amount_before = frame['F17']
+    amount_before.value = 0
+    month_total_out = frame['H17']
+    month_total_out.value = 0
+    amount_after = frame['J17']
+    amount_after.value = 0
     enter_dm = 'x z'
-    while enter_dm.split()[1] not in qrep.keys():
+    while enter_dm.split()[1] not in rep_ndx.keys():
         enter_dm = input('Zi + luna registru (ex. 12 DEC): ').upper()
     frame['F2'].value = f'DATA: {enter_dm} {enter_year}'
     frame.title = enter_dm
@@ -176,45 +181,56 @@ while True:
     # general report
     report = workbook.worksheets[0]
     month = frame.title.split()[1]
-    # column letters for quantity & amount
-    quant, amount = qrep[month]
-    
     # B & G 10:16 in\out parser
     for x in range(10, 17):
-        # comment below after migration from paper
-        # paper_format_transfer(x, prod, frame, prev)
+        # alternative to in_out() if entered amount is to be determined
+        # determine_input (x, prod, frame, prev)
         
-        # regular flow
-        # uncomment below after migration from paper where "Adaugari" is missing
-        in_out('B', x)
-        in_out('G', x)
+        # valoare totala stoc nou intrat
+        quant_in = in_out('B', x)
+        amount_in = quant_in * frame[f'E{x}'].value
+        
+        quant_out = in_out('G', x)
+        amount_out = quant_out * frame[f'E{x}'].value
 
-        # F \\ Valoare totala intrari
-        frame[f'F{x}'].value = (frame[f'B{x}'].value + frame[f'C{x}'].value) * frame[f'E{x}'].value
-        total_f.value += frame[f'F{x}'].value
+        # F \\ Valoare totala intrari + stoc curent
+        amount_stock = (frame[f'B{x}'].value + frame[f'C{x}'].value) * frame[f'E{x}'].value
+        frame[f'F{x}'].value = amount_stock
         
         # H \\ Valoare totala iesiri
-        frame[f'H{x}'].value = frame[f'E{x}'].value * frame[f'G{x}'].value
-        total_h.value += frame[f'H{x}'].value
+        frame[f'H{x}'].value = amount_out
         
         # I \\ Cantitate stoc ramas
-        frame[f'I{x}'].value = (frame[f'B{x}'].value + frame[f'C{x}'].value) - frame[f'G{x}'].value
+        quant_stock = (frame[f'B{x}'].value + frame[f'C{x}'].value) - frame[f'G{x}'].value
+        frame[f'I{x}'].value = quant_stock
         
         # J \\ Valoare stoc ramas
-        frame[f'J{x}'].value = frame[f'E{x}'].value * frame[f'I{x}'].value
-        total_j.value += frame[f'J{x}'].value
+        amount_stock -= amount_out
+        frame[f'J{x}'].value = amount_stock
         
         # general report
-        quant_rep = report[f'{quant}{x}']
-        amount_rep = report[f'{amount}{x}']
-        quant_rep.value += frame[f'G{x}'].value
-        amount_rep.value += frame[f'H{x}'].value
-
-    report[f'{amount}17'].value += total_h.value
+        row = rep_ndx[month]
+        prod_chr = prod[x-ITEM_OFFSET]['chr']
+        rep_mapping = {
+            'quant_in': [report[f'{prod_chr}{row}'], quant_in],
+            'amount_in': [report[f'{prod_chr}{row+1}'], amount_in],
+            'quant_out': [report[f'{prod_chr}{row+2}'], quant_out],
+            'amount_out': [report[f'{prod_chr}{row+3}'], amount_out],
+            'quant_stock': [report[f'{prod_chr}{row+4}'], quant_stock],
+            'amount_stock': [report[f'{prod_chr}{row+5}'], amount_stock],
+            'general_quant_in': [report[f'{prod_chr}80'], quant_in],
+            'general_amount_in': [report[f'{prod_chr}81'], amount_in],
+            'general_quant_out': [report[f'{prod_chr}82'], quant_out],
+            'general_amount_out': [report[f'{prod_chr}83'], amount_out]
+        }
+        for rep_cell in rep_mapping.values():
+            if rep_cell[0].value is None:
+                rep_cell[0].value = 0
+            rep_cell[0].value += rep_cell[1]
     
     zero_to_none_or_float(frame)
     workbook.save(xxpath)
-    nxt = input('Adaugati registru nou?\nApasati "Enter" pentru a continua\nApasati "Esc" urmat de "Enter" pt a iesi')
-    if nxt != '':
+    nxt = input('Adaugati registru nou?\nApasati "Enter" pentru a continua\nApasati "N" urmat de "Enter" pt a iesi: ')
+    if nxt not in ('', None):
         break
     

@@ -13,63 +13,18 @@ for frame in workbook.worksheets[2:]:
             tgt.border = copy(orig.border)
             tgt.alignment = copy(orig.alignment)
 
-
-"""
-SET F \ H \ J 23 ['IUL','AUG','SEP','OCT','NOV']
 tgt.data_type='n'
 tgt.number_format='#,##0.00'
 tgt.value = 0
-"""
+
 from openpyxl import load_workbook
 xxpath='REG.xlsx'
+# xxpth = 'Documents/pyKB/excel/REG.xlsx'
 workbook = load_workbook(xxpath, data_only=True)
-report = workbook.worksheets[0]
-qz = [q for q in workbook.worksheets if q.title.split()[1] in ['IUL','AUG','SEP','OCT','NOV']]
-
-for frame in qz:
-    total_f = frame['F23']
-    total_f.value = 0
-    total_h = frame['H23']
-    total_h.value = 0
-    total_j = frame['J23']
-    total_j.value = 0
-    # initialize(frame)
-    month = frame.title.split()[1]
-    quant, amount = qrep[month]
-    # B & G 10:16 in\out parser
-    for x in range(10, 17):
-        # F \\ Valoare totala intrari
-        total_f.value += frame[f'F{x}'].value                 
-        # H \\ Valoare totala iesiri
-        total_h.value += frame[f'H{x}'].value
-        total_j.value += frame[f'J{x}'].value
-        # <<<<<<<<<<<<<<
-        # general report
-        # get current values from general report 
-        rep_quant = report[f'{quant}{x}']
-        rep_amount = report[f'{amount}{x}']        
-        # add weekly registry value to general report 
-        rep_quant.value += frame[f'G{x}'].value
-        rep_amount.value += frame[f'H{x}'].value        
-        # add weekly total to general report total
-    report[f'{amount}23'].value += total_h.value
-
-workbook.save(xxpath)
-workbook.close()
-
-
-# merge cell
-
-align = q.cell(8,2).alignment
-font =  q.cell(8,2).font
-border = q.cell(8,2).border
-mark_chr = 'B'
-mark_col = 2
-for month in qrep:
-    prod[month] = []
-    for j in range(5):
-        mark=chr(mark+j)
-        prod[month].append(mark)
-    q.insert_cols(mark_col+5, 5)
-    q.merge_cells(start_row=x, start_column=1, end_row=x, end_column=4, value=month)
+align = orig.cell(8,2).alignment
+font =  orig.cell(8,2).font
+border = orig.cell(8,2).border
+qz.insert_rows(9,1)
+qz.merge_cells(start_row=8, start_column=mark_col-5, end_row=8, end_column=mark_col) 
+qz.cell(8, mark_col-5).value=month
     
