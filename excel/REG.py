@@ -1,6 +1,6 @@
 from openpyxl import load_workbook
 import argparse
-
+from pdb import set_trace
 
 ITEM_OFFSET = 9
 
@@ -28,13 +28,13 @@ def prompt_unit_price(frame, prod, opt):
 
 
 def edit_price(frame, prod):
-    opt = [x for x in range(1,12)]
+    opt = [x for x in range(1,8)]
     while True:
         unit = input('Modificati pret unitar?\nApasati "Enter" pentru "DA"\nApasati "N" urmat de "Enter" pt "NU" ')
         if unit == '':
             item = prompt_unit_price(frame, prod, opt)
             while True:
-                pret = input('"Esc" + "Enter" pentru a reveni la meniu.\nIntroduceti pret unitar nou cu zecimale separate de ",": ')
+                pret = input('"N" urmat de "Enter" pentru a reveni la meniu.\nIntroduceti pret unitar nou cu zecimale separate de ",": ')
                 if pret == '\x1b':
                     break
                 # expected xxx,xx
@@ -86,11 +86,17 @@ def in_out(mode, row):
     # mode == 'B'||'G'
     # row == 10:16
     param = {'B': 'Intrari', 'G': 'Iesiri'}
-    nir = 'None'
+    prev_quant = prev[f'I{x}'].value
+    nir = input(param[mode] + " " + frame[f'A{row}'].value + f": ")
+    if nir in [None, '']:
+        return 0
     while not nir.isnumeric():
-        nir = input(param[mode] + " " + frame[f'A{row}'].value + f": ")
-        if nir is None or nir == '':
-            nir = '0'
+        nir = input("Numar invalid! Introduceti din nou " + \
+            param[mode] + " " + frame[f'A{row}'].value + f": "
+        )
+        if nir in [None, '']:
+            frame[f'{mode}{row}'].value = 0
+            return 0
     nir = int(nir)
     frame[f'{mode}{row}'].value = nir
     return nir
@@ -181,6 +187,9 @@ while True:
     # general report
     report = workbook.worksheets[0]
     month = frame.title.split()[1]
+    frame['F17'].value = 0
+    frame['H17'].value = 0
+    frame['J17'].value = 0
     # B & G 10:16 in\out parser
     for x in range(10, 17):
         # alternative to in_out() if entered amount is to be determined
@@ -196,9 +205,11 @@ while True:
         # F \\ Valoare totala intrari + stoc curent
         amount_stock = (frame[f'B{x}'].value + frame[f'C{x}'].value) * frame[f'E{x}'].value
         frame[f'F{x}'].value = amount_stock
+        frame['F17'].value += amount_stock
         
         # H \\ Valoare totala iesiri
         frame[f'H{x}'].value = amount_out
+        frame['H17'].value += amount_out
         
         # I \\ Cantitate stoc ramas
         quant_stock = (frame[f'B{x}'].value + frame[f'C{x}'].value) - frame[f'G{x}'].value
@@ -207,6 +218,7 @@ while True:
         # J \\ Valoare stoc ramas
         amount_stock -= amount_out
         frame[f'J{x}'].value = amount_stock
+        frame['J17'].value += amount_stock
         
         # general report
         row = rep_ndx[month]
@@ -218,11 +230,12 @@ while True:
             'amount_out': [report[f'{prod_chr}{row+3}'], amount_out],
             'quant_stock': [report[f'{prod_chr}{row+4}'], quant_stock],
             'amount_stock': [report[f'{prod_chr}{row+5}'], amount_stock],
-            'general_quant_in': [report[f'{prod_chr}80'], quant_in],
-            'general_amount_in': [report[f'{prod_chr}81'], amount_in],
-            'general_quant_out': [report[f'{prod_chr}82'], quant_out],
-            'general_amount_out': [report[f'{prod_chr}83'], amount_out]
+            'general_quant_in': [report[f'{prod_chr}81'], quant_in],
+            'general_amount_in': [report[f'{prod_chr}82'], amount_in],
+            'general_quant_out': [report[f'{prod_chr}83'], quant_out],
+            'general_amount_out': [report[f'{prod_chr}84'], amount_out]
         }
+        # set_trace()
         for rep_cell in rep_mapping.values():
             if rep_cell[0].value is None:
                 rep_cell[0].value = 0
