@@ -152,44 +152,38 @@ prod = {
 
 # cantitate in, total in, cantitate out, total out, cantitate stoc, total stoc
 # IAN: 8, etc
-rep_ndx = {
-    'IAN': 8,
-    'FEB': 14,
-    'MAR': 20,
-    'APR': 26,
-    'MAI': 32,
-    'IUN': 38,
-    'IUL': 44,
-    'AUG': 50,
-    'SEP': 56,
-    'OCT': 62,
-    'NOV': 68,
-    'DEC': 74
-}
+month_ndx = [
+    ['IAN', 9], 
+    ['FEB', 15], 
+    ['MAR', 21], 
+    ['APR', 27],
+    ['MAI', 33], 
+    ['IUN', 39], 
+    ['IUL', 45], 
+    ['AUG', 51], 
+    ['SEP', 57], 
+    ['OCT', 63], 
+    ['NOV', 69],
+    ['DEC', 75]
+]
+rep_ndx = {q:v for q,v in month_ndx}
 enter_year = input('An registru: ')
 while True:
     prev = workbook.worksheets[-1]
     frame = workbook.copy_worksheet(prev)
-    amount_before = frame['F17']
-    amount_before.value = 0
-    month_total_out = frame['H17']
-    month_total_out.value = 0
-    amount_after = frame['J17']
-    amount_after.value = 0
+    report = workbook.worksheets[0]
+    frame['F17'].value = 0
+    frame['H17'].value = 0
+    frame['J17'].value = 0
     enter_dm = 'x z'
     while enter_dm.split()[1] not in rep_ndx.keys():
         enter_dm = input('Zi + luna registru (ex. 12 DEC): ').upper()
     frame['F2'].value = f'DATA: {enter_dm} {enter_year}'
     frame.title = enter_dm
+    month = enter_dm.split()[1]
     initialize(frame)
     edit_price(frame, prod)
-    
-    # general report
-    report = workbook.worksheets[0]
-    month = frame.title.split()[1]
-    frame['F17'].value = 0
-    frame['H17'].value = 0
-    frame['J17'].value = 0
+
     # B & G 10:16 in\out parser
     for x in range(10, 17):
         # alternative to in_out() if entered amount is to be determined
@@ -223,23 +217,17 @@ while True:
         # general report
         row = rep_ndx[month]
         prod_chr = prod[x-ITEM_OFFSET]['chr']
-        rep_mapping = {
-            'quant_in': [report[f'{prod_chr}{row}'], quant_in],
-            'amount_in': [report[f'{prod_chr}{row+1}'], amount_in],
-            'quant_out': [report[f'{prod_chr}{row+2}'], quant_out],
-            'amount_out': [report[f'{prod_chr}{row+3}'], amount_out],
-            'quant_stock': [report[f'{prod_chr}{row+4}'], quant_stock],
-            'amount_stock': [report[f'{prod_chr}{row+5}'], amount_stock],
-            'general_quant_in': [report[f'{prod_chr}81'], quant_in],
-            'general_amount_in': [report[f'{prod_chr}82'], amount_in],
-            'general_quant_out': [report[f'{prod_chr}83'], quant_out],
-            'general_amount_out': [report[f'{prod_chr}84'], amount_out]
-        }
-        # set_trace()
-        for rep_cell in rep_mapping.values():
-            if rep_cell[0].value is None:
-                rep_cell[0].value = 0
-            rep_cell[0].value += rep_cell[1]
+        report[f'{prod_chr}{row}'].value += quant_in
+        report[f'{prod_chr}{row+1}'].value += amount_in
+        report[f'{prod_chr}{row+2}'].value += quant_out
+        report[f'{prod_chr}{row+3}'].value += amount_out
+        # overwrite stock with last known value
+        report[f'{prod_chr}{row+4}'].value = quant_stock
+        report[f'{prod_chr}{row+5}'].value = amount_stock
+        report[f'{prod_chr}81'].value += quant_in
+        report[f'{prod_chr}82'].value += amount_in
+        report[f'{prod_chr}83'].value += quant_out
+        report[f'{prod_chr}84'].value += amount_out
     
     zero_to_none_or_float(frame)
     workbook.save(xxpath)
