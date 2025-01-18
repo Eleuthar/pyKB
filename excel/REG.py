@@ -4,6 +4,7 @@ import argparse
 """
 1. none_to_zero
 2. enter_date
+reset_to_zero
 3. import_prev_stock
 4. edit_price
     4.1 prompt_unit_price
@@ -139,43 +140,48 @@ def enter_date():
                 not day.isnumeric() 
                 or (day < 1 and day > 31)
                 or not month.isalpha() 
-                or month not in rep_ndx
+                or month not in month_mapping
             ):
                 continue
+            else:
+                return day, month
         except:
             continue
 
 
 # move I, J to C & F
 # reset B, I, J
-def import_prev_stock(frame):
+def import_prev_stock(frame, prev=None):
+    if prev is None:
+        prev = frame
     for x in range(10,17):
         # stock quant
-        frame[f'C{x}'].value = frame['I{x}'].value
+        frame[f'C{x}'].value = prev['I{x}'].value
         # stock total
-        frame[f'F{x}'].value = frame['J{x}'].value
+        frame[f'F{x}'].value = prev['J{x}'].value
         for q in ['B','I','J']:
             frame[f'{q}{x}'].value = 0
 
 
-def extract_sheet(frame, weekly_prod_row):
+# get the current week's product totals for general report
+def extract_sheet_product(frame, prod_row):
     # IN
     amount_in = 0
-    quant_in = wk[f'B{weekly_prod_row+ITEM_OFFSET}'].value
+    quant_in = wk[f'B{prod_row+ITEM_OFFSET}'].value
     if quant_in is None:
         quant_in = 0
     else:
-        amount_in = quant_in * wk[f'E{weekly_prod_row+ITEM_OFFSET}'].value
+        amount_in = quant_in * wk[f'E{prod_row+ITEM_OFFSET}'].value
     # OUT
-    quant_out = wk[f'G{weekly_prod_row+ITEM_OFFSET}'].value
-    amount_out = wk[f'H{weekly_prod_row+ITEM_OFFSET}'].value
+    quant_out = wk[f'G{prod_row+ITEM_OFFSET}'].value
+    amount_out = wk[f'H{prod_row+ITEM_OFFSET}'].value
     if quant_out is None:
         quant_out = 0
     if amount_out is None:
         amount_out = 0        
     # STOCK
-    quant_stock = wk[f'I{weekly_prod_row+ITEM_OFFSET}'].value
-    amount_stock = wk[f'J{weekly_prod_row+ITEM_OFFSET}'].value
+    quant_stock = wk[f'I{prod_row+ITEM_OFFSET}'].value
+    amount_stock = wk[f'J{prod_row+ITEM_OFFSET}'].value
     if quant_stock is None:
         quant_stock = 0
     if amount_stock is None:
@@ -189,8 +195,10 @@ def extract_sheet(frame, weekly_prod_row):
         amount_stock
     ]
 
-def add_to_gen_report(report_row, frame, weekly_prod_row):
-    [quant_in, amount_in, quant_out, amount_out, quant_stock, amount_stock] = extract_sheet(frame, weekly_prod_row)
+
+# incremental report monthly & general totals by product
+def product_week_total(report_row, frame, prod_chr, prod_row, prev=None):
+    [quant_in, amount_in, quant_out, amount_out, quant_stock, amount_stock] = extract_sheet_product(frame, prod_row)
     report[f'{prod_chr}{report_row}'].value += quant_in
     report[f'{prod_chr}{report_row+1}'].value += amount_in
     report[f'{prod_chr}{report_row+2}'].value += quant_out
@@ -205,48 +213,84 @@ def add_to_gen_report(report_row, frame, weekly_prod_row):
 
 
 # fresh start general total from the last unedited weekly report
-def run_past_report(workbook, report, month, begin_report_row, wb_ndx, prod):
-    # set all report months values to 0, including the general total
+# set all report months values to 0, including the general total
+def reset_to_zero(report, begin_report_row):
     for row in range(begin_report_row, 85):
         for prod_chr in range(ord('D'), ord('K')):
             report[f'{chr(prod_chr)}{row}'].value = 0
+
+def run_past_report(workbook, report, month, begin_report_row, wb_ndx, prod):
+    # past general report should be reviewed starting with at least February, 
+    # since the current month would be recalculated by default
     if begin_report_row > ITEM_OFFSET:
         for row in range(ITEM_OFFSET, begin_report_row, 6):
             for prod_chr in range(ord('D'), ord('K')):
                 report[f'{chr}81'].value += report[f'{chr(prod_chr)}{row}'].value
                 report[f'{chr}82'].value += report[f'{chr(prod_chr)}{row+1}'].value
                 report[f'{chr}83'].value += report[f'{chr(prod_chr)}{row+2}'].value
-                report[f'{chr}84'].value += report[f'{chr(prod_chr)}{row+3}'].value
-  
-    # determine how many previous sheets have belong to the same month
+                report[f'{chr}84'].value += report[f'{chr(prod_chr)}{row+3}'].value  
+    # determine the previous sheets belonging to the same month
     begin_month_ndx = None
     for z in range(wb_ndx-1, 0, -1):
         if month in workbook.worksheets[x].title:
             begin_month_ndx = z
         else:
             break
-    # add previous related weeks to general report
+    # add previous related weeks registry totals to general report
     if begin_month_ndx is not None:
         for report_row in range(begin_month_ndx, wb_ndx):
-            for weekly_prod_row in prod:
-                chr = prod[weekly_prod_row]['chr']
-                add_to_gen_report(report_row, frame, weekly_prod_row)
+            for prod_row in prod:
+                prod_chr = prod[prod_row]['chr']
+                product_week_total(report_row, frame, prod_chr, prod_row)
 
 
-def review(extract_sheet, report, rep_ndx, month, month_ndx, month_start):
-    try:
-        for month_pair in month_ndx[month_start:]:
-            wk = wb.worksheets[wb_ndx]
-            while month_pair[0] == month:
-                for weekly_prod_row in prod:
-                    chr = prod[weekly_prod_row]['chr']
-                    add_to_gen_report(report_row, frame, weekly_prod_row)
+# recalculate modified week with updated previous stock quant & amount
+def review_week(frame):
 
-                wb_ndx += 1
-                wk = wb.worksheets[wb_ndx]
-                month = wk.title.split()[1]
-    except:
-        pass
+
+
+def review_next(workbook, report, wb_ndx, max_ndx, extract_sheet_product):
+    wb_ndx+=1
+    if wb_ndx <= max_ndx:
+        # read each sheet
+        for ndx in range(wb_ndx, max_ndx):
+            frame = workbook.worksheets[wb_ndx]
+            month = frame.title.split()[1]
+            # determine the report row
+            report_row = month_mapping[month]
+            # use the previous sheet to get the stock quantity and amount
+            prev = workbook.worksheets[wb_ndx-1]
+            import_prev_stock(frame, prev=prev)
+            review_week(frame)
+            for prod_chr in range(ord('D'), ord('K')):
+                for prod_row in prod:
+                    product_week_total(report_row, frame, prod_chr, prod_row, prev=prev)
+
+
+def main_menu():
+    menu = ''
+    while True:
+        menu = input('\n1. Adaugare registru\n2. Modificare registru\n3. Stergere registru\n4. Iesire\n'\
+        '\nIntroduceti cifra aferenta urmata de "Enter" pentru a continua: ')
+        try: 
+            menu = int(menu)
+            if menu == 4:
+                exit()
+            elif menu not in (1,2,3):
+                continue
+            else:
+                return menu
+        except:
+            continue
+
+
+def insert_frame(workbook, day, month, enter_dm):
+    new_frame = None
+    for x in range in len(workbook.worksheets):
+        fm_day, fm_month = workbook.worksheets[x].title.split()
+        if fm_month == month:
+            if fm_day < day < workbook.worksheets[x+1].title.split([0]) 
+
 
 
 parser = CustomArgParser(description="Example script with custom error handling")
@@ -254,7 +298,6 @@ parser.add_argument("file", type=str)
 argz = parser.parse_args()
 xxpath = argz.file
 workbook = load_workbook(xxpath, data_only=True)
-# IAN-DEC = 8-7ITEM_OFFSET
 # intrare cantitate\total, iesire cantitate\total, stoc cantitate\total
 prod = {
     1: {'prod':'Lumanari 100B', '$': 0, 'chr': 'D'},
@@ -283,12 +326,12 @@ month_ndx = [
     ['NOV', 69],
     ['DEC', 75]
 ]
-rep_ndx = {q:v for q,v in month_ndx}
+month_mapping = {q:v for q,v in month_ndx}
 max_ndx = len(workbook.worksheets)-1
 report = workbook.worksheets[0]
 year = report.title.split()[-1]
  # ensure entire worksheet has no None
-for wk in workbook.worksheets:
+for wk in workbook:
     for x in range(10,17):
         for q in ('B','C','E','F','G','H','I','J'):
             tgt = wk[f'{q}{x}']
@@ -299,61 +342,81 @@ while True:
     wb_ndx = -1
     frame = None
     prev = None
-    enter_dm = enter_date()
-    month = enter_dm.split()[1]
-    try:
-        frame = workbook[enter_dm]
+    menu = main_menu()
+    day, month = enter_date()
+    enter_dm = f'{day} {month}'
+    begin_report_row = month_mapping[month]
+    month_start = month_ndx.index([month, begin_report_row])
+    # determine the position of the active sheet
+    final_day, final_month = workbook.worksheets[wb_ndx].title.split()    
+    if (
+        month_mapping[final_month] < month_mapping[month]
+        or (
+            month_mapping[final_month] == month_mapping[month] 
+            and day < int(final_day)
+        )
+    ):
         retro = True
+        # consider making a new sheet among older
+        frame = insert_frame(workbook, day, month, enter_dm)
         wb_ndx = workbook.index(frame)
-        begin_report_row = rep_ndx[month]
-        month_start = month_ndx.index([month, begin_report_row])
-        run_past_report(workbook, report, month, begin_report_row, wb_ndx, prod)
-    except:
+        prev = workbook.worksheets[wb_ndx-1]
+    # exception triggered on `frame = workbook[enter_dm]`
+    # if the frame doesn't exist, it's considered to be a new one
+    else:
         prev = workbook.worksheets[wb_ndx]
         frame = workbook.copy_worksheet(prev)
         frame.title = enter_dm
-        frame['F2'].value = f'DATA: {enter_dm} {year}'        
-    import_prev_stock(frame)
+        frame['F2'].value = f'DATA: {enter_dm} {year}'
+    # 1=add, 2=modify, 3=remove
+    if menu == 1:
+        import_prev_stock(frame, prev=prev)
+    else:
+        if menu == 3:
+            del workbook[enter_dm]
+            max_ndx -= 1
+            import_prev_stock(frame, prev=prev)
+        else:
+            import_prev_stock(frame)
+        # reset general report values starting from current month
+        reset_to_zero(report, begin_report_row)
+        run_past_report(workbook, report, month, begin_report_row, wb_ndx, prod)
+        review_next(prev)
+        if menu == 3:
+            continue
     edit_price(frame, prod)
-    # B & G 10:16 in\out parser
+    # x is product row for B & G 10:16 in\out parser
     for x in range(10, 17):
         # alternative to in_out() if entered amount is to be determined
         # determine_input (x, prod, frame, prev)
-        
         # valoare totala stoc nou intrat
         quant_in = in_out('B', x)
         amount_in = quant_in * frame[f'E{x}'].value
-        
         quant_out = in_out('G', x)
         amount_out = quant_out * frame[f'E{x}'].value
-
         # F \\ Valoare totala intrari + stoc curent
         amount_stock = (frame[f'B{x}'].value + frame[f'C{x}'].value) * frame[f'E{x}'].value
         frame[f'F{x}'].value = amount_stock
-        frame['F17'].value += amount_stock
-        
+        frame['F17'].value += amount_stock        
         # H \\ Valoare totala iesiri
         frame[f'H{x}'].value = amount_out
         frame['H17'].value += amount_out
-        
         # I \\ Cantitate stoc ramas
         quant_stock = (frame[f'B{x}'].value + frame[f'C{x}'].value) - frame[f'G{x}'].value
-        frame[f'I{x}'].value = quant_stock
-        
+        frame[f'I{x}'].value = quant_stock        
         # J \\ Valoare stoc ramas
         amount_stock -= amount_out
         frame[f'J{x}'].value = amount_stock
-        frame['J17'].value += amount_stock
-        
-        # general report
-        report_row = rep_ndx[month]
+        frame['J17'].value += amount_stock        
+        # add current week totals to general report
+        report_row = month_mapping[month]
         prod_chr = prod[x-ITEM_OFFSET]['chr']
-        add_to_gen_report(report_row, frame, x)
+        product_week_total(report_row, frame, prod_chr, x)
     if retro:
-        # propagate all subsequent sheets following weekly update
-        review(workbook, wb_ndx, extract_sheet, report, month_row=)
+        # propagate the changes to all subsequent sheets following the current week
+        review_next(workbook, report, wb_ndx, max_ndx, extract_sheet_product, menu)
     workbook.save(xxpath)
     nxt = input('Adaugati registru nou?\nApasati "Enter" pentru a continua\nApasati "N" urmat de "Enter" pt a iesi: ')
-    if nxt not in ('', None):
+    if nxt != '':
         break
     
