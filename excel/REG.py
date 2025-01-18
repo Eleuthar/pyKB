@@ -232,7 +232,7 @@ def run_past_report(workbook, report, month, begin_report_row, wb_ndx, prod):
     # determine the previous sheets belonging to the same month
     begin_month_ndx = None
     for z in range(wb_ndx-1, 0, -1):
-        if month in workbook.worksheets[x].title:
+        if month in workbook.sheetnames[x]:
             begin_month_ndx = z
         else:
             break
@@ -286,12 +286,17 @@ def main_menu():
 
 def insert_frame(workbook, day, month, enter_dm):
     new_frame = None
-    for x in range in len(workbook.worksheets):
-        fm_day, fm_month = workbook.worksheets[x].title.split()
-        if fm_month == month:
-            if fm_day < day < workbook.worksheets[x+1].title.split([0]) 
-
-
+    for x in range in len(workbook.sheetnames):
+        prev_fm = workbook.sheetnames
+        if month in prev_fm:
+            fm_day = int(prev_fm.split()[0])
+            next_day = int(workbook.sheetnames[x+1].split()[0])
+            if int(fm_day) < day < next:
+                frame = workbook.copy_worksheet(prev_fm)
+                workbook._sheets.pop()
+                workbook._sheets.insert(x, frame)
+                frame.title = enter_dm
+                return frame
 
 parser = CustomArgParser(description="Example script with custom error handling")
 parser.add_argument("file", type=str)
