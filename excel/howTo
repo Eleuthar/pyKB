@@ -1,30 +1,26 @@
-# insert row & duplicate previous
-from copy import copy
-workbook = load_workbook(xxpath, data_only=True)
-for frame in workbook.worksheets[2:]:
-    frame.column_dimensions['A'].width = 27
-    for x in range(18, 20):
-        frame.insert_rows(x)
-        frame.row_dimensions[x].height = 22.5
-        for q in range(ord('A'), ord('K')):
-            q = chr(q)
-            tgt = frame[f'{q}{x}']
-            tgt.font = copy(orig.font)
-            tgt.border = copy(orig.border)
-            tgt.alignment = copy(orig.alignment)
-
-tgt.data_type='n'
-tgt.number_format='#,##0.00'
-tgt.value = 0
-
 from openpyxl import load_workbook
+from copy import copy
+
 xxpath='REG.xlsx'
-# xxpth = 'Documents/pyKB/excel/REG.xlsx'
 workbook = load_workbook(xxpath, data_only=True)
-align = orig.cell(8,2).alignment
-font =  orig.cell(8,2).font
-border = orig.cell(8,2).border
+
+
+# cell formatting
+frame.column_dimensions['A'].width = 27
+for x in range(18, 20):
+    frame.insert_rows(x)
+    frame.row_dimensions[x].height = 22.5
+    for q in range(ord('A'), ord('K')):
+        q = chr(q)
+        tgt = frame[f'{q}{x}']
+        tgt.font = copy(orig.font)
+        tgt.border = copy(orig.border)
+        tgt.alignment = copy(orig.alignment)
+        tgt.data_type='n'
+        tgt.number_format='#,##0.00'
+        tgt.value = 0
+
+# merging
 qz.insert_rows(9,1)
 qz.merge_cells(start_row=8, start_column=mark_col-5, end_row=8, end_column=mark_col) 
 qz.cell(8, mark_col-5).value=month
-    

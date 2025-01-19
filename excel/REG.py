@@ -4,11 +4,16 @@ import argparse
 """
 1. none_to_zero
 2. enter_date
-reset_to_zero
-3. import_prev_stock
+3. prompt add \ modify \ remove menu
+4. import_prev_stock
 4. edit_price
     4.1 prompt_unit_price
     4.2 prompt_price_menu
+5.1 add
+    5.1.1 if retro, propagate increment
+5.2 modify
+    5.2.1 propagate increment \ subtract delta
+5.3 remove
 """
 
 ITEM_OFFSET = 9
@@ -150,7 +155,7 @@ def enter_date():
 
 
 # move I, J to C & F
-# reset B, I, J
+# reset B, G, H, I, J
 def import_prev_stock(frame, prev=None):
     if prev is None:
         prev = frame
@@ -159,7 +164,7 @@ def import_prev_stock(frame, prev=None):
         frame[f'C{x}'].value = prev['I{x}'].value
         # stock total
         frame[f'F{x}'].value = prev['J{x}'].value
-        for q in ['B','I','J']:
+        for q in ['B','G','H','I','J']:
             frame[f'{q}{x}'].value = 0
 
 
@@ -212,12 +217,51 @@ def product_week_total(report_row, frame, prod_chr, prod_row, prev=None):
     report[f'{prod_chr}84'].value += amount_out
 
 
-# fresh start general total from the last unedited weekly report
-# set all report months values to 0, including the general total
-def reset_to_zero(report, begin_report_row):
+# discard outgoing and reflect in next sheets C,F,I,J via `to_propagate` dict
+def handle_removed(report, begin_report_row, removed, next_fm, prod):
+    to_propagate = {}
+    for item in prod:
+        prod_row = item+ITEM_OFFSET
+        prod_chr = prod[prod_row]['chr']
+    
+        quant_extra = removed[f'G{prod_row}']
+        if quant_extra == 0:
+            continue
+        amount_extra = quant_extra.value * next_fm[f'E{prod_row}'].value
+        
+        # add the outgoing values to the next sheet IN 
+        next_fm[f'C{prod_row}'].value += quant_extra.value - removed[f'B{prod_row}'].value
+        next_fm[f'F{prod_row}'].value += amount_extra
+        next_fm[f'I{prod_row}'].value += quant_extra
+        next_fm[f'J{prod_row}'].value += amount_extra
+        
+        # report adjustment
+        report_quant_in = report[f'{prod_chr}{begin_report_row}']
+        report_amount_in = report[f'{prod_chr}{begin_report_row+1}']
+        report_quant_out = report[f'{prod_chr}{begin_report_row+2}']
+        report_amount_out = report[f'{prod_chr}{begin_report_row+3}']
+        
+        report_quant_in.value -= removed[f'B{prod_row}'].value
+        report_amount_in.value = removed[f'B{prod_row}'].value * next_fm[f'E{prod_row}'].value
+        report_quant_out.value -= removed[f'G{prod_row}'].value
+        report_amount_out.value -= removed[f'H{prod_row}'].value
+
+        report[f'{prod_chr}81'].value -= report_quant_in.value
+        report[f'{prod_chr}82'].value -= report_amount_in.value
+        report[f'{prod_chr}83'].value -= report_quant_out.value
+        report[f'{prod_chr}84'].value -= report_amount_out.value
+        
+        to_propagate[prod_row] = (quant_extra, amount_extra)
+    return to_propagate
+
+
+
+# decrease modified frame values from report quantities and amounts & general total
+def rollback_general_report(report, begin_report_row):
     for row in range(begin_report_row, 85):
         for prod_chr in range(ord('D'), ord('K')):
             report[f'{chr(prod_chr)}{row}'].value = 0
+
 
 def run_past_report(workbook, report, month, begin_report_row, wb_ndx, prod):
     # past general report should be reviewed starting with at least February, 
@@ -244,59 +288,52 @@ def run_past_report(workbook, report, month, begin_report_row, wb_ndx, prod):
                 product_week_total(report_row, frame, prod_chr, prod_row)
 
 
-# recalculate modified week with updated previous stock quant & amount
-def review_week(frame):
-
-
-
-def review_next(workbook, report, wb_ndx, max_ndx, extract_sheet_product):
-    wb_ndx+=1
-    if wb_ndx <= max_ndx:
-        # read each sheet
-        for ndx in range(wb_ndx, max_ndx):
-            frame = workbook.worksheets[wb_ndx]
-            month = frame.title.split()[1]
-            # determine the report row
-            report_row = month_mapping[month]
-            # use the previous sheet to get the stock quantity and amount
-            prev = workbook.worksheets[wb_ndx-1]
-            import_prev_stock(frame, prev=prev)
-            review_week(frame)
-            for prod_chr in range(ord('D'), ord('K')):
-                for prod_row in prod:
-                    product_week_total(report_row, frame, prod_chr, prod_row, prev=prev)
+def review_next(workbook, report, wb_ndx, max_ndx, extract_sheet_product, to_propagate, month):
+    orig_month = month
+    for ndx in range(wb_ndx, max_ndx):
+        frame = workbook.worksheets[ndx]
+        next_month = frame.title.split()[1]
+        if month != next_month:
+            # update report stock quant\amount
+        # determine the report row
+        report_row = month_mapping[month]
+        # use the previous sheet to get the stock quantity and amount
+        prev = workbook.worksheets[ndx-1]
+        import_prev_stock(frame, prev=prev)
+        for prod_chr in range(ord('D'), ord('K')):
+            for prod_row in prod:
+                product_week_total(report_row, frame, prod_chr, prod_row, prev=prev)
 
 
 def main_menu():
     menu = ''
     while True:
-        menu = input('\n1. Adaugare registru\n2. Modificare registru\n3. Stergere registru\n4. Iesire\n'\
+        menu = input('\n1. Adaugare registru nou\n2. Modificare registru\n3. Stergere registru\n4. Iesire\n'\
         '\nIntroduceti cifra aferenta urmata de "Enter" pentru a continua: ')
         try: 
             menu = int(menu)
-            if menu == 4:
-                exit()
-            elif menu not in (1,2,3):
-                continue
-            else:
+            if menu in (1,2,3):
                 return menu
+            elif menu == 4:
+                exit()
         except:
             continue
 
-
+# must propagate new values throughout the report * other weekly reports
 def insert_frame(workbook, day, month, enter_dm):
     new_frame = None
     for x in range in len(workbook.sheetnames):
-        prev_fm = workbook.sheetnames
+        prev_fm = workbook.sheetnames[x]
         if month in prev_fm:
             fm_day = int(prev_fm.split()[0])
             next_day = int(workbook.sheetnames[x+1].split()[0])
             if int(fm_day) < day < next:
                 frame = workbook.copy_worksheet(prev_fm)
                 workbook._sheets.pop()
-                workbook._sheets.insert(x, frame)
+                workbook._sheets.insert(x+1, frame)
                 frame.title = enter_dm
-                return frame
+                return x, frame
+
 
 parser = CustomArgParser(description="Example script with custom error handling")
 parser.add_argument("file", type=str)
@@ -347,12 +384,17 @@ while True:
     wb_ndx = -1
     frame = None
     prev = None
-    menu = main_menu()
+    # 1=add, 2=modify, 3=remove
+    menu = main_menu(workbook)
     day, month = enter_date()
     enter_dm = f'{day} {month}'
+    while menu in (2,3) and enter_dm not in workbook.sheetnames:
+        print(f'Nume registru invalid: {enter_dm}\n')
+        menu = main_menu(workbook)
+        day, month = enter_date()
+        enter_dm = f'{day} {month}'
     begin_report_row = month_mapping[month]
-    month_start = month_ndx.index([month, begin_report_row])
-    # determine the position of the active sheet
+    # determine the position of the target sheet vs the latest
     final_day, final_month = workbook.worksheets[wb_ndx].title.split()    
     if (
         month_mapping[final_month] < month_mapping[month]
@@ -361,34 +403,40 @@ while True:
             and day < int(final_day)
         )
     ):
+        # action over a previous week
         retro = True
-        # consider making a new sheet among older
-        frame = insert_frame(workbook, day, month, enter_dm)
-        wb_ndx = workbook.index(frame)
-        prev = workbook.worksheets[wb_ndx-1]
-    # exception triggered on `frame = workbook[enter_dm]`
-    # if the frame doesn't exist, it's considered to be a new one
+        # get previous sheet, add\insert
+        # current frame recalculated via in_out
+        if menu == 1:
+            wb_ndx, frame = insert_frame(workbook, day, month, enter_dm)
+            prev = workbook.worksheets[wb_ndx]
+            wb_ndx += 1
+        # modif
+        elif menu == 2:
+            frame = workbook[enter_dm]
+            wb_ndx = workbook.sheetnames.index(enter_dm)
+            prev = workbook.worksheets[wb_ndx-1]
+        # remove
+        elif menu == 3:
+            wb_ndx = workbook.sheetnames.index(enter_dm)
+            prev = workbook.worksheets[wb_ndx-1]
+            removed = workbook._sheets.pop(wb_ndx)
+            max_ndx -= 1
+            next_fm = workbook.worksheets[wb_ndx]
+            # after propagate by removed flow, reflect in monthly stock the values from the last week 
+            to_propagate = handle_removed(report, begin_report_row, removed, next_fm, prod)
+            wb_ndx += 1
+            review_next(workbook, report, wb_ndx, max_ndx, extract_sheet_product, to_propagate, month)
     else:
+        # if the provided title doesn't exist, append sheet
         prev = workbook.worksheets[wb_ndx]
         frame = workbook.copy_worksheet(prev)
         frame.title = enter_dm
         frame['F2'].value = f'DATA: {enter_dm} {year}'
-    # 1=add, 2=modify, 3=remove
-    if menu == 1:
-        import_prev_stock(frame, prev=prev)
-    else:
-        if menu == 3:
-            del workbook[enter_dm]
-            max_ndx -= 1
-            import_prev_stock(frame, prev=prev)
-        else:
-            import_prev_stock(frame)
-        # reset general report values starting from current month
-        reset_to_zero(report, begin_report_row)
-        run_past_report(workbook, report, month, begin_report_row, wb_ndx, prod)
-        review_next(prev)
-        if menu == 3:
-            continue
+    import_prev_stock(frame)
+    # withdraw from general report initial values from the currently modified week
+    rollback_general_report(report, begin_report_row)
+    # run_past_report(workbook, report, month, begin_report_row, wb_ndx, prod)
     edit_price(frame, prod)
     # x is product row for B & G 10:16 in\out parser
     for x in range(10, 17):
@@ -418,8 +466,8 @@ while True:
         prod_chr = prod[x-ITEM_OFFSET]['chr']
         product_week_total(report_row, frame, prod_chr, x)
     if retro:
-        # propagate the changes to all subsequent sheets following the current week
-        review_next(workbook, report, wb_ndx, max_ndx, extract_sheet_product, menu)
+        # propagate the changes to all subsequent sheets after the current week
+        review_next(workbook, report, wb_ndx, max_ndx, extract_sheet_product, to_propagate, month)
     workbook.save(xxpath)
     nxt = input('Adaugati registru nou?\nApasati "Enter" pentru a continua\nApasati "N" urmat de "Enter" pt a iesi: ')
     if nxt != '':

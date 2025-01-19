@@ -1,31 +1,16 @@
-https://docs.quantifiedcode.com/python-anti-patterns/index.html
-
 https://www.youtube.com/watch?v=pTB30aXS77U
 	\\ SOLID principles
 	
-https://www.youtube.com/watch?v=x58W9A2lnQc&t=57s
-	\\ numba
-
-numpy
-pandas
-Dependency injection
-DASH
-SNOWFLAKE \ SPARK \ AIRFLOW
 Understanding of fundamental design principles behind a scalable application
-statistical models
-https://cloud.google.com/vertex-ai/docs/start/introduction-unified-platform
-https://github.com/GoogleCloudPlatform/training-data-analyst/tree/master/self-paced-labs/vertex-ai
-https://github.com/GoogleCloudPlatform/training-data-analyst
-
-
-
 improving API performance
-GraphQL
-AWS services
-Redshift / DynamoDB / Athena / S3(Data-lake)
-Lambdas
-Kafka / SQS / SNS / API-GW
-EC2, RDS, S3, CloudFront, ElastiCache, ElasticSearch
 gRPC
+GraphQL
 SOA
 HTTP2
+Kafka
+AWS services
+	Redshift / DynamoDB / Athena / S3(Data-lake)
+	Lambdas
+	SQS / SNS / API-GW
+	EC2, RDS, CloudFront, ElastiCache, ElasticSearch
+

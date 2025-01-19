@@ -57,35 +57,38 @@ def extract_sheet(wk, j):
         amount_stock
     ]
 
-# from pdb import set_trace
-wb = load_workbook(xxpath)
-report = wb.worksheets[1]
-wb_ndx = 2
-try:
-    for rep_month in month_ndx:
-        wk = wb.worksheets[wb_ndx]
-        month = wk.title.split()[1]
-        row = rep_month[1]
-        while rep_month[0] == month:
-            for j in prod:
-                chr = prod[j]['chr']
-                [quant_in, amount_in, quant_out, amount_out, quant_stock, amount_stock] = extract_sheet(wk, j)
-                report[f'{chr}{row}'].value += quant_in
-                report[f'{chr}{row+1}'].value += amount_in
-                report[f'{chr}{row+2}'].value += quant_out
-                report[f'{chr}{row+3}'].value += amount_out
-                # overwrite stock with last known value
-                report[f'{chr}{row+4}'].value = quant_stock
-                report[f'{chr}{row+5}'].value = amount_stock
-                report[f'{chr}81'].value += quant_in
-                report[f'{chr}82'].value += amount_in
-                report[f'{chr}83'].value += quant_out
-                report[f'{chr}84'].value += amount_out
-            wb_ndx += 1
+
+def retro_calculate(wb_ndx):
+    try:
+        for rep_month in month_ndx:
             wk = wb.worksheets[wb_ndx]
             month = wk.title.split()[1]
-except:
-    pass
+            row = rep_month[1]
+            while rep_month[0] == month:
+                for j in prod:
+                    chr = prod[j]['chr']
+                    [quant_in, amount_in, quant_out, amount_out, quant_stock, amount_stock] = extract_sheet(wk, j)
+                    report[f'{chr}{row}'].value += quant_in
+                    report[f'{chr}{row+1}'].value += amount_in
+                    report[f'{chr}{row+2}'].value += quant_out
+                    report[f'{chr}{row+3}'].value += amount_out
+                    # overwrite stock with last known value
+                    report[f'{chr}{row+4}'].value = quant_stock
+                    report[f'{chr}{row+5}'].value = amount_stock
+                    report[f'{chr}81'].value += quant_in
+                    report[f'{chr}82'].value += amount_in
+                    report[f'{chr}83'].value += quant_out
+                    report[f'{chr}84'].value += amount_out
+                wb_ndx += 1
+                wk = wb.worksheets[wb_ndx]
+                month = wk.title.split()[1]
+    except:
+        pass
 
+# from pdb import set_trace
+wb = load_workbook(xxpath)
+report = wb.worksheets[0]
+wb_ndx = 1
+retro_calculate(wb_ndx)
 wb.save(xxpath)
 wb.close()
