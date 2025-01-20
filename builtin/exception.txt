@@ -84,6 +84,24 @@ for (pz, ch) in [('calzone', 0), ('margherita', 110), ('mafia', 20)]:
 		print(x, strerror(x.errno))
 
 
+CUSTOM 
+``````````````````````````
+import argparse
+
+
+class CustomArgParser(argparse.ArgumentParser):
+    def error(self, message):
+        self.print_usage()
+        print('Fisierul Excel trebuie sa fie in acelasi director cu scriptul.\n' + \
+        'Example: python <z.py> <arg x>')
+        exit(2)
+
+
+parser = CustomArgParser(description="Example script with custom error handling")
+parser.add_argument("file", type=str)
+argz = parser.parse_args()
+
+
 
 EXCEPTION
 ``````````````
