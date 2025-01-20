@@ -62,6 +62,3 @@ z['A15'] = 'Candele tip 3'
 z['A16'] = 'Candele tip 4'
 z['A17'] = 'COLPORTAJ'
 z['A18'] = 'TOTAL'
-
-# C \\ Importare Stoc din sheet anterior I10:16  
-z[f'C{x}'].value = prev[f'I{x}'].value
