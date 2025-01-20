@@ -36,10 +36,12 @@ def get_tabz():
     return tabz
         
 
-def prompt_bet(board, ndx):
-    bet = ''
-    while not bet.isdigit():
-        bet = input(f'Pariu {board[ndx][0]} = ')
+def prompt_bet(group, ndx, bid, round):
+    bet = None
+    opt = [x for x in range(bid, round)]
+    print(f"Pariu {group[ndx].nm}: {', '.join()}, sau mai mare")
+    while not bet in opt:
+        bet = input('>>> ')
     return int(bet)
 
 
@@ -80,15 +82,16 @@ roundz = [1 for z in range(gmrz)] + \
         [8 for z in range(gmrz)] + \
             [x for x in range(8,1,-1)] + \
                 [1 for z in range(gmrz)]
-wb = None
+
 # find score workbook, multiple files can be made
 tabz = get_tabz()
 wb = None
-dt = date.today().strftime('%d-%m-%Y')
+frame = None
 # make new workbook if none found
 if len(tabz) == 0:
-    wb = Workbook('wzt.xlsx')
-    wb.create_sheet(dt)
+    wb = Workbook(f'wzt_{date.today().strftime('%d-%m-%Y')}.xlsx')
+    frame = wb.worksheets[-1]
+    frame.title = 'ROUND 1'
 else:
     mzg = ''
     # enrich prompt menu for singular or plural
@@ -112,8 +115,8 @@ else:
             menu = prompt_menu(menu_opt)
         wb = load_workbook(tabz[menu-1])
         ROUND = int(wb.sheetnames[-1].split()[-1])+1
-        wb.create_sheet(f'Round {ROUND}')
-    # no workbook found, make new scoring file
+        frame = wb.create_sheet(f'Round {ROUND}')
+    # make new scoring file
     else:
         while True:
             fn = None
@@ -121,16 +124,17 @@ else:
                 fn = input('Introduceti nume fisier: ')
                 wb = Workbook()
                 fm = wb.worksheets[-1]
-                fm.title = 'Round 1'
-                gen_frame(fm, group, roundz)
+                fm.title = 'Round 1'                
             except:
                 print(f'Nume fisier invalid: >> {fn} <<')
 # GO
-begin = choice(group)
-print(f'Spor la joaca! Incepe {begin.nm}')
-go = group.index([begin])
 while True:
-    for ndx in range(go, 4):
-        bet = prompt_bet(group, ndx)
-    for ndx in range(0, go):
-        bet = prompt_bet(group, ndx)
+    begin = choice(group)
+    print(f'Spor la joaca! Incepe {begin.nm}')
+    go = group.index([begin])
+    for round in roundz:
+        bid = 0
+        for ndx in range(go, 4):
+            bid = prompt_bet(group, ndx, bid, round) 
+        for ndx in range(0, go):
+            bid = prompt_bet(group, ndx, bid, round)
