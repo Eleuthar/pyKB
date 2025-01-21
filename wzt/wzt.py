@@ -4,6 +4,7 @@ from random import choice
 from datetime import date
 from os import listdir
 from collections import namedtuple
+from pdb import set_trace
 
 
 # keep user prompt on same line to prevent terminal clutter
@@ -30,10 +31,10 @@ def group_count():
 
 
 def join_players(gamer_num):
+    group = []
     char = 64
     for q in range(gamer_num):
         char+=2
-        group = []
         who = input('Nume jucator: ')
         # 'nm','chr','bet','fact','winz','failz','total'
         group.append(Member(who, chr(char), 0, 0, 0, 0, 0))
@@ -60,7 +61,7 @@ def init_frame(fm, group, roundz, gamer_num):
     # deck in hand per round
     for q in range(len(roundz)):
         fm[f'A{q+4}'].value = roundz[q]
-    # total score under name row    
+    # total score under name row
     for q in range(gamer_num):
         uzr = group[q]
         char = uzr.chr
