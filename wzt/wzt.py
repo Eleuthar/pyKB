@@ -3,8 +3,19 @@ from openpyxl.styles import Alignment
 from random import choice
 from datetime import date
 from os import listdir
-from collections import namedtuple
+from dataclasses import dataclass
 from pdb import set_trace
+
+
+@dataclass
+class Member:
+    nm: str
+    chr: str
+    bet: int
+    fact: int
+    winz: int
+    failz: int
+    total: int
 
 
 # keep user prompt on same line to prevent terminal clutter
@@ -36,7 +47,7 @@ def join_players(gamer_num):
     for q in range(gamer_num):
         char+=2
         who = input('Nume jucator: ')
-        # 'nm','chr','bet','fact','winz','failz','total'
+        # nm,chr,bet,fact,winz,failz,total
         group.append(Member(who, chr(char), 0, 0, 0, 0, 0))
     return group
 
@@ -95,17 +106,18 @@ def prompt_bet(who, bid, hand):
         bet = rewind_prompt(mzg, condition=condition)
     elif bid < hand:
         diff = hand - bid
-        opt = [q for q in range(0, diff+1)]
-        set_trace()
-        mzg = f"{turn} {', '.join(opt)} sau mai mare ca {diff}"
-        condition = f'bet in {opt} or bet > {diff}'
+        allowed = [q for q in range(0, diff+1)]
+        mzg = f"{turn} {allowed}"
+        condition = f'opt in {allowed}'
         bet = rewind_prompt(mzg, condition=condition)
     else:
         mzg = f"{turn} 0 sau mai mult"
-        condition = f'bet >= 0'
+        condition = f'opt >= 0'
         bet = rewind_prompt(mzg, condition=condition)
+    bet = int(bet)
+    set_trace()
     who.bet = bet
-    return int(bet)
+    return bet
 
 
 # pick workbook or make new
@@ -167,9 +179,7 @@ def get_wb_frame(tabz):
     return wb, fname, frame, ROUND
 
 
-if __name__ == '__main__':
-    # define gamer properties
-    Member = namedtuple('Member', ['nm','chr','bet','fact','winz','failz','total'])
+if __name__ == '__main__':    
     # number of players
     gamer_num = group_count()
     #  player join
