@@ -4,6 +4,7 @@ from random import choice
 from datetime import date
 from os import listdir
 from dataclasses import dataclass
+import operator
 from pdb import set_trace
 
 
@@ -60,7 +61,7 @@ def hand_num(gamer_num):
     return [1 for z in range(gamer_num)] + \
     [x for x in range(2,8)] + \
         [8 for z in range(gamer_num)] + \
-            [x for x in range(8,1,-1)] + \
+            [x for x in range(7,1,-1)] + \
                 [1 for z in range(gamer_num)]
 
 
@@ -74,7 +75,10 @@ def merge_and_write(sheet, start_row, end_row, start_col, end_col, value):
 def init_frame(fm, group, roundz, gamer_num):
     # deck in hand per round
     for q in range(len(roundz)):
-        fm[f'A{q+4}'].value = roundz[q]
+        cell = fm[f'A{q+4}']
+        cell.value = roundz[q]
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
     # total score under name row    
     for q in range(gamer_num):
         uzr = group[q]
@@ -86,7 +90,7 @@ def init_frame(fm, group, roundz, gamer_num):
         fm[f'{chr(ord(char)+1)}3'].value = 'Facut'
         # hands start at row 4
         for j in range(len(roundz)):
-            hand = j+3
+            hand = j+4
             # bet
             fm[f'{char}{hand}'].value = 0
             # fact
@@ -101,23 +105,18 @@ def get_tabz():
     return tabz
         
 
-def prompt_bet(who, bid, hand):
+def prompt_bet(who, ndx, final_bidder, bid, hand):
     turn = f'{who.nm} -->'
-    if bid == hand:
-        mzg = f'{turn} minim 1'
-        condition = 'opt >= 1'
-        bet = rewind_prompt(mzg, condition=condition)
-    elif bid < hand:
+    allowed = None
+    if ndx == final_bidder:
         diff = hand - bid
-        allowed = [q for q in range(0, diff+1)]
-        mzg = f"{turn} {allowed}"
-        condition = f'opt in {allowed}'
-        bet = rewind_prompt(mzg, condition=condition)
+        allowed = [q for q in range(0, hand+1)]
+        allowed.remove(diff)
     else:
-        mzg = f"{turn} 0 sau mai mult"
-        condition = f'opt >= 0'
-        bet = rewind_prompt(mzg, condition=condition)
-    bet = int(bet)
+        allowed = [q for q in range(1, hand+1)]
+    mzg = f"{turn} {allowed}"
+    condition = f'opt in {allowed}'
+    bet = int(rewind_prompt(mzg, condition=condition))
     who.bet = bet
     return bet
 
@@ -202,39 +201,44 @@ if __name__ == '__main__':
         order = list(range(go, 4)) + list(range(0, go))
         for j in range(len(roundz)):
             hand = roundz[j]
-            print(f"\nRunda de {hand}\n{'='*len('runda de x')}")
+            print(f"\n\n#{j+1} Runda de {hand}\n{'='*len('runda de xxxx')}")
 
             # bidding
             print(f'\nPariaza\n{"`"*len("nPariaza")}')
             bid = 0
+            final_bidder = gamer_num-1
             for ndx in order:
-                bid += prompt_bet(group[ndx], bid, hand)
+                bid += prompt_bet(group[ndx], ndx, final_bidder, bid, hand)
 
             # fact
-            print(f'\nMaini facute\n{"="*len("Maini facute")}')
+            print(f'\nMaini facute\n{"`"*len("Maini facute")}')
             for ndx in order:
                 bidder = group[ndx]
                 bidder.fact = rewind_prompt(bidder.nm)
                 # winner
                 if bidder.fact == bidder.bet:
-                    bidder.winz += 1
                     bidder.total += (5+bidder.bet)
                     # positive bonus & reset streak
-                    if bidder.winz == gamer_num:
-                        bidder.total += (5*gamer_num)
-                        bidder.winz = 0
+                    if hand != 1:
+                        bidder.winz += 1
+                        if bidder.winz == gamer_num:
+                            bidder.total += (5*gamer_num)
+                            bidder.winz = 0
+                        # colorize green + previous 4
                 # loser
                 else:
-                    bidder.failz += 1
-                    bidder.total -= (5+ (bidder.fact - bidder.bet))
-                    # negative bonus & reset streak
-                    if bidder.failz == gamer_num:
-                        bidder.total -= (5*gamer_num)
-                        bidder.failz = 0
+                    bidder.total -= int(str(bidder.fact - bidder.bet).strip('-'))
+                    if hand != 1:
+                        bidder.failz += 1
+                        # negative bonus & reset streak
+                        if bidder.failz == gamer_num:
+                            bidder.total -= (5*gamer_num)
+                            bidder.failz = 0
+                        # colorize red + previous 4
                 # update player data, rounds begin at row 4 on split columns 
                 char = bidder.chr
-                frame[f'{char}{ndx}'].value += bidder.bet
-                frame[f'{chr(ord(char)+1)}{ndx}'].value += bidder.fact
+                frame[f'{char}{j+4}'].value += bidder.bet
+                frame[f'{chr(ord(char)+1)}{j+4}'].value += bidder.fact
                 wb.save(fname)
         
                 
