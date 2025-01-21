@@ -15,7 +15,7 @@ def rewind_prompt(mzg, condition=None):
     while True:
         while not opt.isdigit():
             print("\033[A\033[A")
-            opt = input(f'mzg:  \b')
+            opt = input(f'{mzg}:  \b')
         opt = int(opt)
         if condition is not None:
             while not eval(condition):
@@ -61,7 +61,7 @@ def init_frame(fm, group, roundz, gamer_num):
     # deck in hand per round
     for q in range(len(roundz)):
         fm[f'A{q+4}'].value = roundz[q]
-    # total score under name row
+    # total score under name row    
     for q in range(gamer_num):
         uzr = group[q]
         char = uzr.chr
@@ -88,16 +88,21 @@ def get_tabz():
         
 
 def prompt_bet(who, bid, hand):
-    turn = f'"\t{who.nm}, '
+    turn = f'{who.nm} -->'
     if bid == hand:
         mzg = f'{turn} minim 1'
         condition = 'opt >= 1'
         bet = rewind_prompt(mzg, condition=condition)
     elif bid < hand:
-        mzg = f'{turn} 0 sau mai mare ca {bid}'
         diff = hand - bid
-        opt = [q for q in range(0, diff)]
-        condition = f'opt in {opt}'
+        opt = [q for q in range(0, diff+1)]
+        set_trace()
+        mzg = f"{turn} {', '.join(opt)} sau mai mare ca {diff}"
+        condition = f'bet in {opt} or bet > {diff}'
+        bet = rewind_prompt(mzg, condition=condition)
+    else:
+        mzg = f"{turn} 0 sau mai mult"
+        condition = f'bet >= 0'
         bet = rewind_prompt(mzg, condition=condition)
     who.bet = bet
     return int(bet)
@@ -180,15 +185,15 @@ if __name__ == '__main__':
     # GO
     while True:
         begin = choice(group)
-        print(f'Spor la joaca! Incepe {begin.nm}')
-        go = group.index([begin])
+        print(f'\nSpor la joaca! Incepe {begin.nm}\n')
+        go = group.index(begin)
         order = list(range(go, 4)) + list(range(0, go))
         for j in range(len(roundz)):
             hand = roundz[j]
-            print(f"Runda de {hand}\n{'='*len('runda de x')}")
+            print(f"\nRunda de {hand}\n{'='*len('runda de x')}")
 
             # bidding
-            print(f'\nPariaza\n{"="*len("nPariaza")}')
+            print(f'\nPariaza\n{"`"*len("nPariaza")}')
             bid = 0
             for ndx in order:
                 bid += prompt_bet(group[ndx], bid, hand)
