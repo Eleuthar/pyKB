@@ -78,7 +78,6 @@ def init_frame(fm, group, roundz, gamer_num):
         cell = fm[f'A{q+4}']
         cell.value = roundz[q]
         cell.alignment = Alignment(horizontal="center", vertical="center")
-
     # total score under name row    
     for q in range(gamer_num):
         uzr = group[q]
@@ -239,6 +238,21 @@ if __name__ == '__main__':
                 char = bidder.chr
                 frame[f'{char}{j+4}'].value += bidder.bet
                 frame[f'{chr(ord(char)+1)}{j+4}'].value += bidder.fact
-                wb.save(fname)
-        
-                
+                wb.save(fname)        
+        next = ''
+        while not next.isalpha():
+            next = input("\n\nJoc nou? Y \ N")
+            next = next.upper()
+            if next.upper() not in ['Y', 'N']:
+                continue
+            elif next == 'N':
+                exit()
+            else:
+                ROUND += 1
+                frame = wb.create_sheet(title=f'ROUND {ROUND}')
+                for uzr in group:
+                    for prop in ['bet','fact','total','winz','failz']:
+                        setattr(uzr, prop) = 0
+                init_frame(frame, group, roundz, gamer_num)
+                break
+            
