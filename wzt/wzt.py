@@ -29,8 +29,11 @@ def rewind_prompt(mzg, condition=None):
             opt = input(f'{mzg}:  \b')
         opt = int(opt)
         if condition is not None:
-            while not eval(condition):
-                continue        
+            if not eval(condition):
+                opt = ''
+                continue
+            else:
+                return opt
         return opt
 
 
@@ -115,7 +118,6 @@ def prompt_bet(who, bid, hand):
         condition = f'opt >= 0'
         bet = rewind_prompt(mzg, condition=condition)
     bet = int(bet)
-    set_trace()
     who.bet = bet
     return bet
 
