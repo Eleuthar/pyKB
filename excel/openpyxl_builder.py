@@ -1,5 +1,6 @@
-import openpyxl
+from openpyxl import Workbook
 from openpyxl.styles import Alignment
+
 
 # Helper function to merge and align cells
 def merge_and_write(sheet, start_row, end_row, start_col, end_col, value):
@@ -7,7 +8,8 @@ def merge_and_write(sheet, start_row, end_row, start_col, end_col, value):
     cell = sheet.cell(row=start_row, column=start_col, value=value)
     cell.alignment = Alignment(horizontal="center", vertical="center")
 
-z = workbook.create_sheet(title=f"Sheet{len(workbook.sheetnames)+1}")
+workbook = Workbook()
+z = workbook.create_sheet(title=f"Foaie {len(workbook.sheetnames)+1}")
 merge_and_write(z, 1, 1, 1, 4, 'PAROHIA DOMUS - VOLUNTARI')
 merge_and_write(z, 2, 2, 1, 4, 'REGISTRU LUMANARI \ COLPORTAJ PANGAR')
 
