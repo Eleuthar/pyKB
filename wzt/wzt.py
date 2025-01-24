@@ -6,8 +6,7 @@ from os import listdir
 from dataclasses import dataclass
 import json
 from re import search
-
-from pdb import set_trace
+from copy import copy
 
 
 # customization
@@ -121,20 +120,32 @@ def format_data(pen, formatting, pending_colorize, group, roundz, gamer_num):
         '', wb.add_format({'top': 2}))
 
 
-def export_dataframe(output, fname):
+def export_dataframe(output, fname, ROUND, max_col, max_row, begin_char):
     output.seek(0)
-    data = output.getvalue()
-    tgt = load_workbook(fname)
-    frame = tgt.create_sheet(f"ROUND {ROUND}")
-    for row in data.iter_rows():
-        for cell in row:
-            new_cell = frame[cell.coordinate]
-            new_cell.value = cell.value
-            new_cell.font = cell.font
-            new_cell.fill = cell.fill
-            new_cell.border = cell.border
-            new_cell.alignment = cell.alignment
-    tgt.save(fname)
+    memwb = load_workbook(output)
+    mainframe = memwb.active
+    tgt_wb = load_workbook(fname)
+    tgt_frame = tgt_wb.create_sheet(f"ROUND {ROUND}")
+    # column width
+    for col in range(begin_char, max_col):
+        char = chr(col)
+        tgt_frame.column_dimensions[char].width = mainframe.column_dimensions[char].width
+    for row in range(1, max_row):
+        # row height
+        tgt_frame.row_dimensions[row].height = mainframe.row_dimensions[row].height
+        for col in range(begin_char, max_col):
+            coord = f'{chr(col)}{row}'
+            orig = mainframe[coord]
+            tgt = tgt_frame[coord]
+            tgt.value = orig.value
+            tgt.font = copy(orig.font)
+            tgt.fill = copy(orig.fill)
+            tgt.border = copy(orig.border)
+            tgt.alignment = copy(orig.alignment)
+    # MERGED
+    for merged_range in mainframe.merged_cells.ranges:
+        tgt_frame.merge_cells(str(merged_range))
+    tgt_wb.save(fname)
     output.close()
 
 
@@ -219,7 +230,7 @@ def main_menu(tabz):
         if menu == 0:
             main_menu(tabz)
         elif menu == 2:
-            fname = f'Whist {date.today().strftime('%d-%m-%Y')}.xlsx'
+            fname = f"hist {date.today().strftime('%d-%m-%Y')}.xlsx"
         else:
             reserved = ("CON", "PRN", "AUX", "NUL", "COM1", "LPT1")
             pattern = r'[<>:"/\\|?*]'
@@ -314,10 +325,17 @@ if __name__ == '__main__':
         formatting[bg] = wb.add_format(env['formatting'][bg])
     _next = -1
 
-
-    pending_colorize = {} # <<<<<<<<<<< # <<<<<<<<<<<<<<< REMOVE AFTER TZT
-    format_data(pen, formatting, pending_colorize, group, roundz, gamer_num) # <<<<<<<<<<<<<<< REMOVE AFTER TZT
-    wb.close() # <<<<<<<<<<< # <<<<<<<<<<<<<<< REMOVE AFTER TZT
+    # <<<<<<<<<<<<<<< REMOVE AFTER TZT
+    pending_colorize = {
+        'F12':'red_','F13':'red_','F14':'red_','F15':'red_',
+        'I11':'green_','I12':'green_','I13':'green_','I14':'green_',
+    } 
+    format_data(pen, formatting, pending_colorize, group, roundz, gamer_num) # 
+    wb.close() # 
+    if not is_new:
+        export_dataframe(output, fname, ROUND, 
+            (len(group)*3+66), len(roundz)+3, COLUMN_OFFSET-1)
+    # <<<<<<<<<<<<<<< REMOVE AFTER TZT
 
     # GO
     while True:
@@ -358,7 +376,8 @@ if __name__ == '__main__':
         wb.close()
         if not is_new:
             # dump in memory dataframe to file
-            export_dataframe(output, fname)
+            export_dataframe(output, fname, ROUND, 
+                (len(group)*3+66), len(roundz)+3, COLUMN_OFFSET-1)
 
         while not next.isalpha():
             next = input("\n\nJoc nou? Y \ N: ")
@@ -380,4 +399,3 @@ if __name__ == '__main__':
                     for prop in ['bet','done','point']:
                         setattr(uzr, prop, [])
                 break
-            
