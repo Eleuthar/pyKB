@@ -1,19 +1,29 @@
-from openpyxl import load_workbook, Workbook
-from openpyxl.styles import Alignment
-from random import choice
+import pandas as pd
+from xlsxwriter import Workbook
+from openpyxl import load_workbook
 from datetime import date
 from os import listdir
 from dataclasses import dataclass
-import operator
+import json
+
 from pdb import set_trace
+
+
+# customization
+env = json.load(open('env.json'))
+# first column dedicated for round count
+COLUMN_OFFSET = env['column_offset'] + 66
 
 
 @dataclass
 class Member:
     nm: str
-    chr: str
-    bet: int
-    fact: int
+    bet_char: str
+    done_char: str
+    point_char: str
+    bet: list
+    done: list
+    point: list
     winz: int
     failz: int
     total: int
@@ -45,14 +55,28 @@ def group_count():
     return int(gamer_num)
 
 
-def join_players(gamer_num):
+def join_players(COLUMN_OFFSET, gamer_num):
     group = []
-    char = 64
+    uzr_char = COLUMN_OFFSET
+    print()
     for q in range(gamer_num):
-        char+=2
+        # bet \ done \ point
+        bet_char = chr(uzr_char)
+        done_char = chr(uzr_char + 1)
+        point_char = chr(uzr_char+ 2)
         who = input('Nume jucator: ')
-        # nm,chr,bet,fact,winz,failz,total
-        group.append(Member(who, chr(char), 0, 0, 0, 0, 0))
+        # nm,bet_char,done_char,point_char,winz,failz,total
+        group.append(
+            Member(
+                nm=who,
+                bet_char = bet_char,
+                done_char = done_char,
+                point_char = point_char,
+                bet = [], done = [], point = [],
+                winz=0, failz=0, total=0
+            )
+        )
+        uzr_char += 3
     return group
 
 
@@ -65,35 +89,36 @@ def hand_num(gamer_num):
                 [1 for z in range(gamer_num)]
 
 
-def merge_and_write(sheet, start_row, end_row, start_col, end_col, value):
-    sheet.merge_cells(start_row=start_row, start_column=start_col, end_row=end_row, end_column=end_col)
-    cell = sheet.cell(row=start_row, column=start_col, value=value)
-    cell.alignment = Alignment(horizontal="center", vertical="center")
-
-
-# initialize scoring worksheet
-def init_frame(fm, group, roundz, gamer_num):
-    # deck in hand per round
-    for q in range(len(roundz)):
-        cell = fm[f'A{q+4}']
-        cell.value = roundz[q]
-        cell.alignment = Alignment(horizontal="center", vertical="center")
-    # total score under name row    
-    for q in range(gamer_num):
-        uzr = group[q]
-        char = uzr.chr
-        start_col = fm[f'{char}1'].col_idx
-        merge_and_write(fm, 1, 1, start_col, start_col+1, uzr.nm)
-        merge_and_write(fm, 2, 2, start_col, start_col+1, uzr.total)
-        fm[f'{char}3'].value = 'Pariat'
-        fm[f'{chr(ord(char)+1)}3'].value = 'Facut'
-        # hands start at row 4
+# format dataframe
+def dump_frame(fm, formatting, pending_colorize, group, roundz, gamer_num):
+    fm.set_row(0, 30)
+    # round number column
+    round_col = chr(COLUMN_OFFSET-1)
+    fm.write(f'{round_col}3', 'Nr', formatting['done'])
+    fm.set_column(f"{round_col}:{round_col}", 5)       
+    for uzr in group:
+        # name
+        fm.merge_range(f"{uzr.bet_char}1:{uzr.point_char}1", uzr.nm, formatting['header'])
+        # total
+        fm.merge_range(f"{uzr.bet_char}2:{uzr.point_char}2", uzr.total, formatting['total'])
+        # stats
+        fm.write(f'{uzr.bet_char}3', 'Pariat', formatting['stat'])
+        fm.write(f'{uzr.done_char}3', 'Facut', formatting['stat'])
+        fm.write(f'{uzr.point_char}3', 'Puncte', formatting['stat'])
+        # round iteration from row 4
         for j in range(len(roundz)):
-            hand = j+4
-            # bet
-            fm[f'{char}{hand}'].value = 0
-            # fact
-            fm[f'{chr(ord(char)+1)}{hand}'].value = 0
+            row = j+4
+            fm.set_row(row, 25)
+            fm.write(f'{round_col}{row}', f'#{j+1}', formatting['done'])
+            fm.write(f'{uzr.bet_char}{row}', uzr.bet[j], formatting['bet'])
+            fm.write(f'{uzr.done_char}{row}', uzr.done[j], formatting['done'])
+            point = f'{uzr.point_char}{row}'
+            color = pending_colorize.get(point, '')
+            fm.write(point, uzr.point[j], formatting[f'{color}point'])
+    # table bottom border
+    fm.merge_range(
+        f'{group[0].bet_char}{row+1}:{group[-1].point_char}{row+1}', 
+        '', wb.add_format({'top': 2}))
 
 
 def get_tabz():
@@ -102,157 +127,232 @@ def get_tabz():
         if 'xlsx' in q:
             tabz.append(q)
     return tabz
-        
+
 
 def prompt_bet(who, ndx, final_bidder, bid, hand):
-    turn = f'{who.nm} -->'
+    turn = f'{who} -->'
     allowed = None
-    if ndx == final_bidder:
+    # no constraint for final bidder if bid > hand
+    if ndx == final_bidder and bid <= hand:
         diff = hand - bid
         allowed = [q for q in range(0, hand+1)]
         allowed.remove(diff)
     else:
-        allowed = [q for q in range(1, hand+1)]
+        allowed = [q for q in range(0, hand+1)]
     mzg = f"{turn} {allowed}"
     condition = f'opt in {allowed}'
     bet = int(rewind_prompt(mzg, condition=condition))
-    who.bet = bet
     return bet
 
 
-# pick workbook or make new
+# pick workbook or make new1
 def prompt_menu(menu_opt):
-    mzg = 'Alegeti optiune'
+    mzg = '\nAlegeti optiune'
     for z in menu_opt:
         print(z)
-    condition = range(1, len(menu_opt)+1)
+    condition = f"opt in range(1, {len(menu_opt)+1})"
     menu = rewind_prompt(mzg, condition=condition)
     return menu
     
 
 def get_wb_frame(tabz):
-    wb = None
+    # xlsxwriter object
     fname = None
+    pen = None
+    wb = None
+    frame = None
+    ROUND = 1
+    # make new workbook if none found
+    if len(tabz) > 0:
+        ROUND = len(tabz)
+    fname = f'ROUND {ROUND}.xlsx'
+    wb = Workbook(fname)
+    frame = wb.add_worksheet(f'ROUND {ROUND}')
+    return wb, frame, ROUND
+
+
+def old_get_wb_frame(tabz):
+    # xlsxwriter object
+    fname = None
+    pen = None
+    wb = None
     frame = None
     ROUND = 1
     # make new workbook if none found
     if len(tabz) == 0:
         dt = date.today().strftime('%d-%m-%Y')
-        fname = f'wzt_{dt}.xlsx'
-        wb = Workbook()
-        frame = wb.worksheets[-1]
-        frame.title = 'ROUND 1'
+        fname = f'ROUND {ROUND}.xlsx'
+        wb = Workbook(fname)
+        frame = wb.add_worksheet('ROUND 1')
     else:
         mzg = ''
         # enrich prompt menu for singular or plural
-        for z in tabz:
-            print(z)
         if len(tabz) > 1:
             mzg = 'mai multe tabele'
         else:
             mzg = 'un tabel'
         # score workbooks menu
-        print(f'Am gasit {mzg}')
-        menu_opt = ['\n1.Alegeti tabel', '2.Creati tabel nou', '3. EXIT']
+        print(f'\nAm gasit {mzg}\n')
+        for z in tabz:
+            print(z)
+        menu_opt = ['\n\n1.Alegeti tabel', '2.Creati tabel nou', '3. EXIT']
         menu = prompt_menu(menu_opt)
         if menu == 3:
             exit()
         # pick existing scoring file
         if menu == 1:
-            print('Alegeti tabel')
-            for x in range(1, len(tabz)+1):
-                menu_opt = [f'{x}. {tabz[x]}' for x in range(len(tabz))]
-                menu = prompt_menu(menu_opt)
-            wb = load_workbook(tabz[menu-1])
-            ROUND = len(wb.sheetnames)+1
-            frame = wb.create_sheet(title=f'Round {ROUND}')
+            print('\n\nAlegeti tabel\n')
+            menu_opt = [f'{x+1}. {tabz[x]}' for x in range(len(tabz))]
+            menu = prompt_menu(menu_opt)
+            fname = tabz[menu-1]
+            with pd.ExcelFile(fname, engine="openpyxl") as reader:
+                ROUND = len(wb.sheetnames)+1
+            pen = Workbook(fname)
+            wb = pen.book
+            frame = wb.add_worksheet(f'Round {ROUND}')
         # make new scoring file
         else:
             while True:
                 try:
                     fname = input('Introduceti nume fisier: ')
+                    fname = f"{'_'.join(fname.split())}.xlsx"
+                    pen = pd.ExcelWriter(fname, engine="xlsxwriter")
                     wb = Workbook()
-                    frame = wb.worksheets[-1]
-                    frame.title = 'ROUND 1'
+                    frame = wb.add_worksheet('ROUND 1')
+                    break
                 except:
                     print(f'Nume fisier invalid: >> {fname} <<')
-    return wb, fname, frame, ROUND
+    return wb, frame, ROUND
 
 
-if __name__ == '__main__':    
+# mark Cell for color formatting during dataframe dump
+def colorize(pending_colorize, color, point_char, row, gamer_num):
+    for j in range(gamer_num, row-gamer_num, -1):
+        pending_colorize[f'{point_char}{j}'] = f'{color}_'
+    return pending_colorize
+
+
+if __name__ == '__main__':
     # number of players
     gamer_num = group_count()
     #  player join
-    group = join_players(gamer_num)
+    # group = join_players(COLUMN_OFFSET, gamer_num)
+
+    group = [
+        Member(nm='ela', bet_char='D', done_char='E', point_char='F', 
+            bet = [1, 1, 1, 1, 2, 3, 4, 5, 1, 2, 4, 2, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            done= [1, 1, 1, 1, 2, 3, 4, 5, 2, 3, 5, 1, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            point=[1, 1, 1, 1, 2, 3, 4, 5, -1, -1, -1, -1, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            winz=0, failz=0, total=0
+        ),
+        Member(nm='geo', bet_char='G', done_char='H', point_char='I', 
+            bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            done =[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            point=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            winz=0, failz=0, total=0), 
+        Member(nm='flo', bet_char='J', done_char='K', point_char='L', 
+            bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            done =[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            point=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            winz=0, failz=0, total=0),
+        Member(nm='cip', bet_char='M', done_char='N', point_char='O', 
+            bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            done= [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            point=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
+            winz=0, failz=0, total=0)
+    ]
+
     # number of deck dealing per round
     roundz = hand_num(gamer_num)
     # find existing score workbook in game directory
     tabz = get_tabz()
     # read existing or write new workbook
-    wb, fname, frame, ROUND = get_wb_frame(tabz)
-    init_frame(frame, group, roundz, gamer_num)
+    wb, frame, ROUND = get_wb_frame(tabz)
+    # formatting
+    formatting = {}
+    for bg in ['header','total','stat','bet','done','point','green_point','red_point']:
+        formatting[bg] = wb.add_format(env['formatting'][bg])
+    _next = -1
+
+    pending_colorize = {} # <<<<<<<<<<< # <<<<<<<<<<<<<<< REMOVE AFTER TZT
+    dump_frame(frame, formatting, pending_colorize, group, roundz, gamer_num) # <<<<<<<<<<<<<<< REMOVE AFTER TZT
+    wb.close() # <<<<<<<<<<< # <<<<<<<<<<<<<<< REMOVE AFTER TZT
 
     # GO
     while True:
-        begin = choice(group)
-        print(f'\nSpor la joaca! Incepe {begin.nm}\n')
-        go = group.index(begin)
-        order = list(range(go, 4)) + list(range(0, go))
+        break # <<<<<<<<<<<<<<< REMOVE AFTER TZT
+    
+        pending_colorize = {}
+        print(f'\nSpor la joaca!\n')
         for j in range(len(roundz)):
+            row = j+3
             hand = roundz[j]
             print(f"\n\n#{j+1} Runda de {hand}\n{'='*len('runda de xxxx')}")
-
             # bidding
             print(f'\nPariaza\n{"`"*len("nPariaza")}')
             bid = 0
-            final_bidder = gamer_num-1
+            _next += 1
+            if _next == gamer_num:
+                _next = 0
+            order = [x for x in range(_next, gamer_num)] + [x for x in range(0, _next)]
+            final_bidder = order[-1]
             for ndx in order:
-                bid += prompt_bet(group[ndx], ndx, final_bidder, bid, hand)
-
-            # fact
+                who = group[ndx]
+                bet = prompt_bet(who.nm, ndx, final_bidder, bid, hand)
+                who.bet.append(bet)
+                bid += bet
+            # done
             print(f'\nMaini facute\n{"`"*len("Maini facute")}')
             for ndx in order:
                 bidder = group[ndx]
-                bidder.fact = rewind_prompt(bidder.nm)
+                condition = f"opt <= {hand}"
+                done = rewind_prompt(bidder.nm, condition)
+                bidder.done.append(done)
                 # winner
-                if bidder.fact == bidder.bet:
-                    bidder.total += (5+bidder.bet)
+                bet = bidder.bet[j]
+                if done == bet:
+                    bidder.point.append(5+bet)
+                    bidder.total += bidder.point[j]
                     # positive bonus & reset streak
                     if hand != 1:
                         bidder.winz += 1
                         if bidder.winz == gamer_num:
                             bidder.total += (5*gamer_num)
                             bidder.winz = 0
-                        # colorize green + previous 4
+                            pending_colorize = colorize(
+                                pending_colorize, 'green_', bidder.point_char, row, gamer_num)
                 # loser
                 else:
-                    bidder.total -= int(str(bidder.fact - bidder.bet).strip('-'))
+                    # make negative to positive to allow subtraction from total
+                    point = int(str(done - bet).strip('-'))
+                    bidder.point.append(point)
+                    bidder.total -= point
                     if hand != 1:
                         bidder.failz += 1
                         # negative bonus & reset streak
                         if bidder.failz == gamer_num:
                             bidder.total -= (5*gamer_num)
                             bidder.failz = 0
-                        # colorize red + previous 4
-                # update player data, rounds begin at row 4 on split columns 
-                char = bidder.chr
-                frame[f'{char}{j+4}'].value += bidder.bet
-                frame[f'{chr(ord(char)+1)}{j+4}'].value += bidder.fact
-                wb.save(fname)        
+                            colorize(pending_colorize, 'red_', bidder.point_char, row, gamer_num)
+        dump_frame(frame, formatting, pending_colorize, group, roundz, gamer_num)
         next = ''
+        wb.close()
         while not next.isalpha():
-            next = input("\n\nJoc nou? Y \ N")
+            next = input("\n\nJoc nou? Y \ N: ")
             next = next.upper()
             if next.upper() not in ['Y', 'N']:
                 continue
             elif next == 'N':
                 exit()
             else:
+                _next = -1
                 ROUND += 1
-                frame = wb.create_sheet(title=f'ROUND {ROUND}')
+                wb = Workbook(f'ROUND {ROUND}.xlsx')
+                frame = wb.add_worksheet(f'ROUND {ROUND}')
                 for uzr in group:
-                    for prop in ['bet','fact','total','winz','failz']:
-                        setattr(uzr, prop) = 0
-                init_frame(frame, group, roundz, gamer_num)
+                    for prop in ['total','winz','failz']:
+                        setattr(uzr, prop, 0)
+                    for prop in ['bet','done','point']:
+                        setattr(uzr, prop, [])
                 break
             
