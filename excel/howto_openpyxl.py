@@ -42,8 +42,9 @@ def export_dataframe(output, fname, ROUND, max_col, max_row, begin_char):
     
 
 # generate frame cell coordinate
-for x in range(18, 20):
-    for q in range(ord('A'), ord('K')):
-        q = chr(q)
-        tgt = frame[f'{q}{x}']
+def gen_coord(frame):
+    for x in range(18, 20):
+        for q in range(ord('A'), ord('K')):
+            q = chr(q)
+            tgt = frame[f'{q}{x}']
         

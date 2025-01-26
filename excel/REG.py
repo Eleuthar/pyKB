@@ -1,5 +1,4 @@
 from openpyxl import load_workbook
-from collections import namedtuple
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from pdb import set_trace
@@ -11,9 +10,8 @@ def merge_and_write(sheet, start_row, end_row, start_col, end_col, value):
     cell = sheet.cell(row=start_row, column=start_col, value=value)
     cell.alignment = Alignment(horizontal="center", vertical="center")
 
-def gen_week_sheet():
-    workbook = Workbook()
-    z = workbook.create_sheet(title=f"Foaie {len(workbook.sheetnames)+1}")
+def gen_week_sheet(workbook,fname):
+    z = workbook.create_sheet(title=fname)
     merge_and_write(z, 1, 1, 1, 4, 'PAROHIA DOMUS - VOLUNTARI')
     merge_and_write(z, 2, 2, 1, 4, 'REGISTRU LUMANARI \ COLPORTAJ PANGAR')
 
@@ -80,8 +78,8 @@ def insert_frame(workbook, day, month, enter_dm):
                 frame.title = enter_dm
                 return x, frame
 
-# todo generate for the entire year a sheet for each week's Monday date
-def gen_sheet_names(workbook, no):
+# todo generate for the entire year sheet name for each week on Monday date
+def gen_sheet_names(workbook, gen_week_sheet):
     ...
 
 def put_formula_week(workbook, ndx):
@@ -122,10 +120,12 @@ def put_formula_week(workbook, ndx):
         rep_chr = chr(rep_ord+1)
         df[C].value = f"=='{rep_title}'!{rep_chr}{8}"
 
-def find_negative(workbook):
+def find_negative(wb_name, col_range, begin=10, end=17):
+    '''col_range = ['B','C','F','G','H','I','J']'''
+    workbook = load_workbook(wb_name, data_only=True)
     for fm in workbook.worksheets[1:]:
-        for prod in ['B','C','F','G','H','I','J']:
-            for row in range(10,17):
+        for prod in col_range:
+            for row in range(begin, end):
                 try:
                     tgt = fm[f'{prod}{row}']
                     if tgt.value < 0:
@@ -135,8 +135,9 @@ def find_negative(workbook):
                         if tgt.value < 0:
                             print(fm.title, prod, row, tgt.value)
                     except:
-                        set_trace()
-# F2
+                        print(tgt.value)
+
+# make sheet title match the date_cell
 def rename_title(workbook, date_cell):
     for frame in workbook.worksheets[1:]:
         dt = frame[date_cell]
@@ -146,24 +147,27 @@ def rename_title(workbook, date_cell):
         dt.value = ': '.join(head)
         frame.title = ' '.join(part.split()[:-1])
 
-# ensure the HEAD title matches the frame title
-def match_form_with_prev_title(workbook, charz):
-    # first week sheet gets the report sheet name, not subject for change
+# helper function to ensure the formula referencing the previous sheet matches the title
+# charz is a list of columns that hold the reference
+def match_form_with_prev_title(workbook, prev_char, tgt_char, begin_row, end_row, fix=False):
+    # exclude first sheet as the report & 2nd sheet as formula origin
     for x in range(2, len(workbook.sheetnames)):
         prev = workbook.sheetnames[x-1]
         frame = workbook.worksheets[x]
-        for char in charz:
-            for row in range(10,17):
-                head = frame[f'{char}{row}']
-                try:
-                    form = head.value.split("'")
-                    if len(form) == 1:
-                        form = input(f'FOUND {head.value}, {char}{row}, {prev} < ')
-                        form = head.value.split("'")
-                    form[1] = f"'{prev}'"
-                    head.value = ''.join(form)
-                except:
-                    pass
+        for row in range(begin_row, end_row):
+            tgt = frame[f'{tgt_char}{row}']
+            expected = f"='{prev}'!{prev_char}"
+            if tgt.value != expected:
+                print(f'FOUND {tgt.value}, {tgt_char}{row}, {prev} < Apply fix? ')
+                if fix:
+                    tgt.value = expected
+                    
+
+def init_report(report, begin_chr='D', end_chr='J', begin_row=9, end_row=84):
+    for col in range(ord(begin_chr), ord(end_chr)+1):
+        for row in range(begin_row, end_row+1):
+            report[f'{chr(col)}{row}'].value = ''
+    
 
 def enrich_form(
         quant_in, amount_in, quant_out, amount_out, 
@@ -174,23 +178,19 @@ def enrich_form(
     pattern_amount_in = amount_in + f"'{name}'!{'E'}{prod_row} * '{name}'!{'B'}{prod_row}, "
     pattern_quant_out = quant_out + f"'{name}'!{'G'}{prod_row}, "
     pattern_amount_out = amount_out + f"'{name}'!{'H'}{prod_row}, "
-    pattern_quant_stock = quant_stock + f"'{name}'!{'I'}{prod_row}, "
-    pattern_amount_stock = amount_stock + f"'{name}'!{'J'}{prod_row}, "
+    pattern_quant_stock = f"'{name}'!{'I'}{prod_row}"
+    pattern_amount_stock = f"'{name}'!{'J'}{prod_row}"
     if begin:
         init = "=SUM("
         pattern_quant_in = init + pattern_quant_in
         pattern_amount_in = init + pattern_amount_in
         pattern_quant_out = init + pattern_quant_out
         pattern_amount_out = init + pattern_amount_out
-        pattern_quant_stock = init + pattern_quant_stock
-        pattern_amount_stock = init + pattern_amount_stock
     elif end:
         pattern_quant_in += ')'
         pattern_amount_in += ')'
         pattern_quant_out += ')'
         pattern_amount_out += ')'
-        pattern_quant_stock += ')'
-        pattern_amount_stock += ')'
     return [
         pattern_quant_in,
         pattern_amount_in,
@@ -201,27 +201,26 @@ def enrich_form(
     ]
 
 def report_form(workbook, report, max_ndx, prod, month_mapping, enrich_form):
-    
     # gather each month report row relevant to in\out quant\amount
-    quant_in_rep_rowz = []
-    amount_in_rep_rowz = []
-    quant_out_rep_rowz = []
-    amount_out_rep_rowz = []
+    quant_in_month_row = []
+    amount_in_month_row = []
+    quant_out_month_row = []
+    amount_out_month_row = []
     wb_ndx = 1
     for month_pair in month_mapping:
         month = month_pair[0]
-        rep_row = month_pair[1]
+        report_row = month_pair[1]
         begin = True
         end = False
-        quant_in_rep_rowz.append(rep_row)
-        amount_in_rep_rowz.append(rep_row+1)
-        quant_out_rep_rowz.append(rep_row+2)
-        amount_out_rep_rowz.append(rep_row+3)
+        quant_in_month_row.append(report_row)
+        amount_in_month_row.append(report_row+1)
+        quant_out_month_row.append(report_row+2)
+        amount_out_month_row.append(report_row+3)
         prev = workbook.sheetnames[wb_ndx-1]
         frame = workbook.worksheets[wb_ndx] 
         next_frame = ''
-        if x != max_ndx-1:
-            next_frame = workbook.sheetnames[x+1]
+        if wb_ndx != max_ndx:
+            next_frame = workbook.sheetnames[wb_ndx+1]
         if month not in prev:
             begin = True
             end = False
@@ -253,12 +252,12 @@ def report_form(workbook, report, max_ndx, prod, month_mapping, enrich_form):
             )
             # concatenated weekly columns to matching report row 
             # place formula pattern in the matching report cell
-            report[rep_chr][rep_row].value += quant_in
-            report[rep_chr][rep_row+1].value += amount_in
-            report[rep_chr][rep_row+2].value += quant_out
-            report[rep_chr][rep_row+3].value += amount_out
-            report[rep_chr][rep_row+4].value += quant_stock
-            report[rep_chr][rep_row+5].value += amount_stock
+            report[rep_chr][report_row].value += quant_in
+            report[rep_chr][report_row+1].value += amount_in
+            report[rep_chr][report_row+2].value += quant_out
+            report[rep_chr][report_row+3].value += amount_out
+            report[rep_chr][report_row+4].value = quant_stock
+            report[rep_chr][report_row+5].value = amount_stock
         wb_ndx += 1
         if end:
             continue
@@ -272,10 +271,10 @@ def report_form(workbook, report, max_ndx, prod, month_mapping, enrich_form):
         general_quant_out = "=SUM("
         general_amount_out = "=SUM("
         for x in range(12):
-            general_quant_in += f'{prod_chr}{quant_in_rep_rowz[x]}, '
-            general_amount_in += f'{prod_chr}{amount_in_rep_rowz[x]}, '
-            general_quant_out += f'{prod_chr}{quant_out_rep_rowz[x]}, '
-            general_amount_out += f'{prod_chr}{amount_out_rep_rowz[x]}, '
+            general_quant_in += f'{prod_chr}{quant_in_month_row[x]}, '
+            general_amount_in += f'{prod_chr}{amount_in_month_row[x]}, '
+            general_quant_out += f'{prod_chr}{quant_out_month_row[x]}, '
+            general_amount_out += f'{prod_chr}{amount_out_month_row[x]}, '
         # end pattern 
         report[f'{prod_chr}81'].value = general_quant_in + ')'
         report[f'{prod_chr}82'].value = general_amount_in + ')'

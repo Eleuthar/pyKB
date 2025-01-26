@@ -1,2 +1,4 @@
 typings/
 *:Zone.Identifier
+__pycache__
+excel/__pycache__/REG.cpython-310.pyc
