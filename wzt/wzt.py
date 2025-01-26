@@ -120,24 +120,32 @@ def format_data(pen, formatting, pending_colorize, group, roundz, gamer_num):
         '', wb.add_format({'top': 2}))
 
 
-def export_dataframe(output, fname, max_col, max_row, begin_char):
+def export_dataframe(output, fname, ROUND, max_col, max_row, begin_char):
     output.seek(0)
     memwb = load_workbook(output)
     mainframe = memwb.active
     tgt_wb = load_workbook(fname)
     tgt_frame = tgt_wb.create_sheet(f"ROUND {ROUND}")
-    from pdb import set_trace
-    set_trace()
-    for row in range(max_row):
+    # column width
+    for col in range(begin_char, max_col):
+        char = chr(col)
+        tgt_frame.column_dimensions[char].width = mainframe.column_dimensions[char].width
+    for row in range(1, max_row):
+        # row height
+        tgt_frame.row_dimensions[row].height = mainframe.row_dimensions[row].height
         for col in range(begin_char, max_col):
-            coord = f'{chr(col)}{chr(row)}'
+            coord = f'{chr(col)}{row}'
             orig = mainframe[coord]
             tgt = tgt_frame[coord]
+            tgt.value = orig.value
             tgt.font = copy(orig.font)
             tgt.fill = copy(orig.fill)
             tgt.border = copy(orig.border)
             tgt.alignment = copy(orig.alignment)
-    tgt.save(fname)
+    # MERGED
+    for merged_range in mainframe.merged_cells.ranges:
+        tgt_frame.merge_cells(str(merged_range))
+    tgt_wb.save(fname)
     output.close()
 
 
@@ -325,7 +333,8 @@ if __name__ == '__main__':
     format_data(pen, formatting, pending_colorize, group, roundz, gamer_num) # 
     wb.close() # 
     if not is_new:
-        export_dataframe(output, fname, (len(group)*3+66), len(roundz)+3, COLUMN_OFFSET-13)
+        export_dataframe(output, fname, ROUND, 
+            (len(group)*3+66), len(roundz)+3, COLUMN_OFFSET-1)
     # <<<<<<<<<<<<<<< REMOVE AFTER TZT
 
     # GO
@@ -367,7 +376,8 @@ if __name__ == '__main__':
         wb.close()
         if not is_new:
             # dump in memory dataframe to file
-            export_dataframe(output, fname, (len(group)*3+66), len(roundz)+3, COLUMN_OFFSET-1)
+            export_dataframe(output, fname, ROUND, 
+                (len(group)*3+66), len(roundz)+3, COLUMN_OFFSET-1)
 
         while not next.isalpha():
             next = input("\n\nJoc nou? Y \ N: ")
