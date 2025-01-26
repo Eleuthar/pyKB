@@ -67,29 +67,6 @@ def gen_week_sheet():
     z['A17'] = 'COLPORTAJ'
     z['A18'] = 'TOTAL'
 
-def enter_date():
-    while True:
-        day = None
-        month = None
-        enter_dm = input('Zi + luna registru (exemplu 12 DEC): ').upper()
-        # '04DEC' to '4dec
-        enter_dm = enter_dm.strip('0')
-        try:
-            day = int(''.join([h for h in enter_dm if h.isdigit()]))
-            month = ''.join([h for h in enter_dm if h.isalpha()])[:3]
-        
-            if (
-                not str(day).isnumeric()
-                or (day < 1 and day > 31)
-                or not month.isalpha() 
-                or month not in month_mapping
-            ):
-                continue
-            else:
-                return day, month
-        except:
-            continue
-
 def insert_frame(workbook, day, month, enter_dm):
     for x in range(1, len(workbook.sheetnames)):
         prev_fm = workbook.sheetnames[x]
@@ -223,7 +200,7 @@ def enrich_form(
         pattern_amount_stock
     ]
 
-def report_form(workbook, report, max_ndx, prod, month_ndx, month_mapping, enrich_form):
+def report_form(workbook, report, max_ndx, prod, month_mapping, enrich_form):
     
     # gather each month report row relevant to in\out quant\amount
     quant_in_rep_rowz = []
@@ -231,7 +208,7 @@ def report_form(workbook, report, max_ndx, prod, month_ndx, month_mapping, enric
     quant_out_rep_rowz = []
     amount_out_rep_rowz = []
     wb_ndx = 1
-    for month_pair in month_ndx:
+    for month_pair in month_mapping:
         month = month_pair[0]
         rep_row = month_pair[1]
         begin = True
@@ -324,7 +301,7 @@ prod = {
 
 # cantitate in, total in, cantitate out, total out, cantitate stoc, total stoc
 # IAN: 8, etc
-month_ndx = [
+month_mapping = [
     ['IAN', 9], 
     ['FEB', 15], 
     ['MAR', 21], 
@@ -338,9 +315,6 @@ month_ndx = [
     ['NOV', 69],
     ['DEC', 75]
 ]
-
-month_mapping = {q:v for q,v in month_ndx}
-
-# report_form(workbook, report, max_ndx, prod, month_ndx, month_mapping, enrich_form)
+# report_form(workbook, report, max_ndx, prod, month_mapping, enrich_form)
 # workbook.save(xxpath)
 # workbook.close()
