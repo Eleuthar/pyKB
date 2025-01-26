@@ -10,6 +10,7 @@ def merge_and_write(sheet, start_row, end_row, start_col, end_col, value):
     cell = sheet.cell(row=start_row, column=start_col, value=value)
     cell.alignment = Alignment(horizontal="center", vertical="center")
 
+
 def gen_week_sheet(workbook,fname):
     z = workbook.create_sheet(title=fname)
     merge_and_write(z, 1, 1, 1, 4, 'PAROHIA DOMUS - VOLUNTARI')
@@ -65,22 +66,12 @@ def gen_week_sheet(workbook,fname):
     z['A17'] = 'COLPORTAJ'
     z['A18'] = 'TOTAL'
 
-def insert_frame(workbook, day, month, enter_dm):
-    for x in range(1, len(workbook.sheetnames)):
-        prev_fm = workbook.sheetnames[x]
-        if month in prev_fm:
-            fm_day = int(prev_fm.split()[0])
-            next_frame_day = int(workbook.sheetnames[x+1].split()[0])
-            if fm_day < day < next_frame_day:
-                frame = workbook.copy_worksheet(prev_fm)
-                workbook._sheets.pop()
-                workbook._sheets.insert(x+1, frame)
-                frame.title = enter_dm
-                return x, frame
+            
 
 # todo generate for the entire year sheet name for each week on Monday date
 def gen_sheet_names(workbook, gen_week_sheet):
     ...
+
 
 def put_formula_week(workbook, ndx):
     # sheet[1] col C exception: 
@@ -120,6 +111,7 @@ def put_formula_week(workbook, ndx):
         rep_chr = chr(rep_ord+1)
         df[C].value = f"=='{rep_title}'!{rep_chr}{8}"
 
+
 def find_negative(wb_name, col_range, begin=10, end=17):
     '''col_range = ['B','C','F','G','H','I','J']'''
     workbook = load_workbook(wb_name, data_only=True)
@@ -137,6 +129,7 @@ def find_negative(wb_name, col_range, begin=10, end=17):
                     except:
                         print(tgt.value)
 
+
 # make sheet title match the date_cell
 def rename_title(workbook, date_cell):
     for frame in workbook.worksheets[1:]:
@@ -146,6 +139,7 @@ def rename_title(workbook, date_cell):
         head[1] = part
         dt.value = ': '.join(head)
         frame.title = ' '.join(part.split()[:-1])
+
 
 # helper function to ensure the formula referencing the previous sheet matches the title
 # charz is a list of columns that hold the reference
@@ -178,8 +172,8 @@ def enrich_form(
     pattern_amount_in = amount_in + f"'{name}'!{'E'}{prod_row} * '{name}'!{'B'}{prod_row}, "
     pattern_quant_out = quant_out + f"'{name}'!{'G'}{prod_row}, "
     pattern_amount_out = amount_out + f"'{name}'!{'H'}{prod_row}, "
-    pattern_quant_stock = f"'{name}'!{'I'}{prod_row}"
-    pattern_amount_stock = f"'{name}'!{'J'}{prod_row}"
+    pattern_quant_stock = f"='{name}'!{'I'}{prod_row}"
+    pattern_amount_stock = f"='{name}'!{'J'}{prod_row}"
     if begin:
         init = "=SUM("
         pattern_quant_in = init + pattern_quant_in
@@ -207,60 +201,63 @@ def report_form(workbook, report, max_ndx, prod, month_mapping, enrich_form):
     quant_out_month_row = []
     amount_out_month_row = []
     wb_ndx = 1
+    begin = True
+    end = False
     for month_pair in month_mapping:
+        # reset "begin\end" flags between months
+        if end:
+            begin = True
+            end = False
         month = month_pair[0]
         report_row = month_pair[1]
-        begin = True
-        end = False
         quant_in_month_row.append(report_row)
         amount_in_month_row.append(report_row+1)
         quant_out_month_row.append(report_row+2)
         amount_out_month_row.append(report_row+3)
-        prev = workbook.sheetnames[wb_ndx-1]
-        frame = workbook.worksheets[wb_ndx] 
-        next_frame = ''
-        if wb_ndx != max_ndx:
-            next_frame = workbook.sheetnames[wb_ndx+1]
-        if month not in prev:
-            begin = True
-            end = False
-        elif month in next_frame:
-            begin = False
-            end = False
-        else:
-            begin = False
-            end = True        
-        # report product iteration by rows iteration
-        for j in prod:
-            quant_in = ''
-            amount_in = ''
-            quant_out = ''
-            amount_out = ''
-            quant_stock = ''
-            amount_stock = ''
-            # map weekly row to report column
-            # product starting on row 10 to 16 
-            prod_row = j+9
-            rep_chr = prod[j]['chr']
-            [
-                quant_in, amount_in, quant_out, amount_out,
-                quant_stock, amount_stock
-            ] = enrich_form(
-                quant_in, amount_in, quant_out, amount_out, 
-                quant_stock, amount_stock, 
-                frame.title, prod_row, begin=begin, end=end
-            )
-            # concatenated weekly columns to matching report row 
-            # place formula pattern in the matching report cell
-            report[rep_chr][report_row].value += quant_in
-            report[rep_chr][report_row+1].value += amount_in
-            report[rep_chr][report_row+2].value += quant_out
-            report[rep_chr][report_row+3].value += amount_out
-            report[rep_chr][report_row+4].value = quant_stock
-            report[rep_chr][report_row+5].value = amount_stock
-        wb_ndx += 1
-        if end:
-            continue
+        while not end:
+            prev = workbook.sheetnames[wb_ndx-1]
+            frame = workbook.worksheets[wb_ndx]
+            next_frame = ''
+            if wb_ndx != max_ndx-1:
+                next_frame = workbook.sheetnames[wb_ndx+1]
+            if month not in prev:
+                begin = True
+                end = False
+            elif month in next_frame:
+                begin = False
+                end = False
+            else:
+                begin = False
+                end = True        
+            # report product iteration by rows iteration
+            for j in prod:
+                quant_in = ''
+                amount_in = ''
+                quant_out = ''
+                amount_out = ''
+                quant_stock = ''
+                amount_stock = ''
+                # map weekly row to report column
+                # product starting on row 10 to 16 
+                prod_row = j+9
+                rep_chr = prod[j]['chr']
+                [
+                    quant_in, amount_in, quant_out, amount_out,
+                    quant_stock, amount_stock
+                ] = enrich_form(
+                    quant_in, amount_in, quant_out, amount_out, 
+                    quant_stock, amount_stock, 
+                    frame.title, prod_row, begin=begin, end=end
+                )
+                # concatenated weekly columns to matching report row 
+                # place formula pattern in the matching report cell
+                report[rep_chr][report_row].value += quant_in
+                report[rep_chr][report_row+1].value += amount_in
+                report[rep_chr][report_row+2].value += quant_out
+                report[rep_chr][report_row+3].value += amount_out
+                report[rep_chr][report_row+4].value = quant_stock
+                report[rep_chr][report_row+5].value = amount_stock
+            wb_ndx += 1
 
     # GENERAL TOTALS
     # build formula pattern using the above gathered rows    
@@ -314,6 +311,8 @@ month_mapping = [
     ['NOV', 69],
     ['DEC', 75]
 ]
-# report_form(workbook, report, max_ndx, prod, month_mapping, enrich_form)
-# workbook.save(xxpath)
-# workbook.close()
+
+init_report(report)
+report_form(workbook, report, max_ndx, prod, month_mapping, enrich_form)
+workbook.save(xxpath)
+workbook.close()
