@@ -4,6 +4,46 @@ from openpyxl.styles import Alignment
 from pdb import set_trace
 
 
+# start row of products under weekly registry
+PROD_OFFSET = 9
+BEGIN_ROW = 10
+END_ROW = 16
+TOTAL_ROW = 17
+
+
+xxpath = 'REG.xlsx'
+workbook = load_workbook(xxpath)
+max_ndx = len(workbook.worksheets)
+report = workbook.worksheets[0]
+year = 2024
+# intrare cantitate\total, iesire cantitate\total, stoc cantitate\total
+prod = {
+    1: {'prod':'Lumanari 100B', '$': 0, 'chr': 'D'},
+    2: {'prod':'Lumanari C20', '$': 0, 'chr': 'E'},
+    3: {'prod':'Candele tip 0', '$': 0, 'chr': 'F'},
+    4: {'prod':'Candele tip 1', '$': 0, 'chr': 'G'},
+    5: {'prod':'Candele tip 2', '$': 0, 'chr': 'H'},
+    6: {'prod':'Candele tip 3', '$': 0, 'chr': 'I'},
+    7: {'prod':'Candele tip 4', '$': 0, 'chr': 'J'}
+}
+
+# sheet range for general report formulas
+month_mapping = {
+    'IAN': { 'row': 9, 'range': '', 'wkz': [] }, 
+    'FEB': { 'row': 15, 'range': '', 'wkz': [] }, 
+    'MAR': { 'row': 21, 'range': '', 'wkz': [] }, 
+    'APR': { 'row': 27, 'range': '', 'wkz': [] },
+    'MAI': { 'row': 33, 'range': '', 'wkz': [] }, 
+    'IUN': { 'row': 39, 'range': '', 'wkz': [] }, 
+    'IUL': { 'row': 45, 'range': '', 'wkz': [] }, 
+    'AUG': { 'row': 51, 'range': '', 'wkz': [] }, 
+    'SEPT': { 'row': 57, 'range': '', 'wkz': [] }, 
+    'OCT': { 'row': 63, 'range': '', 'wkz': [] }, 
+    'NOV': { 'row': 69, 'range': '', 'wkz': [] },
+    'DEC': { 'row': 75, 'range': '', 'wkz': [] }
+}
+
+
 # Helper function to merge and align cells
 def merge_and_write(sheet, start_row, end_row, start_col, end_col, value):
     sheet.merge_cells(start_row=start_row, start_column=start_col, end_row=end_row, end_column=end_col)
@@ -66,19 +106,18 @@ def gen_week_sheet(workbook,fname):
     z['A17'] = 'COLPORTAJ'
     z['A18'] = 'TOTAL'
 
-            
 
 # todo generate for the entire year sheet name for each week on Monday date
 def gen_sheet_names(workbook, gen_week_sheet):
     ...
 
 
-def put_formula_week(workbook, ndx):
+def put_formula_week(workbook, ndx, BEGIN_ROW, END_ROW):
     # sheet[1] col C exception: 
     # weekly sheet formulas
     df = workbook.worksheets[ndx]
     prev = workbook.sheetnames[ndx-1]
-    for prod_row in range(10,17):
+    for prod_row in range(BEGIN_ROW, END_ROW+1):
         B = f'B{prod_row}'
         C = f'C{prod_row}'
         E = f'E{prod_row}'
@@ -99,20 +138,20 @@ def put_formula_week(workbook, ndx):
         df[J].value = f"={I} * {E}"
     # weekly totals used by general report
     for z in ['F','H','J']:
-        df[f'{z}17'].value = f'=SUM({z}10:{z}16)'
+        df[f'{z}{TOTAL_ROW}'].value = f'=SUM({z}{BEGIN_ROW}:{z}{END_ROW})'
     # initial stock
-    # set first week sheet C10-C16 as D8-J8
+    # set first week sheet BEGIN_ROW-END_ROW as GENERAL REPORT INITIAL STOCK ROW
     rep_title = workbook.sheetnames[0]
     rep_ord = ord('C')
     df = workbook.worksheets[1]
-    for prod_row in range(10,17):
+    for prod_row in range(BEGIN_ROW,17):
         C = f'C{prod_row}'
         rep_ord += 1
         rep_chr = chr(rep_ord+1)
         df[C].value = f"=='{rep_title}'!{rep_chr}{8}"
 
 
-def find_negative(wb_name, col_range, begin=10, end=17):
+def find_negative(wb_name, col_range, begin=BEGIN_ROW, end=TOTAL_ROW):
     '''col_range = ['B','C','F','G','H','I','J']'''
     workbook = load_workbook(wb_name, data_only=True)
     for fm in workbook.worksheets[1:]:
@@ -156,163 +195,107 @@ def match_form_with_prev_title(workbook, prev_char, tgt_char, begin_row, end_row
                 if fix:
                     tgt.value = expected
                     
-
+# prevent NoneType error
 def init_report(report, begin_chr='D', end_chr='J', begin_row=9, end_row=84):
     for col in range(ord(begin_chr), ord(end_chr)+1):
         for row in range(begin_row, end_row+1):
             report[f'{chr(col)}{row}'].value = ''
-    
 
-def enrich_form(
-        quant_in, amount_in, quant_out, amount_out, 
-        quant_stock, amount_stock, name, prod_row, 
-        begin=False, end=False
-    ):
-    pattern_quant_in = quant_in + f"'{name}'!{'B'}{prod_row}, "
-    pattern_amount_in = amount_in + f"'{name}'!{'E'}{prod_row} * '{name}'!{'B'}{prod_row}, "
-    pattern_quant_out = quant_out + f"'{name}'!{'G'}{prod_row}, "
-    pattern_amount_out = amount_out + f"'{name}'!{'H'}{prod_row}, "
-    pattern_quant_stock = f"='{name}'!{'I'}{prod_row}"
-    pattern_amount_stock = f"='{name}'!{'J'}{prod_row}"
-    if begin:
-        init = "=SUM("
-        pattern_quant_in = init + pattern_quant_in
-        pattern_amount_in = init + pattern_amount_in
-        pattern_quant_out = init + pattern_quant_out
-        pattern_amount_out = init + pattern_amount_out
-    elif end:
-        pattern_quant_in += ')'
-        pattern_amount_in += ')'
-        pattern_quant_out += ')'
-        pattern_amount_out += ')'
-    return [
-        pattern_quant_in,
-        pattern_amount_in,
-        pattern_quant_out,
-        pattern_amount_out,
-        pattern_quant_stock,
-        pattern_amount_stock
-    ]
 
-def report_form(workbook, report, max_ndx, prod, month_mapping, enrich_form):
-    # gather each month report row relevant to in\out quant\amount
+def gather_month_wkz(workbook, month_mapping):
+    wb_ndx = 1
+    for month in month_mapping:
+        for wk in workbook.sheetnames[wb_ndx:]:
+            if month in wk:
+                month_mapping[month]['wkz'].append(wk)
+                wb_ndx += 1
+            else:
+                # update range value
+                begin = month_mapping[month]['wkz'][0]
+                end = month_mapping[month]['wkz'][-1]
+                month_mapping[month]['range'] = f'{begin}:{end}'
+                break
+    # handle December, having no next month to trigger else condition
+    begin = month_mapping[month]['wkz'][0]
+    end = month_mapping[month]['wkz'][-1]
+    month_mapping[month]['range'] = f'{begin}:{end}'
+
+
+def generate_monthly_formula(month_mapping, month, prod_row):
+
+    # =('1 IAN'!E10 * '1 IAN'!B10) + ('8 IAN'!E10 * '8 IAN'!B10) + ...
+    amount_in = '='
+    for wk in month_mapping[month]['wkz']:
+        amount_in += f"('{wk}'!E{prod_row} * '{wk}'!B{prod_row}) + "
+    amount_in = amount_in.rstrip(' + ')
+    wk_range = month_mapping[month]['range']
+    end_wk = month_mapping[month]['wkz'][-1]
+
+    # =SUM('1 IAN:29 IAN'!B10)
+    quant_in = f"=SUM('{wk_range}'!{'B'}{prod_row})"
+    quant_out = f"=SUM('{wk_range}'!{'G'}{prod_row})"
+    amount_out = f"=SUM('{wk_range}'!{'H'}{prod_row})"
+
+    # stock is using the last sheet from month_mapping['range']
+    quant_stock = f"='{end_wk}'!{'I'}{prod_row}"
+    amount_stock = f"='{end_wk}'!{'J'}{prod_row}"
+    return [quant_in, amount_in, quant_out, amount_out, quant_stock, amount_stock]
+
+
+def report_form(PROD_OFFSET, prod, report, month_mapping):
+    # gather each month report row relevant to general totals
     quant_in_month_row = []
     amount_in_month_row = []
     quant_out_month_row = []
     amount_out_month_row = []
-    wb_ndx = 1
-    begin = True
-    end = False
-    for month_pair in month_mapping:
-        # reset "begin\end" flags between months
-        if end:
-            begin = True
-            end = False
-        month = month_pair[0]
-        report_row = month_pair[1]
-        quant_in_month_row.append(report_row)
-        amount_in_month_row.append(report_row+1)
-        quant_out_month_row.append(report_row+2)
-        amount_out_month_row.append(report_row+3)
-        while not end:
-            prev = workbook.sheetnames[wb_ndx-1]
-            frame = workbook.worksheets[wb_ndx]
-            next_frame = ''
-            if wb_ndx != max_ndx-1:
-                next_frame = workbook.sheetnames[wb_ndx+1]
-            if month not in prev:
-                begin = True
-                end = False
-            elif month in next_frame:
-                begin = False
-                end = False
-            else:
-                begin = False
-                end = True        
-            # report product iteration by rows iteration
-            for j in prod:
-                quant_in = ''
-                amount_in = ''
-                quant_out = ''
-                amount_out = ''
-                quant_stock = ''
-                amount_stock = ''
-                # map weekly row to report column
-                # product starting on row 10 to 16 
-                prod_row = j+9
-                rep_chr = prod[j]['chr']
-                [
-                    quant_in, amount_in, quant_out, amount_out,
-                    quant_stock, amount_stock
-                ] = enrich_form(
-                    quant_in, amount_in, quant_out, amount_out, 
-                    quant_stock, amount_stock, 
-                    frame.title, prod_row, begin=begin, end=end
-                )
-                # concatenated weekly columns to matching report row 
-                # place formula pattern in the matching report cell
-                report[rep_chr][report_row].value += quant_in
-                report[rep_chr][report_row+1].value += amount_in
-                report[rep_chr][report_row+2].value += quant_out
-                report[rep_chr][report_row+3].value += amount_out
-                report[rep_chr][report_row+4].value = quant_stock
-                report[rep_chr][report_row+5].value = amount_stock
-            wb_ndx += 1
+    for prod_ndx in prod:
+        prod_row = prod_ndx + PROD_OFFSET
+        for month in month_mapping:
+            report_row = month_mapping[month]['row']
+            # store the row number for SUM aggregation in general totals
+            quant_in_month_row.append(report_row)
+            amount_in_month_row.append(report_row+1)
+            quant_out_month_row.append(report_row+2)
+            amount_out_month_row.append(report_row+3)
+            # monthly formulas
+            prod_chr = prod[prod_ndx]['chr']
+            quant_in = report[f'{prod_chr}{report_row}']
+            amount_in = report[f'{prod_chr}{report_row+1}']
+            quant_out = report[f'{prod_chr}{report_row+2}']
+            amount_out = report[f'{prod_chr}{report_row+3}']
+            quant_stock = report[f'{prod_chr}{report_row+4}']
+            amount_stock = report[f'{prod_chr}{report_row+5}']
+            [
+                quant_in.value,
+                amount_in.value,
+                quant_out.value,
+                amount_out.value,
+                quant_stock.value,
+                amount_stock.value
+            ] = generate_monthly_formula(month_mapping, month, prod_row)
 
-    # GENERAL TOTALS
-    # build formula pattern using the above gathered rows    
-    for j in prod:
-        prod_chr = prod[j]['chr']
-        general_quant_in = "=SUM("
-        general_amount_in = "=SUM("
-        general_quant_out = "=SUM("
-        general_amount_out = "=SUM("
-        for x in range(12):
-            general_quant_in += f'{prod_chr}{quant_in_month_row[x]}, '
-            general_amount_in += f'{prod_chr}{amount_in_month_row[x]}, '
-            general_quant_out += f'{prod_chr}{quant_out_month_row[x]}, '
-            general_amount_out += f'{prod_chr}{amount_out_month_row[x]}, '
-        # end pattern 
-        report[f'{prod_chr}81'].value = general_quant_in + ')'
-        report[f'{prod_chr}82'].value = general_amount_in + ')'
-        report[f'{prod_chr}83'].value = general_quant_out + ')'
-        report[f'{prod_chr}84'].value = general_amount_out + ')'
+    # GENERAL TOTALS   
+    # generate sum formula after month rows have been gathered
+    for prod_ndx in prod:
+        prod_chr = prod[prod_ndx]['chr']
+        
+        range_quant_in = [f'{prod_chr}{x}' for x in quant_in_month_row]
+        report[f'{prod_chr}81'].value = "=SUM(" + ', '.join(range_quant_in) + ")"
+
+        range_amount_in = [f'{prod_chr}{x}' for x in amount_in_month_row]
+        report[f'{prod_chr}82'].value = "=SUM(" + ', '.join(range_amount_in) + ")"
+
+        range_quant_out = [f'{prod_chr}{x}' for x in quant_out_month_row]
+        report[f'{prod_chr}83'].value = "=SUM(" + ', '.join(range_quant_out) + ")"
+
+        range_amount_out = [f'{prod_chr}{x}' for x in amount_out_month_row]
+        report[f'{prod_chr}84'].value = "=SUM(" + ', '.join(range_amount_out) + ")"
 
 
-xxpath = 'REG.xlsx'
-workbook = load_workbook(xxpath)
-max_ndx = len(workbook.worksheets)
-report = workbook.worksheets[0]
-year = 2024
-# intrare cantitate\total, iesire cantitate\total, stoc cantitate\total
-prod = {
-    1: {'prod':'Lumanari 100B', '$': 0, 'chr': 'D'},
-    2: {'prod':'Lumanari C20', '$': 0, 'chr': 'E'},
-    3: {'prod':'Candele tip 0', '$': 0, 'chr': 'F'},
-    4: {'prod':'Candele tip 1', '$': 0, 'chr': 'G'},
-    5: {'prod':'Candele tip 2', '$': 0, 'chr': 'H'},
-    6: {'prod':'Candele tip 3', '$': 0, 'chr': 'I'},
-    7: {'prod':'Candele tip 4', '$': 0, 'chr': 'J'}
-}
-
-# cantitate in, total in, cantitate out, total out, cantitate stoc, total stoc
-# IAN: 8, etc
-month_mapping = [
-    ['IAN', 9], 
-    ['FEB', 15], 
-    ['MAR', 21], 
-    ['APR', 27],
-    ['MAI', 33], 
-    ['IUN', 39], 
-    ['IUL', 45], 
-    ['AUG', 51], 
-    ['SEPT', 57], 
-    ['OCT', 63], 
-    ['NOV', 69],
-    ['DEC', 75]
-]
-
-init_report(report)
-report_form(workbook, report, max_ndx, prod, month_mapping, enrich_form)
-workbook.save(xxpath)
-workbook.close()
+if __name__ == '__main__':
+    init_report(report)
+    gather_month_wkz(workbook, month_mapping)
+    # helper `generate_monthly_formula(month_mapping, month, prod_row)`
+    report_form(PROD_OFFSET, prod, report, month_mapping)
+    workbook.save(xxpath)
+    workbook.close()
