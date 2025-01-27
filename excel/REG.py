@@ -1,22 +1,20 @@
 from openpyxl import load_workbook
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
-from pdb import set_trace
+
+
+
+"""
+Generator de formule pt registre saptamanale + raport general
+"""
 
 
 # start row of products under weekly registry
 PROD_OFFSET = 9
 BEGIN_ROW = 10
 END_ROW = 16
-TOTAL_ROW = 17
+TOTAL_ROW = END_ROW + 1
 
-
-xxpath = 'REG.xlsx'
-workbook = load_workbook(xxpath)
-max_ndx = len(workbook.worksheets)
-report = workbook.worksheets[0]
-year = 2024
-# intrare cantitate\total, iesire cantitate\total, stoc cantitate\total
 prod = {
     1: {'prod':'Lumanari 100B', '$': 0, 'chr': 'D'},
     2: {'prod':'Lumanari C20', '$': 0, 'chr': 'E'},
@@ -26,6 +24,15 @@ prod = {
     6: {'prod':'Candele tip 3', '$': 0, 'chr': 'I'},
     7: {'prod':'Candele tip 4', '$': 0, 'chr': 'J'}
 }
+
+
+xxpath = 'REG.xlsx'
+workbook = load_workbook(xxpath)
+max_ndx = len(workbook.worksheets)
+report = workbook.worksheets[0]
+year = 2024
+# intrare cantitate\total, iesire cantitate\total, stoc cantitate\total
+
 
 # sheet range for general report formulas
 month_mapping = {
@@ -107,48 +114,8 @@ def gen_week_sheet(workbook,fname):
     z['A18'] = 'TOTAL'
 
 
-# todo generate for the entire year sheet name for each week on Monday date
-def gen_sheet_names(workbook, gen_week_sheet):
-    ...
+# generate for the entire year sheet name for each week on Monday date
 
-
-def put_formula_week(workbook, ndx, BEGIN_ROW, END_ROW):
-    # sheet[1] col C exception: 
-    # weekly sheet formulas
-    df = workbook.worksheets[ndx]
-    prev = workbook.sheetnames[ndx-1]
-    for prod_row in range(BEGIN_ROW, END_ROW+1):
-        B = f'B{prod_row}'
-        C = f'C{prod_row}'
-        E = f'E{prod_row}'
-        G = f'G{prod_row}'
-        I = f'I{prod_row}'
-        F = f'F{prod_row}'
-        H = f'H{prod_row}'
-        I = f'I{prod_row}'
-        J = f'J{prod_row}'
-        # previous stock
-        df[C].value = f"=='{prev}'!I{prod_row}"
-        # unit price
-        df[E].value = f"='{prev}'!E{prod_row}"
-        # quantity and amount
-        df[F].value = f"={E} *({B} + {C})"
-        df[H].value = f"={G} * {E}"
-        df[I].value = f"=({B} + {C}) - {G}"
-        df[J].value = f"={I} * {E}"
-    # weekly totals used by general report
-    for z in ['F','H','J']:
-        df[f'{z}{TOTAL_ROW}'].value = f'=SUM({z}{BEGIN_ROW}:{z}{END_ROW})'
-    # initial stock
-    # set first week sheet BEGIN_ROW-END_ROW as GENERAL REPORT INITIAL STOCK ROW
-    rep_title = workbook.sheetnames[0]
-    rep_ord = ord('C')
-    df = workbook.worksheets[1]
-    for prod_row in range(BEGIN_ROW,17):
-        C = f'C{prod_row}'
-        rep_ord += 1
-        rep_chr = chr(rep_ord+1)
-        df[C].value = f"=='{rep_title}'!{rep_chr}{8}"
 
 
 def find_negative(wb_name, col_range, begin=BEGIN_ROW, end=TOTAL_ROW):
@@ -202,6 +169,7 @@ def init_report(report, begin_chr='D', end_chr='J', begin_row=9, end_row=84):
             report[f'{chr(col)}{row}'].value = ''
 
 
+# for building formula by `generate_monthly_report_formula`
 def gather_month_wkz(workbook, month_mapping):
     wb_ndx = 1
     for month in month_mapping:
@@ -221,7 +189,9 @@ def gather_month_wkz(workbook, month_mapping):
     month_mapping[month]['range'] = f'{begin}:{end}'
 
 
-def generate_monthly_formula(month_mapping, month, prod_row):
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GENERAL REPORT BUILDER ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def generate_monthly_report_formula(month_mapping, month, prod_row):
 
     # =('1 IAN'!E10 * '1 IAN'!B10) + ('8 IAN'!E10 * '8 IAN'!B10) + ...
     amount_in = '='
@@ -272,7 +242,7 @@ def report_form(PROD_OFFSET, prod, report, month_mapping):
                 amount_out.value,
                 quant_stock.value,
                 amount_stock.value
-            ] = generate_monthly_formula(month_mapping, month, prod_row)
+            ] = generate_monthly_report_formula(month_mapping, month, prod_row)
 
     # GENERAL TOTALS   
     # generate sum formula after month rows have been gathered
@@ -295,7 +265,7 @@ def report_form(PROD_OFFSET, prod, report, month_mapping):
 if __name__ == '__main__':
     init_report(report)
     gather_month_wkz(workbook, month_mapping)
-    # helper `generate_monthly_formula(month_mapping, month, prod_row)`
+    # helper `generate_monthly_report_formula(month_mapping, month, prod_row)`
     report_form(PROD_OFFSET, prod, report, month_mapping)
     workbook.save(xxpath)
     workbook.close()
