@@ -1,4 +1,5 @@
 import io
+from pdb import set_trace
 from xlsxwriter import Workbook
 from openpyxl import load_workbook
 from datetime import date
@@ -13,7 +14,6 @@ from copy import copy
 env = json.load(open('env.json'))
 # first column dedicated for round count
 COLUMN_OFFSET = env['column_offset'] + 66
-
 
 @dataclass
 class Member:
@@ -89,18 +89,24 @@ def hand_num(gamer_num):
                 [1 for z in range(gamer_num)]
 
 
-def format_data(pen, formatting, pending_colorize, group, roundz, gamer_num):
-    pen.set_row(0, 30)
+def format_data(pen, formatting, pending_colorize, group, roundz, gamer_num):   # tall name row 
+    pen.set_row(0, 27)
     # round number column
     round_col = chr(COLUMN_OFFSET-1)
     pen.write(f'{round_col}3', 'Nr', formatting['done'])
+    # narrow round counter column
     pen.set_column(f"{round_col}:{round_col}", 5)
+    # all rows except for name
+    for row in range(1,4):
+        pen.set_row(row, 25)
     for uzr in group:
         # name
         pen.merge_range(f"{uzr.bet_char}1:{uzr.point_char}1", uzr.nm, formatting['header'])
         # total
         pen.merge_range(f"{uzr.bet_char}2:{uzr.point_char}2", uzr.total, formatting['total'])
         # stats
+        for col in (uzr.bet_char, uzr.done_char, uzr.point_char):
+            pen.set_column(f"{col}:{col}", 10)
         pen.write(f'{uzr.bet_char}3', 'Pariat', formatting['stat'])
         pen.write(f'{uzr.done_char}3', 'Facut', formatting['stat'])
         pen.write(f'{uzr.point_char}3', 'Puncte', formatting['stat'])
@@ -127,12 +133,12 @@ def export_dataframe(output, fname, ROUND, max_col, max_row, begin_char):
     tgt_wb = load_workbook(fname)
     tgt_frame = tgt_wb.create_sheet(f"ROUND {ROUND}")
     # column width
-    for col in range(begin_char, max_col):
+    for col in range(begin_char+1, max_col):
         char = chr(col)
-        tgt_frame.column_dimensions[char].width = mainframe.column_dimensions[char].width
+        tgt_frame.column_dimensions[char].width = mainframe.column_dimensions[char].width-4
     for row in range(1, max_row):
         # row height
-        tgt_frame.row_dimensions[row].height = mainframe.row_dimensions[row].height
+        tgt_frame.row_dimensions[row].height = mainframe.row_dimensions[row].height-4
         for col in range(begin_char, max_col):
             coord = f'{chr(col)}{row}'
             orig = mainframe[coord]
@@ -144,7 +150,12 @@ def export_dataframe(output, fname, ROUND, max_col, max_row, begin_char):
             tgt.alignment = copy(orig.alignment)
     # MERGED
     for merged_range in mainframe.merged_cells.ranges:
-        tgt_frame.merge_cells(str(merged_range))
+        tgt_frame.merge_cells(
+            start_row = merged_range.min_row, 
+            start_column = merged_range.min_col,
+            end_row = merged_range.max_row,
+            end_column = merged_range.max_col
+        )
     tgt_wb.save(fname)
     output.close()
 
@@ -152,7 +163,7 @@ def export_dataframe(output, fname, ROUND, max_col, max_row, begin_char):
 def get_tabz():
     tabz = []
     for q in listdir():
-        if 'xlsx' in q:
+        if 'xlsx' in q and not q.startswith('~'):
             tabz.append(q)
     return tabz
 
@@ -284,31 +295,7 @@ if __name__ == '__main__':
     # number of players
     gamer_num = group_count()
     #  player join
-    # group = join_players(COLUMN_OFFSET, gamer_num)
-
-    group = [
-        Member(nm='ela', bet_char='D', done_char='E', point_char='F', 
-            bet = [1, 1, 1, 1, 2, 3, 4, 5, 1, 2, 4, 2, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            done= [1, 1, 1, 1, 2, 3, 4, 5, 2, 3, 5, 1, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            point=[1, 1, 1, 1, 2, 3, 4, 5, -1, -1, -1, -1, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            winz=0, failz=0, total=0
-        ),
-        Member(nm='geo', bet_char='G', done_char='H', point_char='I', 
-            bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            done =[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            point=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            winz=0, failz=0, total=0),
-        Member(nm='flo', bet_char='J', done_char='K', point_char='L', 
-            bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            done =[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            point=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            winz=0, failz=0, total=0),
-        Member(nm='cip', bet_char='M', done_char='N', point_char='O', 
-            bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            done= [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            point=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1], 
-            winz=0, failz=0, total=0)
-    ]
+    group = join_players(COLUMN_OFFSET, gamer_num)
     wb, pen = None, None
     # number of deck dealing per round
     roundz = hand_num(gamer_num)
@@ -324,23 +311,8 @@ if __name__ == '__main__':
     for bg in ['header','total','stat','bet','done','point','green_point','red_point']:
         formatting[bg] = wb.add_format(env['formatting'][bg])
     _next = -1
-
-    # <<<<<<<<<<<<<<< REMOVE AFTER TZT
-    pending_colorize = {
-        'F12':'red_','F13':'red_','F14':'red_','F15':'red_',
-        'I11':'green_','I12':'green_','I13':'green_','I14':'green_',
-    } 
-    format_data(pen, formatting, pending_colorize, group, roundz, gamer_num) # 
-    wb.close() # 
-    if not is_new:
-        export_dataframe(output, fname, ROUND, 
-            (len(group)*3+66), len(roundz)+3, COLUMN_OFFSET-1)
-    # <<<<<<<<<<<<<<< REMOVE AFTER TZT
-
     # GO
     while True:
-        break # <<<<<<<<<<<<<<< REMOVE AFTER TZT
-    
         pending_colorize = {}
         print(f'\nSpor la joaca!\n')
         for j in range(len(roundz)):

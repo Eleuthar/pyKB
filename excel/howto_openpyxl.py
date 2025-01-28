@@ -5,6 +5,7 @@ from copy import copy
 xxpath='REG.xlsx'
 workbook = load_workbook(xxpath, data_only=True)
 
+# sheet.merge_cells(start_row=start_row, start_column=start_col, end_row=end_row, end_column=end_col)
 
 # copy cell formatting from in-memory workbook
 def export_dataframe(output, fname, ROUND, max_col, max_row, begin_char):
