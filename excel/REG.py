@@ -74,7 +74,7 @@ def gen_week_sheet(workbook,fname):
     merge_and_write(z, 7, 8, 2, 2, "Adaugat")
     merge_and_write(z, 7, 8, 3, 3, "Anterior")
 
-    merge_and_write(z, 6, 8, 4, 4, "U.M.")
+    merge_and_write(z, 6, 8, 4, 4, )
 
     merge_and_write(z, 6, 6, 5, 5, "Pret unitar")
     merge_and_write(z, 7, 7, 5, 5, "")
