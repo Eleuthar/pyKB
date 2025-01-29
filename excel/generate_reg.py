@@ -107,7 +107,6 @@ def generate_monthly_report_formula(month_mapping, month, prod_row):
     quant_stock = f"='{end_wk}'!{'I'}{prod_row}"
     amount_stock = f"='{end_wk}'!{'J'}{prod_row}"
     return [quant_in, amount_in, quant_out, amount_out, quant_stock, amount_stock]
-    
 
 
 def generate_report_grid(pen, formatter, month_mapping, prod):
@@ -129,6 +128,8 @@ def generate_report_grid(pen, formatter, month_mapping, prod):
         name = prod[prod_row]['prod']
         pen.set_column(f"{prod_chr}:{prod_chr}", len(name)+4)
         pen.write(f"{prod_chr}5", name, formatter.head)
+        # previous stock initializer
+        pen.write(f"{prod_chr}6", 0, formatter.regular)
 
     # A:A
     row = 1
@@ -151,10 +152,10 @@ def generate_report_grid(pen, formatter, month_mapping, prod):
         for z in range(0,6,2):
             quant_row = row+z
             amount_row = row+z+1
-            pen.write(f'C{quant_row}', 'Cantitate', formatter.regular)
-            pen.write(f'C{amount_row}', 'Total', formatter.regular)
             pen.set_row(quant_row, 23)
             pen.set_row(amount_row, 23)
+            pen.write(f'C{quant_row}', 'Cantitate', formatter.regular)
+            pen.write(f'C{amount_row}', 'Total', formatter.regular)
 
         # build formula for each type
         for prod_ndx in prod:
@@ -178,11 +179,13 @@ def generate_report_grid(pen, formatter, month_mapping, prod):
     pen.merge_range('A80:A83', 'TOTAL GENERAL', formatter.head)
     pen.merge_range(f'B80:B81', 'Intrare', formatter.regular)
     pen.merge_range(f'B82:B83', 'Iesire', formatter.regular)
-    for row in [80,82]:
+
+    for row in range(79,84):
+        pen.set_row(row, 23)
+
+    for row in [80,82]:    
         pen.write(f'C{row}', 'Cantitate', formatter.regular)
         pen.write(f'C{row+1}', 'Total', formatter.regular)
-        pen.set_row(row, 23)
-        pen.set_row(row+1, 23)
 
     for prod_ndx in prod:
         prod_chr = prod[prod_ndx]['chr'] 
@@ -190,33 +193,17 @@ def generate_report_grid(pen, formatter, month_mapping, prod):
         range_amount_in = [f'{prod_chr}{x}' for x in amount_in_month_row]
         range_quant_out = [f'{prod_chr}{x}' for x in quant_out_month_row]
         range_amount_out = [f'{prod_chr}{x}' for x in amount_out_month_row]
-        for pair in (
-            (80, range_quant_in),
-            (82, range_quant_out)
-        ):
+        
+        for pair in ((80, range_quant_in), (82, range_quant_out)):
             pen.write(f'{prod_chr}{pair[0]}', "=SUM(" + ', '.join(pair[1]) + ")", formatter.regular)
-            
-        for pair in (
-            (81, range_amount_in),
-            (83, range_amount_out)
-        ):
+
+        for pair in ((81, range_amount_in), (83, range_amount_out)):
             pen.write(f'{prod_chr}{pair[0]}', "=SUM(" + ', '.join(pair[1]) + ")", formatter.price)
 
 
 def generate_week_registry(
         pen, prev, report_title, prod, formatter, year, stock_row, first_sheet=False
     ):
-    pen.set_column('A:A', 18)
-    pen.set_column('E:E', 11)
-    pen.set_column('G:G', 11)
-    pen.set_column('I:I', 12)
-    # NR CRT row 9
-    crt = 1
-    for j in range(ord('A'), ord('K')):
-        pen.write(f'{chr(j)}9', crt, formatter.regular)
-        crt += 1
-
-    pen.set_row(9, 23)
     pen.merge_range('A1:C3', 'PAROHIA DOMUS – VOLUNTARI\r\nREGISTRU LUMANARI', formatter.title)
     merger = {
         'A5:A8': 'TIP PRODUS',
@@ -249,11 +236,22 @@ def generate_week_registry(
     for ron in ['E8','F8','H8','J8']:
         pen.write(ron, "~ LEI ~", formatter.head)
 
+    # column width & NR CRT row 9
+    pen.set_row(9, 23)
+    pen.set_row(10, 23)    
+    crt = 1
+    for j in range(ord('A'), ord('K')):
+        col = chr(j)
+        pen.set_column(f'{col}:{col}', 12)
+        pen.write(f'{col}9', crt, formatter.regular)
+        crt += 1
+    pen.set_column('A:A', 23)
+    
     # sheet[1] col C exception
     # weekly sheet formulas
     pen.merge_range('E2:G2', f'DATA: {pen.name} {year}', formatter.title)
     for prod_row in prod:
-        pen.set_row(prod_row+1, 21)
+        pen.set_row(prod_row+1, 23)
         A = f'A{prod_row}'
         B = f'B{prod_row}'
         C = f'C{prod_row}'
@@ -308,7 +306,7 @@ def generate_week_registry(
             D = f'D{row}'
             E = f'E{row}'
             rep_chr = prod[row]['chr']
-            pen.write(C, f"=='{rep_title}'!{rep_chr}{stock_row}", formatter.head)
+            pen.write(C, f"=='{rep_title}'!{rep_chr}{stock_row}", formatter.regular)
             pen.write(D, "buc.", formatter.regular)
             pen.write(E, prod[row]['$'], formatter.price)
 
