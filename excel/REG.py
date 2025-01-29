@@ -114,10 +114,6 @@ def gen_week_sheet(workbook,fname):
     z['A18'] = 'TOTAL'
 
 
-# generate for the entire year sheet name for each week on Monday date
-
-
-
 def find_negative(wb_name, col_range, begin=BEGIN_ROW, end=TOTAL_ROW):
     '''col_range = ['B','C','F','G','H','I','J']'''
     workbook = load_workbook(wb_name, data_only=True)
@@ -218,15 +214,18 @@ def report_form(PROD_OFFSET, prod, report, month_mapping):
     amount_in_month_row = []
     quant_out_month_row = []
     amount_out_month_row = []
+    for month in month_mapping:
+        report_row = month_mapping[month]['row']
+        quant_in_month_row.append(report_row)
+        amount_in_month_row.append(report_row+1)
+        quant_out_month_row.append(report_row+2)
+        amount_out_month_row.append(report_row+3)
+
     for prod_ndx in prod:
-        prod_row = prod_ndx + PROD_OFFSET
+        prod_row = prod_ndx + PROD_OFFSET        
         for month in month_mapping:
             report_row = month_mapping[month]['row']
             # store the row number for SUM aggregation in general totals
-            quant_in_month_row.append(report_row)
-            amount_in_month_row.append(report_row+1)
-            quant_out_month_row.append(report_row+2)
-            amount_out_month_row.append(report_row+3)
             # monthly formulas
             prod_chr = prod[prod_ndx]['chr']
             quant_in = report[f'{prod_chr}{report_row}']

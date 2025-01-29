@@ -335,32 +335,32 @@ if __name__ == '__main__':
     Formatter = namedtuple('Formatter', ('title', 'head', 'regular', 'price'))
 
     regular = workbook.add_format({
-        "font_name": "Calibri",
-        "font_size": 12,
+        "font_name": "Bahnschrift",
+        "font_size": 10,
         "align": "center",
         "valign": "vcenter",
         "border": 1
     })
     title = workbook.add_format({
         "font_name": "Bahnschrift",
-        "font_size": 14,
+        "font_size": 11,
         "bold": True,
         "align": "center",
         "valign": "vcenter",
         'text_wrap': True
     })
     head = workbook.add_format({
-        "font_name": "Calibri",
-        "font_size": 13,
+        "font_name": "Bahnschrift",
+        "font_size": 11,
         "bold": True,
         "align": "center",
         "valign": "vcenter",
-        "border": 2,
+        "border": 1,
         'text_wrap': True
     })
     price = workbook.add_format({
-        "font_name": "Calibri",
-        "font_size": 12,
+        "font_name": "Bahnschrift",
+        "font_size": 10,
         'num_format': '0.00',
         "align": "center",
         "valign": "vcenter",

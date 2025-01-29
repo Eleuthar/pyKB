@@ -1,67 +1,55 @@
-~~~~~~~~~~~~~~~~~~~~~
-#   WITHOUT ARG     #   
-~~~~~~~~~~~~~~~~~~~~~
+Function that wraps another function to modify its behavior
+
+* @wraps(fnc) OR update_wrapper(fnc, inner) copies metadata of the decorated function to the decorator and returns the decorator with the new properties
+
+* without @wraps, ``add()`` would print mapper ``log_decorator``
+
+* the inner function args\kwargs are taken from the decorated function on invoking
 
 
-from functools import wraps, update_wrapper
+Example 1
+`````````````````````````
+
+import functools
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 
-def mapper(fnc):
-
-    @wraps(fnc)
-    def inner(list_of_valuez):
-        return [fnc(value) for value in list_of_values]
-
-    return inner
-
-
-
-@mapper
-def camelcase(z):
-    return ''.join([word.capitalize() for word in z.split('-')])
-
-names = [ 'rick_ross', 'A$Ap_rocky', 'znoop_dg' ]
+def log_decorator(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        print(f"Calling {func.__name__} with args: {args}, kwargs: {kwargs}")
+        result = func(*args, **kwargs)
+        print(f"{func.__name__} returned: {result}")
+        return result
+    return wrapper
 
 
+@log_decorator
+def add(a, b):
+    return a + b
 
-\\ @wraps(fnc) OR update_wrapper(fnc, inner) copies metadata of the decorated function to the decorator and returns the decorator with the new properties
-\\ without @wraps, ``print(camelcase.__doc__)`` would print mapper doc
-	
-
-
-
-~~~~~~~~~~~~~~~~~
-#   WITH  ARG   #
-~~~~~~~~~~~~~~~~~
-
-
-import random
-
-
-def power_of(arg):
-	"""return a new function with the result of the decorated"""
-
-    def decorator(fnc):
-        def inner():
-            return fnc() ** exponent
-		return inner
-
-   # default arg value if is function
-   # better approach than signature kwarg of "arg=2"
-   if callable(arg):
-	    exponent = 2
-	    return decorator(arg)
-	else:
-	    exponent = arg
-	    return decorator
+add(3, 5)
 
 
 
-@power_of(.5)
-def random_odd_digit():
-    return random.choice([1, 3, 5, 7, 9])
+Example 2 \\ decorator factory
+``````````````````````````````````
 
+def my_decorator():
+    def actual_decorator(func):
+        def wrapper(*args, **kwargs):
+            print("Before function call")
+            result = func(*args, **kwargs)
+            print("After function call")
+            return result
+        return wrapper
+    return actual_decorator
 
-print(random_odd_digit())
-    \\ without argument, use the default arg of 2
+@my_decorator()  # Must call it to get the actual decorator
+def greet(mzg):
+    print(mzg)
 
+greet('BREEEEEH, bruh !!')

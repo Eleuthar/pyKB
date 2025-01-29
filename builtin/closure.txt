@@ -1,0 +1,74 @@
+Function that remembers variables from its enclosing scope.
+
+* the outer function returns the inner function as callable. 
+* an inner function returns the outer function's variable
+
+* alternative to small classes, for hiding & encapsulating data.
+* a true closure must have an outer scope function var to be referenced by the inner.
+
+* "nonlocal" is used to store \ modify an outer scope immutable variable, excluding globals
+* <new_function>.__closure__[0].cell_contents == closure variable value
+
+
+
+# EXAMPLE 1
+``````````````
+def make_login_counter(http_uri):
+    uri = http_uri
+    i = 0
+    def counter(login):     # counter() is a closure
+        nonlocal i, uri
+        print(f'Invoking uri with credentials {login}')
+        i += 1
+        return i
+    return counter
+
+>>> c1 = make_login_counter()
+>>> c2 = make_login_counter()
+>>> print (c1(), c1(), c2(), c2())
+1 2 1 2
+
+
+Example 2
+`````````````
+def make_power(exponent):
+    outer_var = exponent
+    def power(base):
+        return base ** outer_var
+    return power
+
+>>> f2 = make_power(2)
+>>> f2(2)
+4
+>>> f2(3)
+9
+>>> f2(4)
+16
+>>> f3 = make_power(3)
+>>> f3(2)
+8
+>>> f3(3)
+27
+>>>
+
+
+# EXAMPLE 3
+``````````````
+def generateCallback(x, y):
+    x = x
+    y = y
+    def callback(ch, method, properties, body):
+        print(f'Executing callback with {x} {y}')
+        print(f'Executing inner callback with {ch}, {method}, {properties} & {body}')
+    return callback
+
+
+>>> qb = generateCallback('xxx', 'qqq')
+>>> qb.__closure__[0].cell_contents == 'xxx'
+>>> qb.__closure__[1].cell_contents == 'qqq'
+>>> qb('ch', 'method', 'properties', 'body')
+Executing callback with xxx qqq
+Executing inner callback with ch, method, properties & body
+
+
+
