@@ -1,0 +1,23 @@
+# Text content
+print(dox.Content.Text)
+
+# Paragraphs
+for para in dox.Paragraphs:
+    print(para.Range.Text.strip())
+
+# Inline images (pictures, charts)
+for i in range(1, dox.InlineShapes.Count + 1):
+    print(f"Image {i}: Type = {dox.InlineShapes(i).Type}")
+
+# Shapes (floating images, text boxes, etc.)
+for i in range(1, dox.Shapes.Count + 1):
+    print(f"Shape {i}: Type = {dox.Shapes(i).Type}")
+
+# Tables
+for table in dox.Tables:
+    for row in table.Rows:
+        row_data = [cell.Range.Text.strip('\r\x07') for cell in row.Cells]
+        print(" | ".join(row_data))
+
+dox.Close(False)
+word.Quit()
