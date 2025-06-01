@@ -4,7 +4,15 @@ from os import listdir
 from collections import namedtuple
 
 
-def get_prod():    
+def get_prod():
+    '''
+    read first txt file in directory
+    return prod dict with structure: inventory[10] = {
+        'prod': product, 
+        '$': float(price),
+        'chr': chr(begin_chr)
+    }
+    '''
     year = None
     inventory = {}
     nr = 10
@@ -66,7 +74,7 @@ def get_week_dates(start_date, end_date):
 
     return week_dates
 
-
+# month mapping base record 'IAN': { 'row': 7, 'range': '', 'wkz': [] },
 def enrich_mapping(month_mapping, week_dates):
     wb_ndx = 0
     for month in month_mapping:
@@ -109,7 +117,7 @@ def generate_monthly_report_formula(month_mapping, month, prod_row):
     return [quant_in, amount_in, quant_out, amount_out, quant_stock, amount_stock]
 
 
-def generate_report_grid(pen, formatter, month_mapping, prod):
+def generate_report_grid(year, pen, formatter, month_mapping, prod):
 
     # formula aggregator for general totals
     quant_in_month_row = []
@@ -119,7 +127,7 @@ def generate_report_grid(pen, formatter, month_mapping, prod):
 
     pen.set_column('A:A', 10)
     pen.set_row(6, 23)
-    pen.merge_range('E1:G3', 'RAPORT GENERAL 2024\r\nPAROHIA DOMUS - VOLUNTARI', formatter.title)
+    pen.merge_range('E1:G3', f'RAPORT GENERAL {year}\r\nPAROHIA DOMUS - VOLUNTARI', formatter.title)
     pen.merge_range('A6:C6', 'Stoc anterior', formatter.head)
 
     # product names on row 5, starting on col D == 68
@@ -370,7 +378,7 @@ if __name__ == '__main__':
     enrich_mapping(month_mapping, wkz)
     report_title = f'Raport general {year}'
     pen = workbook.add_worksheet(report_title)
-    generate_report_grid(pen, formatter, month_mapping, prod)
+    generate_report_grid(year, pen, formatter, month_mapping, prod)
     # first weekly sheet
     pen = workbook.add_worksheet(wkz[0])
     generate_week_registry(
