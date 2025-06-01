@@ -158,8 +158,8 @@ def generate_report_grid(pen, formatter, month_mapping, prod):
             pen.write(f'C{amount_row}', 'Total', formatter.regular)
 
         # build formula for each type
-        for prod_ndx in prod:
-            prod_chr = prod[prod_ndx]['chr']
+        for prod_row in prod:
+            prod_chr = prod[prod_row]['chr']
             [
                 quant_in,
                 amount_in,
