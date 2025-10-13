@@ -1,5 +1,8 @@
 # capture stdout & stderr
 > pytest -s
+
+# code coverage + missing item
+> coverage run --source=src -m pytest -v tests && coverage report -m
 # ```````````````````````````````````````````````````
 
 import pytest
