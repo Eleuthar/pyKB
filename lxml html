@@ -1,0 +1,20 @@
+import requests as rq
+from lxml import etree
+from io import StringIO
+
+
+for num in range(1,21):
+    uri = f'https://audio.resursecrestine.ro/cantece/index-tematic/colinde/pagina/{num}'
+    txt = rq.get(uri).content.decode('utf-8')
+    parser = etree.HTMLParser()
+    tree = etree.parse(StringIO(txt), parser)
+    html = tree.xpath("//a[contains(@href, 'playonline')]")
+
+    for row in html:
+        row = row.values()
+        tgt = row[0].split('/')[-1]
+        fname = row[-1]+'.mp3'
+
+        with open(fname, 'wb') as f:
+            mp3 = rq.get(f'https://resursecrestine.ro/download/{tgt}')
+            f.write(mp3.content)
