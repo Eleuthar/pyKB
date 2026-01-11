@@ -1,5 +1,4 @@
 import io
-from pdb import set_trace
 from xlsxwriter import Workbook
 from openpyxl import load_workbook
 from datetime import date
@@ -8,7 +7,10 @@ from dataclasses import dataclass
 import json
 from re import search
 from copy import copy
+from sys import argv, exit
+from pdb import set_trace
 
+# any single argument triggers test
 
 # customization
 env = json.load(open('env.json'))
@@ -24,8 +26,7 @@ class Member:
     bet: list
     done: list
     point: list
-    winz: int
-    failz: int
+    report: list
     total: int
 
 
@@ -254,51 +255,104 @@ def main_menu(tabz):
 
 # mark Cell for color formatting during datapen dump
 def colorize(pending_colorize, color, point_char, row, gamer_num):
-    for j in range(gamer_num, row-gamer_num, -1):
+    set_trace()
+
+    for j in range(row, row-gamer_num, -1):
         pending_colorize[f'{point_char}{j}'] = f'{color}_'
     return pending_colorize
 
 
-def parse_point(gamer_num, row, hand, bidder, done, bet, colorize, pending_colorize):
+def parse_point(gamer_num, round, hand, bidder, colorize, pending_colorize):
+    BONUS = 5
+    done = bidder.done[round]
+    bet = bidder.done[round]
+
     # win
     if done == bet:
-        point = 5+bet
+        bidder.report.append(1)
+        point = 5 + bet
         bidder.point.append(point)
-        bidder.total += bidder.point[row]
+        bidder.total += bidder.point[round]
         # positive bonus & reset streak
         if hand != 1:
-            bidder.winz += 1
-            if bidder.winz == gamer_num:
-                bidder.total += (5*gamer_num)
-                bidder.winz = 0
+            winz = bidder.report[round-BONUS:round].count(1)
+            if winz == BONUS:
+                bidder.total += (BONUS * gamer_num)
                 pending_colorize = colorize(
-                    pending_colorize, 'green_', bidder.point_char, row, gamer_num)
+                    pending_colorize, 'green_', bidder.point_char, round, gamer_num)
     # lose
     else:
         # make negative to positive to allow subtraction from total
         point = int(str(done - bet).strip('-'))
         bidder.point.append(point)
         bidder.total -= point
+        
         if hand != 1:
-            bidder.failz += 1
-            # negative bonus & reset streak
-            if bidder.failz == gamer_num:
-                bidder.total -= (5*gamer_num)
-                bidder.failz = 0
+            failz = bidder.report[round-BONUS:round].count(0)
+            if failz == BONUS:
+                # negative bonus & reset streak
+                bidder.total -= (BONUS * gamer_num)
                 pending_colorize = colorize(
-                    pending_colorize, 'red_', bidder.point_char, row, gamer_num)
+                    pending_colorize, 'red_', bidder.point_char, round, gamer_num)
+    return pending_colorize
+
+
+def demo(output, fname, wb, pen, formatting, roundz):
+    gamer_num = 4
+    group = [
+        Member(nm='ela', bet_char='D', done_char='E', point_char='F',
+            bet = [1, 1, 1, 1, 2, 3, 4, 5, 1, 2, 4, 2, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+            done= [1, 1, 1, 1, 2, 3, 4, 5, 2, 3, 5, 1, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+            point=[],
+            report=[], total=0
+        ),
+        Member(nm='geo', bet_char='G', done_char='H', point_char='I',
+            bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+            done =[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+            point=[],
+            report=[], total=0),
+        Member(nm='flo', bet_char='J', done_char='K', point_char='L',
+            bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+            done =[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+            point=[],
+            report=[], total=0),
+        Member(nm='cip', bet_char='M', done_char='N', point_char='O',
+            bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+            done= [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+            point=[],
+            report=[], total=0)
+    ]
+    pending_colorize = {
+        'F12':'red_','F13':'red_','F14':'red_','F15':'red_',
+        'I11':'green_','I12':'green_','I13':'green_','I14':'green_',
+    }
+    for round in range(len(roundz)):
+        row = round+4
+        for bidder in group:
+            hand = roundz[round]
+            pending_colorize = parse_point(
+                gamer_num, round, hand, bidder, colorize, pending_colorize
+            )
+    format_data(pen, formatting, pending_colorize, group, roundz, gamer_num)
+    wb.close()
+    if not is_new:
+        # dump in memory dataframe to file
+        export_dataframe(output, fname, 1, 
+        (len(group)*3+66), len(roundz)+3, COLUMN_OFFSET-1)
 
 
 if __name__ == '__main__':
     # in memory writer object
     output = io.BytesIO()
-    # number of players
-    gamer_num = group_count()
-    #  player join
-    group = join_players(COLUMN_OFFSET, gamer_num)
+
+    # TESTING: COMMENT 344 & 345 & UNCOMMENT line 346
+    # gamer_num = group_count()
+    # group = join_players(COLUMN_OFFSET, gamer_num)
+    gamer_num = 4
+
     wb, pen = None, None
     # number of deck dealing per round
-    roundz = hand_num(gamer_num)
+    roundz = hand_num(gamer_num=4)
     # find score workbook in game directory
     tabz = get_tabz()
     # if workbook is not new, make in memory copy 
@@ -311,63 +365,73 @@ if __name__ == '__main__':
     for bg in ['header','total','stat','bet','done','point','green_point','red_point']:
         formatting[bg] = wb.add_format(env['formatting'][bg])
     _next = -1
-    # GO
-    while True:
-        pending_colorize = {}
-        print(f'\nSpor la joaca!\n')
-        for j in range(len(roundz)):
-            row = j+4
-            hand = roundz[j]
-            print(f"\n\n#{j+1} Runda de {hand}\n{'='*len('runda de xxxx')}")
-            # bidding
-            print(f'\nPariaza\n{"`"*len("nPariaza")}')
-            bid = 0
-            _next += 1
-            if _next == gamer_num:
-                _next = 0
-            order = [x for x in range(_next, gamer_num)] + [x for x in range(0, _next)]
-            final_bidder = order[-1]
-            for ndx in order:
-                who = group[ndx]
-                bet = prompt_bet(who.nm, ndx, final_bidder, bid, hand)
-                who.bet.append(bet)
-                bid += bet
-            # done
-            print(f'\nMaini facute\n{"`"*len("Maini facute")}')
-            for ndx in order:
-                bidder = group[ndx]
-                condition = f"opt <= {hand}"
-                done = rewind_prompt(bidder.nm, condition)
-                bidder.done.append(done)
-                # winner
-                bet = bidder.bet[-1]
-                parse_point(
-                    gamer_num, row, hand, bidder, done, bet, colorize, pending_colorize)
-        next = ''
-        format_data(pen, formatting, pending_colorize, group, roundz, gamer_num)
-        wb.close()
-        if not is_new:
-            # dump in memory dataframe to file
-            export_dataframe(output, fname, ROUND, 
-                (len(group)*3+66), len(roundz)+3, COLUMN_OFFSET-1)
+    pending_colorize = {}
+    group = []
 
-        while not next.isalpha():
-            next = input("\n\nJoc nou? Y \ N: ")
-            next = next.upper()
-            if next.upper() not in ['Y', 'N']:
-                continue
-            elif next == 'N':
-                exit()
-            else:
-                _next = -1
-                ROUND += 1
-                output = io.BytesIO()
-                fname = f'ROUND {ROUND}.xlsx'
-                wb = Workbook(output, {'in_memory': True})
-                pen = wb.add_worksheet(f'ROUND {ROUND}')
-                for uzr in group:
-                    for prop in ['total','winz','failz']:
-                        setattr(uzr, prop, 0)
-                    for prop in ['bet','done','point']:
-                        setattr(uzr, prop, [])
-                break
+    # TEST ONLY, comment 348, 350
+    if len(argv) == 2:
+        demo(output, fname, wb, pen, formatting, roundz)
+        exit()
+
+    # PRODUCTION
+    else:
+        while True:
+            print(f'\nSpor la joaca!\n')
+            for j in range(len(roundz)):
+                row = j+4
+                hand = roundz[j]
+                print(f"\n\n#{j+1} Runda de {hand}\n{'='*len('runda de xxxx')}")
+                # bidding
+                print(f'\nPariaza\n{"`"*len("nPariaza")}')
+                bid = 0
+                _next += 1
+                if _next == gamer_num:
+                    _next = 0
+                order = [x for x in range(_next, gamer_num)] + [x for x in range(0, _next)]
+                final_bidder = order[-1]
+                for ndx in order:
+                    who = group[ndx]
+                    bet = prompt_bet(who.nm, ndx, final_bidder, bid, hand)
+                    who.bet.append(bet)
+                    bid += bet
+                # done
+                print(f'\nMaini facute\n{"`"*len("Maini facute")}')
+                for ndx in order:
+                    bidder = group[ndx]
+                    condition = f"opt <= {hand}"
+                    done = rewind_prompt(bidder.nm, condition)
+                    bidder.done.append(done)
+                    # winner
+                    bet = bidder.bet[-1]
+                    # update dict of cells to be colored
+                    pending_colorize = parse_point(
+                        gamer_num, row, hand, bidder, colorize, pending_colorize)
+            next = ''
+            format_data(pen, formatting, pending_colorize, group, roundz, gamer_num)
+            wb.close()
+            if not is_new:
+                # dump in memory dataframe to file
+                export_dataframe(output, fname, ROUND, 
+                    (len(group)*3+66), len(roundz)+3, COLUMN_OFFSET-1)
+
+            while not next.isalpha():
+                next = input("\n\nJoc nou? Y \\ N: ")
+                next = next.upper()
+                if next.upper() not in ['Y', 'N']:
+                    continue
+                elif next == 'N':
+                    exit()
+                else:
+                    _next = -1
+                    ROUND += 1
+                    output = io.BytesIO()
+                    fname = f'ROUND {ROUND}.xlsx'
+                    wb = Workbook(output, {'in_memory': True})
+                    pen = wb.add_worksheet(f'ROUND {ROUND}')
+                    for uzr in group:
+                        for prop in ['total','winz','failz']:
+                            setattr(uzr, prop, 0)
+                        for prop in ['bet','done','point']:
+                            setattr(uzr, prop, [])
+                    break
+
