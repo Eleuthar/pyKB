@@ -74,7 +74,7 @@ def join_players(COLUMN_OFFSET, gamer_num):
                 done_char = done_char,
                 point_char = point_char,
                 bet = [], done = [], point = [],
-                winz=0, failz=0, total=0
+                report = [], total=0
             )
         )
         uzr_char += 3
@@ -120,7 +120,7 @@ def format_data(pen, formatting, pending_colorize, group, roundz, gamer_num):   
             pen.write(f'{uzr.done_char}{row}', uzr.done[j], formatting['done'])
             point = f'{uzr.point_char}{row}'
             color = pending_colorize.get(point, '')
-            pen.write(point, uzr.point[j], formatting[f'{color}point'])
+            pen.write(point, uzr.point[j], formatting['point'])
     # table bottom border
     pen.merge_range(
         f'{group[0].bet_char}{row+1}:{group[-1].point_char}{row+1}', 
@@ -190,7 +190,7 @@ def prompt_menu(menu_opt):
     mzg = '\nAlegeti optiune'
     for z in menu_opt:
         print(z)
-    condition = f"opt in range(1, {len(menu_opt)+1})"
+    condition = f"opt in range(0, {len(menu_opt)})"
     menu = rewind_prompt(mzg, condition=condition)
     return menu
     
@@ -213,9 +213,12 @@ def main_menu(tabz):
     is_new = True
     ROUND = 1
     fname = None
-    menu_opt = ['0. EXIT', '\n\n1.Creati tabel nou', '2.Alegeti tabel']
-    # enrich prompt menu for singular or plural
+    menu = None
+    
+
     if len(tabz) > 0:
+        menu_opt = ['\n\n0. EXIT', '1.Creati tabel nou', '2.Alegeti tabel']
+        # enrich prompt menu for singular or plural
         if len(tabz) > 1:
             mzg = 'mai multe tabele'
         else:
@@ -224,41 +227,43 @@ def main_menu(tabz):
         print(f'\nAm gasit {mzg}\n')
         for z in tabz:
             print(z)
-    menu = prompt_menu(menu_opt)
-    if menu == 0:
-        exit()
-    # pick existing scoring file
-    if menu == 2:
-        is_new = False
-        menu_opt = [f'{x+1}. {tabz[x]}' for x in range(len(tabz))]
-        menu = prompt_menu(menu_opt)
-        fname = tabz[menu-1]
-        reader = load_workbook(fname)
-        ROUND = len(reader.sheetnames)+1
-    # make new scoring file
-    else:
-        menu_opt = ['\n\n0. Inapoi', '1.Alege nume', '2.Genereaza nume cu data de azi', ]
+    
         menu = prompt_menu(menu_opt)
         if menu == 0:
-            main_menu(tabz)
-        elif menu == 2:
-            fname = f"hist {date.today().strftime('%d-%m-%Y')}.xlsx"
+            exit()
+        # pick existing scoring file
+        if menu == 2:
+            is_new = False
+            menu_opt = [f'x. {tabz[x]}' for x in range(len(tabz))]
+            menu = prompt_menu(menu_opt)
+            fname = tabz[menu]
+            reader = load_workbook(fname)
+            ROUND = len(reader.sheetnames)+1
+        # make new scoring file
         else:
-            reserved = ("CON", "PRN", "AUX", "NUL", "COM1", "LPT1")
-            pattern = r'[<>:"/\\|?*]'
-            condition = f"not search({pattern}, opt) and (filename.strip() != '')" + \
-                "and not (filename.split('.')[0].upper() in reserved_names)"
-            rewind_prompt('Introduceti nume fisier: ', condition=condition)
-            fname = f"{fname}.xlsx"
+            menu_opt = ['\n\n0. Inapoi', '1.Alege nume', '2.Genereaza nume cu data de azi', ]
+            menu = prompt_menu(menu_opt)
+            if menu == 0:
+                main_menu(tabz)
+            elif menu == 2:
+                fname = f"Whist {date.today().strftime('%d-%m-%Y')}.xlsx"
+            else:
+                reserved = ("CON", "PRN", "AUX", "NUL", "COM1", "LPT1")
+                pattern = r'[<>:"/\\|?*]'
+                condition = f"not search({pattern}, opt) and (filename.strip() != '')" + \
+                    "and not (filename.split('.')[0].upper() in reserved_names)"
+                rewind_prompt('Introduceti nume fisier: ', condition=condition)
+                fname = f"{fname}.xlsx"
+    else:
+        fname = f"Whist {date.today().strftime('%d-%m-%Y')}.xlsx"
+        print("Tabelul de scor: " + fname)
     return is_new, fname, ROUND
 
 
 # mark Cell for color formatting during datapen dump
 def colorize(pending_colorize, color, point_char, row, gamer_num):
-    set_trace()
-
-    for j in range(row, row-gamer_num, -1):
-        pending_colorize[f'{point_char}{j}'] = f'{color}_'
+    for j in range(row-gamer_num, row):
+        pending_colorize[f'{point_char}{j}'] = f'{color}_color'
     return pending_colorize
 
 
@@ -269,31 +274,33 @@ def parse_point(gamer_num, round, hand, bidder, colorize, pending_colorize):
 
     # win
     if done == bet:
-        bidder.report.append(1)
+        if hand >= 1:
+            bidder.report.append(1)
         point = 5 + bet
         bidder.point.append(point)
         bidder.total += bidder.point[round]
         # positive bonus & reset streak
-        if hand != 1:
+        if hand > 1:
             winz = bidder.report[round-BONUS:round].count(1)
             if winz == BONUS:
                 bidder.total += (BONUS * gamer_num)
                 pending_colorize = colorize(
-                    pending_colorize, 'green_', bidder.point_char, round, gamer_num)
+                    pending_colorize, 'green', bidder.point_char, round, gamer_num)
     # lose
     else:
+        if hand > 1:
+            bidder.report.append(0)
         # make negative to positive to allow subtraction from total
         point = int(str(done - bet).strip('-'))
         bidder.point.append(point)
         bidder.total -= point
-        
         if hand != 1:
             failz = bidder.report[round-BONUS:round].count(0)
             if failz == BONUS:
                 # negative bonus & reset streak
                 bidder.total -= (BONUS * gamer_num)
                 pending_colorize = colorize(
-                    pending_colorize, 'red_', bidder.point_char, round, gamer_num)
+                    pending_colorize, 'red', bidder.point_char, round, gamer_num)
     return pending_colorize
 
 
@@ -323,8 +330,8 @@ def demo(output, fname, wb, pen, formatting, roundz):
             report=[], total=0)
     ]
     pending_colorize = {
-        'F12':'red_','F13':'red_','F14':'red_','F15':'red_',
-        'I11':'green_','I12':'green_','I13':'green_','I14':'green_',
+        'F12':'red','F13':'red','F14':'red','F15':'red',
+        'I11':'green','I12':'green','I13':'green','I14':'green',
     }
     for round in range(len(roundz)):
         row = round+4
