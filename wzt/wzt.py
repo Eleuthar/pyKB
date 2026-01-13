@@ -122,9 +122,9 @@ def format_data(pen, formatting, pending_colorize, group, roundz, gamer_num):   
             color = pending_colorize.get(point, '')
             pen.write(point, uzr.point[j], formatting['point'])
     # table bottom border
-    pen.merge_range(
-        f'{group[0].bet_char}{row+1}:{group[-1].point_char}{row+1}', 
-        '', wb.add_format({'top': 2}))
+    # pen.merge_range(
+        # f'{group[0].bet_char}{row+1}:{group[-1].point_char}{row+1}', 
+        # '', wb.add_format({'top': 2}))
 
 
 def export_dataframe(output, fname, ROUND, max_col, max_row, begin_char):
@@ -185,12 +185,12 @@ def prompt_bet(who, ndx, final_bidder, bid, hand):
     return bet
 
 
-# pick workbook or make new1
-def prompt_menu(menu_opt):
+# pick workbook or make new
+def prompt_menu(menu):
     mzg = '\nAlegeti optiune'
-    for z in menu_opt:
+    for z in menu:
         print(z)
-    condition = f"opt in range(0, {len(menu_opt)})"
+    condition = f"opt in range(0, {len(menu)})"
     menu = rewind_prompt(mzg, condition=condition)
     return menu
     
@@ -205,19 +205,17 @@ def mk_wb(ROUND, fname, is_new, output):
     return wb, pen
 
 
-def main_menu(tabz):
+def main_menu(
+        tabz, is_new=True, ROUND=1, 
+        fname=f"Whist {date.today().strftime('%d-%m-%Y')}.xlsx",
+        menu=0
+    ):
     """ Return 
         * round counter for sheetname 
         * filename for new or existing workbook
     """
-    is_new = True
-    ROUND = 1
-    fname = None
-    menu = None
-    
-
     if len(tabz) > 0:
-        menu_opt = ['\n\n0. EXIT', '1.Creati tabel nou', '2.Alegeti tabel']
+        menu_opt = ['\n\n0. EXIT', '1. Creati tabel nou', '2. Alegeti tabel']
         # enrich prompt menu for singular or plural
         if len(tabz) > 1:
             mzg = 'mai multe tabele'
@@ -227,37 +225,41 @@ def main_menu(tabz):
         print(f'\nAm gasit {mzg}\n')
         for z in tabz:
             print(z)
-    
         menu = prompt_menu(menu_opt)
         if menu == 0:
             exit()
         # pick existing scoring file
         if menu == 2:
             is_new = False
-            menu_opt = [f'x. {tabz[x]}' for x in range(len(tabz))]
+            menu_opt = [f'{x+1}. {tabz[x]}' for x in range(len(tabz))]
+            menu_opt.insert(0, '\n\n0. Meniu anterior')
             menu = prompt_menu(menu_opt)
-            fname = tabz[menu]
+            if menu == 0:
+                return 'back', 'to', 'menu'
+            fname = tabz[menu-1]
             reader = load_workbook(fname)
             ROUND = len(reader.sheetnames)+1
+            return is_new, fname, ROUND
         # make new scoring file
         else:
             menu_opt = ['\n\n0. Inapoi', '1.Alege nume', '2.Genereaza nume cu data de azi', ]
             menu = prompt_menu(menu_opt)
             if menu == 0:
-                main_menu(tabz)
+                return 'back to menu'
             elif menu == 2:
                 fname = f"Whist {date.today().strftime('%d-%m-%Y')}.xlsx"
             else:
                 reserved = ("CON", "PRN", "AUX", "NUL", "COM1", "LPT1")
                 pattern = r'[<>:"/\\|?*]'
-                condition = f"not search({pattern}, opt) and (filename.strip() != '')" + \
-                    "and not (filename.split('.')[0].upper() in reserved_names)"
-                rewind_prompt('Introduceti nume fisier: ', condition=condition)
+                condition = f"not search({pattern}, opt) and (filename.strip() != '') and not (filename.split('.')[0].upper() in reserved_names)"
+                menu_opt = rewind_prompt('Introduceti nume fisier: ', condition=condition)
                 fname = f"{fname}.xlsx"
+            return is_new, fname, ROUND
+                
     else:
         fname = f"Whist {date.today().strftime('%d-%m-%Y')}.xlsx"
         print("Tabelul de scor: " + fname)
-    return is_new, fname, ROUND
+        return is_new, fname, ROUND
 
 
 # mark Cell for color formatting during datapen dump
@@ -329,12 +331,9 @@ def demo(output, fname, wb, pen, formatting, roundz):
             point=[],
             report=[], total=0)
     ]
-    pending_colorize = {
-        'F12':'red','F13':'red','F14':'red','F15':'red',
-        'I11':'green','I12':'green','I13':'green','I14':'green',
-    }
+    pending_colorize = {}
     for round in range(len(roundz)):
-        row = round+4
+        row = round + 4
         for bidder in group:
             hand = roundz[round]
             pending_colorize = parse_point(
@@ -365,6 +364,8 @@ if __name__ == '__main__':
     # if workbook is not new, make in memory copy 
     # add new sheet with openpyxl
     is_new, fname, ROUND = main_menu(tabz)
+    while is_new == 'back':
+        is_new, fname, ROUND = main_menu(tabz)
     wb, pen = mk_wb(ROUND, fname, is_new, output)
     
     # formatting
@@ -441,4 +442,3 @@ if __name__ == '__main__':
                         for prop in ['bet','done','point']:
                             setattr(uzr, prop, [])
                     break
-
