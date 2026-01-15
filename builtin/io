@@ -1,0 +1,26 @@
+
+# keep user prompt on same line to prevent terminal clutter
+def rewind_prompt(mzg, condition=None):
+    opt = ''
+    # prompt option must be digit in a certain range
+    print()
+    while True:
+        while not opt.isdigit():
+            print("\033[A\033[A")
+            opt = input(f'{mzg}:  \b')
+        opt = int(opt)
+        if condition is not None:
+            if not eval(condition):
+                opt = ''
+                continue
+            else:
+                return opt
+        return opt
+
+
+# sanitize windows reserved names
+reserved = ("CON", "PRN", "AUX", "NUL", "COM1", "LPT1")
+pattern = r'[<>:"/\\|?*]'
+condition = f"not search({pattern}, opt) and (filename.strip() != '') and not (filename.split('.')[0].upper() in reserved_names)"
+fname = rewind_prompt('Introduceti nume fisier: ', condition=condition)
+fname = f"{fname}.xlsx"
