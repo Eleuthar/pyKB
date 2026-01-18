@@ -58,14 +58,15 @@ def group_count():
 def join_players(gamer_num):
     group = []
     uzr_char = COLUMN_OFFSET
-    for q in range(gamer_num):
+    for j in range(gamer_num):
         # bet \ done \ point
         bet_char = chr(uzr_char)
         done_char = chr(uzr_char + 1)
         point_char = chr(uzr_char + 2)
         uzr_char += 3
+
         who = input('Nume jucator: ')
-        # nm,bet_char,done_char,point_char,winz,failz,total
+        # nm,bet_char,done_char,point_char,total
         group.append(
             Member(
                 nm=who,
@@ -102,22 +103,7 @@ def format_data(pen, formatting, pending_colorize, group, roundz, gamer_num):
 
     # all rows except for name
     for row in range(1,4):
-        pen.set_row(row, 25)
-        group = [
-            Member(nm='P1', bet_char='D', done_char='E', point_char='F',
-                bet=[1,1,2,3,4,5,6,7,8,8,7,6,5,4,3,2,1,1],
-                done = [0,0,2,0,4,5,6,7,8,8,7,6,5,4,3,0,0,0],
-                point = [-1,-1,7,-3,9,10,11,12,13,13,12,11,10,9,8,-2,-1,-1],
-                report=[], total=136
-            ),
-            Member(nm='P2', bet_char='D', done_char='E', point_char='F',
-                bet=[1,1,2,3,4,5,6,7,8,8,7,6,5,4,3,2,1,1],
-                done = [0,0,2,0,4,5,6,7,8,8,7,6,5,4,3,0,0,0],
-                point = [-1,-1,7,-3,9,10,11,12,13,13,12,11,10,9,8,-2,-1,-1],
-                report=[], total=136
-            ),
-        ]
-    print(group)
+        pen.set_row(row, 25)    
 
     for uzr in group:
         try:
@@ -128,6 +114,7 @@ def format_data(pen, formatting, pending_colorize, group, roundz, gamer_num):
             # stats
             for col in (uzr.bet_char, uzr.done_char, uzr.point_char):
                 pen.set_column(f"{col}:{col}", 10)
+
             pen.write(2, ord(uzr.bet_char)-CHAR_DIFF, 'Pariat', formatting['stat'])
             pen.write(2, ord(uzr.done_char)-CHAR_DIFF, 'Facut', formatting['stat'])
             pen.write(2, ord(uzr.point_char)-CHAR_DIFF, 'Puncte', formatting['stat'])
@@ -144,7 +131,6 @@ def format_data(pen, formatting, pending_colorize, group, roundz, gamer_num):
                 pen.write(row, ord(uzr.point_char)-CHAR_DIFF, uzr.point[j], formatting[color])
         except Exception as x:
             print(x)
-            
 
     # table bottom border
     # pen.merge_range(
@@ -185,6 +171,7 @@ def next_fight():
 def colorize(pending_colorize, color, point_char, row, gamer_num):
     for j in range(row-4, row+1):
         pending_colorize[f'{point_char}{j}'] = f'{color}_point'
+    print(pending_colorize)
     return pending_colorize
 
 
@@ -194,6 +181,7 @@ def parse_point(gamer_num, game, hand, bidder, colorize, pending_colorize):
     row = game + BEGIN_ROUND_ROW
     done = bidder.done[game]
     bet = bidder.bet[game]
+
     # win
     if done == bet:
         point = 5 + bet
@@ -218,7 +206,6 @@ def parse_point(gamer_num, game, hand, bidder, colorize, pending_colorize):
         if hand > 1:
             bidder.report.append(0)
             if game >= BEGIN_BONUS_ROUND:
-                print(bidder.report)
                 failz = bidder.report[-1:-6:-1].count(0)
                 if failz == BONUS:
                     bidder.report = []
@@ -245,13 +232,15 @@ if __name__ == '__main__':
     formatting = {}
     for bg in ['header','total','stat','bet','done','point','green_point','red_point']:
         formatting[bg] = wb.add_format(env['formatting'][bg])
-    _next = -1
+    _next = 0
 
     while True:
         print(f'\nSpor la joaca!\n')
         for game in range(len(roundz)):
             row = game+4
             hand = roundz[game]
+            order = [x for x in range(_next, gamer_num)] + [x for x in range(0, _next)]
+            
             print(f"\n\n#{game+1} Runda de {hand}\n{'='*len('runda de xxxx')}")
 
             # bidding
@@ -260,7 +249,7 @@ if __name__ == '__main__':
             _next += 1
             if _next == gamer_num:
                 _next = 0
-            order = [x for x in range(_next, gamer_num)] + [x for x in range(0, _next)]
+            
             final_bidder = order[-1]
             for ndx in order:
                 who = group[ndx]
@@ -273,15 +262,20 @@ if __name__ == '__main__':
             done_total = 0
             for ndx in order:
                 bidder = group[ndx]
-                condition = f"{done_total} + opt <= {hand} and opt <= {hand}"
-                done = rewind_prompt(bidder.nm, condition)
+                if order.index(ndx) == len(order)-1:
+                    done = hand - done_total
+                    print(f'{bidder.nm}: {done}')
+                else:
+                    condition = f"{done_total} + opt <= {hand} and opt <= {hand}"
+                    done = rewind_prompt(bidder.nm, condition)
                 done_total += done
                 bidder.done.append(done)
                 # winner
                 bet = bidder.bet[-1]
                 # update dict of cells to be colored
                 pending_colorize = parse_point(
-                    gamer_num, game, hand, bidder, colorize, pending_colorize)
+                    gamer_num, game, hand, bidder, colorize, pending_colorize
+                )
         format_data(pen, formatting, pending_colorize, group, roundz, gamer_num)
         wb.close()
         
