@@ -6,32 +6,29 @@ import io
 
 # first column dedicated for game count
 output = io.BytesIO()
-gamer_num = 4
-roundz = hand_num(gamer_num)
-
 group = [
     Member(nm='P1', bet_char='D', done_char='E', point_char='F',
-        bet = [1, 1, 1, 1, 2, 3, 4, 5, 2, 2, 4, 2, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
-        done= [1, 1, 1, 1, 2, 3, 4, 5, 2, 3, 5, 1, 7, 7, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
-        point=[],
-        report=[], total=0
+        bet=[1, 1, 1, 1, 2, 3, 4, 5, 2, 2, 4, 2, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+        done=[1, 1, 1, 1, 2, 3, 4, 5, 2, 3, 5, 1, 7, 7, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+        point=[], report=[], total=0
     ),
     Member(nm='P2', bet_char='G', done_char='H', point_char='I',
-        bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
-        done =[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
-        point=[],
-        report=[], total=0),
-    Member(nm='P3', bet_char='J', done_char='K', point_char='L',
-        bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
-        done =[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
-        point=[],
-        report=[], total=0),
-    Member(nm='P4', bet_char='M', done_char='N', point_char='O',
-        bet = [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
-        done= [1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
-        point=[],
-        report=[], total=0)
+        bet=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+        done=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+        point=[], report=[], total=0),
+    # Member(nm='P3', bet_char='J', done_char='K', point_char='L',
+    #     bet=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+    #     done=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+    #     point=[],
+    #     report=[], total=0),
+    # Member(nm='P4', bet_char='M', done_char='N', point_char='O',
+    #     bet=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+    #     done=[1, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 6, 5, 4, 3, 2, 1, 1, 1, 1],
+    #     point=[],
+    #     report=[], total=0)
     ]
+gamer_num = len(group)
+roundz = hand_num(gamer_num)
 pending_colorize = {}
 # find previous score workbooks in game directory
 fname, ROUND = next_fight()

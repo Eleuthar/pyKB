@@ -9,7 +9,7 @@ from re import search
 from copy import copy
 from sys import argv, exit
 
-
+                    
 # customization
 env = json.load(open('env.json'))
 # first column dedicated for game count
@@ -58,12 +58,12 @@ def group_count():
 def join_players(gamer_num):
     group = []
     uzr_char = COLUMN_OFFSET
-    print()
     for q in range(gamer_num):
         # bet \ done \ point
         bet_char = chr(uzr_char)
         done_char = chr(uzr_char + 1)
         point_char = chr(uzr_char + 2)
+        uzr_char += 3
         who = input('Nume jucator: ')
         # nm,bet_char,done_char,point_char,winz,failz,total
         group.append(
@@ -76,7 +76,6 @@ def join_players(gamer_num):
                 report = [], total=0
             )
         )
-        uzr_char += COLUMN_OFFSET
     return group
 
 
@@ -89,41 +88,68 @@ def hand_num(gamer_num):
                 [1 for z in range(gamer_num)]
 
 
-def format_data(pen, formatting, pending_colorize, group, roundz, gamer_num):   # tall name row 
+def format_data(pen, formatting, pending_colorize, group, roundz, gamer_num):
+
+    CHAR_DIFF = 65
     pen.set_row(0, 27)
+    
     # game number column
     game_col = chr(COLUMN_OFFSET-1)
-    pen.write(f'{game_col}3', 'Nr', formatting['done'])
+    pen.write(3, ord(game_col)-CHAR_DIFF, 'Nr', formatting['done'])
+    
     # narrow game counter column
     pen.set_column(f"{game_col}:{game_col}", 5)
+
     # all rows except for name
     for row in range(1,4):
         pen.set_row(row, 25)
+        group = [
+            Member(nm='P1', bet_char='D', done_char='E', point_char='F',
+                bet=[1,1,2,3,4,5,6,7,8,8,7,6,5,4,3,2,1,1],
+                done = [0,0,2,0,4,5,6,7,8,8,7,6,5,4,3,0,0,0],
+                point = [-1,-1,7,-3,9,10,11,12,13,13,12,11,10,9,8,-2,-1,-1],
+                report=[], total=136
+            ),
+            Member(nm='P2', bet_char='D', done_char='E', point_char='F',
+                bet=[1,1,2,3,4,5,6,7,8,8,7,6,5,4,3,2,1,1],
+                done = [0,0,2,0,4,5,6,7,8,8,7,6,5,4,3,0,0,0],
+                point = [-1,-1,7,-3,9,10,11,12,13,13,12,11,10,9,8,-2,-1,-1],
+                report=[], total=136
+            ),
+        ]
+    print(group)
+
     for uzr in group:
-        # name
-        pen.merge_range(f"{uzr.bet_char}1:{uzr.point_char}1", uzr.nm, formatting['header'])
-        # total
-        pen.merge_range(f"{uzr.bet_char}2:{uzr.point_char}2", uzr.total, formatting['total'])
-        # stats
-        for col in (uzr.bet_char, uzr.done_char, uzr.point_char):
-            pen.set_column(f"{col}:{col}", 10)
-        pen.write(f'{uzr.bet_char}3', 'Pariat', formatting['stat'])
-        pen.write(f'{uzr.done_char}3', 'Facut', formatting['stat'])
-        pen.write(f'{uzr.point_char}3', 'Puncte', formatting['stat'])
-        # game iteration from row 4
-        for j in range(len(roundz)):
-            row = j+4
-            pen.set_row(row, 25)
-            pen.write(f'{game_col}{row}', f'#{j+1}', formatting['done'])
-            pen.write(f'{uzr.bet_char}{row}', uzr.bet[j], formatting['bet'])
-            pen.write(f'{uzr.done_char}{row}', uzr.done[j], formatting['done'])
-            point = f'{uzr.point_char}{row}'
-            color = pending_colorize.get(point, 'point')
-            pen.write(point, uzr.point[j], formatting[color])
+        try:
+            # name
+            pen.merge_range(f"{uzr.bet_char}1:{uzr.point_char}1", uzr.nm, formatting['header'])
+            # total
+            pen.merge_range(f"{uzr.bet_char}2:{uzr.point_char}2", uzr.total, formatting['total'])
+            # stats
+            for col in (uzr.bet_char, uzr.done_char, uzr.point_char):
+                pen.set_column(f"{col}:{col}", 10)
+            pen.write(2, ord(uzr.bet_char)-CHAR_DIFF, 'Pariat', formatting['stat'])
+            pen.write(2, ord(uzr.done_char)-CHAR_DIFF, 'Facut', formatting['stat'])
+            pen.write(2, ord(uzr.point_char)-CHAR_DIFF, 'Puncte', formatting['stat'])
+
+            # game iteration from row 4
+            for j in range(len(roundz)):
+                row = j+3
+                point = f'{uzr.point_char}{row}'
+                color = pending_colorize.get(point, 'point')
+                pen.set_row(row, 25)
+                pen.write(row, ord(game_col)-CHAR_DIFF, f'#{j+1}', formatting['done'])
+                pen.write(row, ord(uzr.bet_char)-CHAR_DIFF, uzr.bet[j], formatting['bet'])
+                pen.write(row, ord(uzr.done_char)-CHAR_DIFF, uzr.done[j], formatting['done'])
+                pen.write(row, ord(uzr.point_char)-CHAR_DIFF, uzr.point[j], formatting[color])
+        except Exception as x:
+            print(x)
+            
+
     # table bottom border
-    pen.merge_range(
-        f'{group[0].bet_char}{row+1}:{group[-1].point_char}{row+1}', 
-        '', wb.add_format({'top': 2}))
+    # pen.merge_range(
+    #     f'{group[0].bet_char}{row+1}:{group[-1].point_char}{row+1}', 
+    #     '', wb.add_format({'top': 2}))
 
 
 def prompt_bet(who, ndx, final_bidder, bid, hand):
@@ -142,21 +168,8 @@ def prompt_bet(who, ndx, final_bidder, bid, hand):
     return bet
 
 
-# pick workbook or make new
-def prompt_menu(menu):
-    mzg = '\nAlegeti optiune'
-    for z in menu:
-        print(z)
-    condition = f"opt in range(0, {len(menu)})"
-    menu = rewind_prompt(mzg, condition=condition)
-    return menu
-
-
 def next_fight():
-    """ Return
-        * game counter for workbook
-        * filename  workbook
-    """
+    """ Return workbook filename """
     ROUND = 1
     next_fight = [
         int(fname.split()[-1].split('.')[0]) 
@@ -195,8 +208,7 @@ def parse_point(gamer_num, game, hand, bidder, colorize, pending_colorize):
                     bidder.report = []
                     bidder.total += (BONUS * gamer_num)
                     pending_colorize = colorize(
-                        pending_colorize, 'green', bidder.point_char, row, gamer_num)
-                    
+                        pending_colorize, 'green', bidder.point_char, row-1, gamer_num)
     # lose
     else:
         # make negative to positive to allow subtraction from total
@@ -206,13 +218,14 @@ def parse_point(gamer_num, game, hand, bidder, colorize, pending_colorize):
         if hand > 1:
             bidder.report.append(0)
             if game >= BEGIN_BONUS_ROUND:
+                print(bidder.report)
                 failz = bidder.report[-1:-6:-1].count(0)
                 if failz == BONUS:
                     bidder.report = []
                     # negative bonus & reset streak
                     bidder.total -= (BONUS * gamer_num)
                     pending_colorize = colorize(
-                        pending_colorize, 'red', bidder.point_char, row, gamer_num)
+                        pending_colorize, 'red', bidder.point_char, row-1, gamer_num)
     return pending_colorize
 
 
@@ -269,10 +282,10 @@ if __name__ == '__main__':
                 # update dict of cells to be colored
                 pending_colorize = parse_point(
                     gamer_num, game, hand, bidder, colorize, pending_colorize)
-        _next = ''
         format_data(pen, formatting, pending_colorize, group, roundz, gamer_num)
         wb.close()
         
+        _next = ''
         while not _next.isalpha():
             _next = input("\n\nJoc nou? Y \\ N: ")
             _next = _next.upper()
