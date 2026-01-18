@@ -1,3 +1,12 @@
+# pick workbook or make new
+def prompt_menu(menu):
+    mzg = '\nAlegeti optiune'
+    for z in menu:
+        print(z)
+    condition = f"opt in range(0, {len(menu)})"
+    menu = rewind_prompt(mzg, condition=condition)
+    return menu
+
 
 # keep user prompt on same line to prevent terminal clutter
 def rewind_prompt(mzg, condition=None):
