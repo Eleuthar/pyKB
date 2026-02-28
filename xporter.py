@@ -135,7 +135,7 @@ def xport(data: dict, fname: str):
                     found_duplicate[pkg] = pkg_count    
                     # add all other fields that do not require row merging
                     for row in range(data_row, data_row + pkg_count):
-                        for col in range(ord(head_col), ord(head_col + len(bom_data))):
+                        for col in range( ord(head_col), ord(head_col) + len(bom_data) ):
                             page.write(f"{col}{row}", pkg, regular_format)
                     # merge index field rows
                     page.merge_range(f"{head_col}{data_row}:{head_col}{data_row + pkg_count}", pkg, regular_format)
