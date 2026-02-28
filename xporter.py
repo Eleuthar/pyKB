@@ -121,8 +121,7 @@ def xport(data: dict, fname: str):
             # during iteration of bom_data object
             found_duplicate = {}
 
-            for ndx, pkg in enumerate(bom_data):
-                    
+            for ndx, pkg in enumerate(bom_data):               
                 if pkg in found_duplicate:
                     continue
 
