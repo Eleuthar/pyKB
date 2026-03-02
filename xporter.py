@@ -10,6 +10,7 @@ import pandas as pd
 import xlsxwriter
 from os import system
 from copy import deepcopy
+from pdb import set_trace
 
 
 def argue():
@@ -74,8 +75,6 @@ def generate_df_dict(mapping: dict, diff_rezult: set) -> dict:
 
 def xport(data: dict, fname: str):
     """Export to xlsx"""
-    global header_format
-
     wb = xlsxwriter.Workbook(fname)
     page = wb.add_worksheet()
     header_format = wb.add_format(
@@ -89,56 +88,54 @@ def xport(data: dict, fname: str):
     regular_format = deepcopy(header_format)
     regular_format.bold = False
     regular_format.border = 1
-
-    header_begin_col = ord('A') # 65
+    
+    header_begin_col = 0 #ord('A') # 65
     
     for header in data.keys():
         title_end_col = header_begin_col + len(data[header].keys())
         
         # headers are on the same row, but different columns
-        page.merge_range(f"{chr(header_begin_col)}1:{chr(title_end_col)}1", header, header_format)
+        page.merge_range(f"{chr(header_begin_col+65)}1:{chr(title_end_col+65)}1", header, header_format)
         
         # visual separation of the compared tables
         header_begin_col = title_end_col + 1
-        bom = data.pop(header)
         
         # subheaders & their data
         next_header_col = 0
         head_row = 2
-
-        for bom_header, bom_data in bom.items():
-            head_col = chr(header_begin_col + next_header_col)
-            page.write(f"{head_col}{head_row}", bom_header, header_format)
+        set_trace()
+        for bom_header, bom_data in data[header].items():
+            head_col = header_begin_col + next_header_col
+            page.write(head_row, head_col, bom_header, header_format)
             next_header_col += 1
 
             # first column is index, can support row merging
             data_row = 3
             # tech name as index key
-            from pdb import set_trace
-            set_trace()
 
             # map of indexed duplicates to be skipped 
             # during iteration of bom_data object
             found_duplicate = {}
-
+            
             for ndx, pkg in enumerate(bom_data):               
                 if pkg in found_duplicate:
-                    continue
-
-                pkg_count = bom_data.count(pkg)
+                    continue 
+                
+                pkg_count = bom_data[pkg].count(pkg)
                 
                 if pkg_count == 1:
-                    page.write(f"{head_col}{data_row}", pkg, regular_format)
+                    page.write(head_row, head_col, pkg, regular_format)
                     data_row += 1
 
                 else:
-                    found_duplicate[pkg] = pkg_count    
-                    # add all other fields that do not require row merging
-                    for row in range(data_row, data_row + pkg_count):
-                        for col in range( ord(head_col), ord(head_col) + len(bom_data) ):
-                            page.write(f"{col}{row}", pkg, regular_format)
-                    # merge index field rows
-                    page.merge_range(f"{head_col}{data_row}:{head_col}{data_row + pkg_count}", pkg, regular_format)
+                    found_duplicate[pkg] = pkg_count
+                    # add all other fields related to merged index row
+                    
+                    # for row in range(data_row, data_row + pkg_count):
+                    #     for col in range( ord(head_col), ord(head_col) + len(bom_data) ):
+                    #         page.write(f"{chr(col)}{row}", pkg, regular_format)
+                    # # merge index field rows
+                    # page.merge_range(f"{head_col}{data_row}:{head_col}{data_row + pkg_count}", pkg, regular_format)
                     data_row += pkg_count + 1
     page.autofit()
     wb.close()
