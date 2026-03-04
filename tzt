@@ -1,0 +1,46 @@
+import json
+import xlsxwriter
+from copy import deepcopy
+from exporter import generate_df_dict, xport
+
+
+cobalt_set = set(grouped_cobalt.keys())
+jbom_set = set(grouped_jbom.keys())
+
+diff_cobalt_not_in_jbom = cobalt_set - jbom_set
+diff_jbom_not_in_cobalt = jbom_set - cobalt_set
+
+
+# exclusivity report
+x_jbom = generate_df_dict(grouped_jbom, diff_jbom_not_in_cobalt)
+x_jbom = {"PLS": x_jbom}
+
+x_cobalt = generate_df_dict(grouped_cobalt, diff_cobalt_not_in_jbom)
+x_cobalt = {"Cobalt": x_cobalt}
+
+
+# xport(x_jbom, "output/PLS_not_in_Cobalt.xlsx")
+
+# # common tech in pls & cobalt, with dedicated version
+# common_version = cobalt_set.intersection(jbom_set)
+u_cobalt = generate_df_dict(grouped_cobalt, common_version)
+u_jbom = generate_df_dict(grouped_jbom, common_version)
+common = {"Cobalt": u_cobalt, "PLS": u_jbom}
+
+# xport(common, "output/common_version.xlsx")
+
+wb = xlsxwriter.Workbook('dmp.xlsx')
+page = wb.add_worksheet()
+header_format = wb.add_format(
+    {
+        "bold": True,
+        "align": "center",
+        "valign": "vcenter",
+        "border": 2,
+    }
+)
+regular_format = deepcopy(header_format)
+regular_format.bold = False
+regular_format.border = 1
+
+title_begin_row = title_begin_col = title_end_row = 1
