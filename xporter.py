@@ -89,54 +89,59 @@ def xport(data: dict, fname: str):
     regular_format.bold = False
     regular_format.border = 1
     
-    header_begin_col = 0 #ord('A') # 65
-    
+    title_begin_row = title_begin_col = title_end_row = 1
+
     for header in data.keys():
-        title_end_col = header_begin_col + len(data[header].keys())
+        title_end_col = len(data[header].keys()) - 1
         
-        # headers are on the same row, but different columns
-        page.merge_range(f"{chr(header_begin_col+65)}1:{chr(title_end_col+65)}1", header, header_format)
-        
-        # visual separation of the compared tables
-        header_begin_col = title_end_col + 1
-        
-        # subheaders & their data
-        next_header_col = 0
-        head_row = 2
-        set_trace()
-        for bom_header, bom_data in data[header].items():
-            head_col = header_begin_col + next_header_col
+        # table title
+        page.merge_range(
+            title_begin_row, title_begin_col, 
+            title_end_row, title_end_col,
+            header, header_format
+        )
+
+        # table headers
+        head_col = title_begin_col # 1 
+        head_row = title_begin_row + 1 # 2
+
+        # setup next table title on the same row, separated by 1 blank column
+        # if any comparison is in order
+        title_begin_col = title_end_col + 1
+        title_end_col = title_begin_col + len(data[header].keys()) - 1
+
+        # table headers
+        for bom_header in data[header]:
             page.write(head_row, head_col, bom_header, header_format)
-            next_header_col += 1
+            head_col += 1
 
-            # first column is index, can support row merging
-            data_row = 3
-            # tech name as index key
+        # first column is index, can support row merging
+        data_row = head_row + 1
 
-            # map of indexed duplicates to be skipped 
-            # during iteration of bom_data object
-            found_duplicate = {}
+        # map of indexed duplicates to be skipped 
+        # during iteration of bom_data object
+        found_duplicate = {}
+        
+        for ndx, pkg in enumerate(bom_data):
+            if pkg in found_duplicate:
+                continue 
             
-            for ndx, pkg in enumerate(bom_data):               
-                if pkg in found_duplicate:
-                    continue 
-                
-                pkg_count = bom_data[pkg].count(pkg)
-                
-                if pkg_count == 1:
-                    page.write(head_row, head_col, pkg, regular_format)
-                    data_row += 1
+            pkg_count = bom_data[pkg].count(pkg)
+            
+            if pkg_count == 1:
+                page.write(head_row, head_col, pkg, regular_format)
+                data_row += 1
 
-                else:
-                    found_duplicate[pkg] = pkg_count
-                    # add all other fields related to merged index row
-                    
-                    # for row in range(data_row, data_row + pkg_count):
-                    #     for col in range( ord(head_col), ord(head_col) + len(bom_data) ):
-                    #         page.write(f"{chr(col)}{row}", pkg, regular_format)
-                    # # merge index field rows
-                    # page.merge_range(f"{head_col}{data_row}:{head_col}{data_row + pkg_count}", pkg, regular_format)
-                    data_row += pkg_count + 1
+            else:
+                found_duplicate[pkg] = pkg_count
+                # add all other fields related to merged index row
+                
+                for row in range(data_row, data_row + pkg_count):
+                    for col in range( ord(head_col), ord(head_col) + len(bom_data) ):
+                        page.write(f"{chr(col)}{row}", pkg, regular_format)
+                # merge index field rows
+                page.merge_range(f"{head_col}{data_row}:{head_col}{data_row + pkg_count}", pkg, regular_format)
+                data_row += pkg_count + 1
     page.autofit()
     wb.close()
 
