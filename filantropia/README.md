@@ -1,5 +1,18 @@
-Executa in terminal comanda de mai jos pentru instalarea librariilor necesare.
+* Executa in terminal comanda de mai jos pentru instalarea librariilor necesare.
+`python3 -m pip install --user requests pypdf selenium`
 
-python3 -m pip install --user requests pypdf selenium
+* Actualizati fisierul `credential.json` cu datele de autentificare.
 
-Actualizati fisierul `credential.json` cu datele de autentificare.
+* In acelasi director in care in care se afla scriptul, adaugati doar avizele PDF care apartin aceleiasi categorii din cele mai jos.
+In timpul executiei, programul va cere tipul de avize care se doresc a fi importate. Nu executati scriptul avand avize de categorii diferite!
+Exemplu: aviz de materiale executat ca fiind de alimente, va duce la importarea in cadrul gestiunii de alimente, cu produse aferente materialelor.
+ - alimente
+ - materiale
+ - rechizite
+ - inventar
+ - mijloace
+ - constructii
+ - consumabile
+ - meniu
+
+* Dupa executia scriptului, stergeti sau mutati PDF-urile din director si faceti loc urmatoarelor avize grupate pe categorii
