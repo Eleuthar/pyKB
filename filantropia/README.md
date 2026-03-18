@@ -4,7 +4,7 @@
 * Actualizati fisierul `credential.json` cu datele de autentificare.
 
 * Executia scriptului se face astfel, alegand obligatoriu una din optiunile separate de `|` :
-  `python3 nir.py alimente | materiale | rechizite | inventar | mijloace | constructii | consumabile | meniu`
+`python3 nir.py alimente | materiale | rechizite | inventar | mijloace | constructii | consumabile | meniu`
 
  !!! In timpul executiei, programul va valida tipul de avize care se doresc a fi importate. Nu executati scriptul avand avize de categorii diferite in acelasi director !!! 
 
