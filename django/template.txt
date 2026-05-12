@@ -7,6 +7,10 @@ polls.urls.py.app_name = "<app name>"
 {{ post.date_posted|date:"F d, Y" }}
     \\ date pipeline
 
+{% for form in formset %}
+    {{ page_obj.start_index|add:forloop.counter0 }}
+    {{ form.instance.product.name }}
+
 {{ form | crispy }}
     \\ crispy forms
 
