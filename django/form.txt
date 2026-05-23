@@ -148,6 +148,22 @@ BaseFormSet.clean():
 		\\ to override as per custom criteria
 
 
+# ~~~~~~~~~~~~~~~ INLINE FORMSET ~~~~~~~~~~~~~~~
+# alternative to modelformset_factory, where you cannot specify 
+# relation between parent model and current model, needing to generate instances via `formset.save(commit=False)` for each instance to correlate with parent model
+
+
+BookAuthorFormset = inlineformset_factory(Author, Book, fields=('name', 'year'))
+author = Author.objects.get(pk=author_id)
+formset = BookAuthorFormset(instance=author)
+
+# if POST, instance will be updated
+formset = BookAuthorFormset(request.POST, instance=author)
+if formset.is_valid():
+	formset.save()
+
+
+
 
 # ~~~~~~~~~~~~~~~ foo views.py ~~~~~~~~~~~~~~~
 def index(request):		
